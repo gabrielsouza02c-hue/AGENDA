@@ -39,10 +39,12 @@
     --grid: #E3E8EC;
 
     /* tipos de serviço — validados para CVD (todos os pares) sobre superfície branca */
-    --t1: #1F5FBF;  /* manutenção / PMOC */
-    --t2: #0096A5;  /* instalação de ar  */
-    --t3: #A85E16;  /* fotovoltaico      */
-    --t4: #872D5A;  /* outro             */
+    --t1: #1F5FBF;  /* azul       */
+    --t2: #0096A5;  /* verde-água */
+    --t3: #A85E16;  /* âmbar      */
+    --t4: #872D5A;  /* vinho      */
+    --t5: #8A84F6;  /* lilás      */
+    --t6: #5B6570;  /* cinza — categoria coringa, fora da escala de matizes */
 
     --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
@@ -72,6 +74,8 @@
       --t2: #2DAAA0;
       --t3: #C98230;
       --t4: #A0505A;
+      --t5: #844EBA;
+      --t6: #94A0AC;
     }
   }
 
@@ -82,7 +86,7 @@
     --ok-bg:#16281E; --warn-bg:#2A2015; --danger-bg:#2C1917;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 20px -10px rgba(0,0,0,.6);
     --s2:#C98230; --grid:#262E37;
-    --t1:#4F8CE4; --t2:#2DAAA0; --t3:#C98230; --t4:#A0505A;
+    --t1:#4F8CE4; --t2:#2DAAA0; --t3:#C98230; --t4:#A0505A; --t5:#844EBA; --t6:#94A0AC;
   }
 
   :root[data-theme="light"] {
@@ -92,7 +96,7 @@
     --ok-bg:#E4F1E9; --warn-bg:#F8EEE0; --danger-bg:#F6E5E4;
     --shadow:0 1px 2px rgba(20,28,38,.07), 0 6px 16px -8px rgba(20,28,38,.16);
     --s2:#A85E16; --grid:#E3E8EC;
-    --t1:#1F5FBF; --t2:#0096A5; --t3:#A85E16; --t4:#872D5A;
+    --t1:#1F5FBF; --t2:#0096A5; --t3:#A85E16; --t4:#872D5A; --t5:#8A84F6; --t6:#5B6570;
   }
 
   * { box-sizing: border-box; }
@@ -567,6 +571,12 @@
         <div class="comp" id="dinComp"></div>
       </div>
 
+      <div class="card">
+        <h3>Mão de obra e material</h3>
+        <p class="note">O custo é o que você pagou pelo material. A sobra é o que fica do mês depois de descontá-lo.</p>
+        <div id="matComp"></div>
+      </div>
+
       <div class="card" id="orcCard" hidden>
         <h3>Orçamentos</h3>
         <p class="note">Visitas para cotar. Não entram no faturamento nem nas máquinas do mês — viram serviço só quando o cliente aprova.</p>
@@ -678,19 +688,23 @@
     { id: 1, var: "--t1", nome: "azul" },
     { id: 2, var: "--t2", nome: "verde-água" },
     { id: 3, var: "--t3", nome: "âmbar" },
-    { id: 4, var: "--t4", nome: "vinho" }
+    { id: 4, var: "--t4", nome: "vinho" },
+    { id: 5, var: "--t5", nome: "lilás" },
+    { id: 6, var: "--t6", nome: "cinza" }
   ];
 
   // ---------- estado ----------
   function padrao() {
     return {
-      v: 1,
+      v: 2,
       cfg: { preco: 250, teto: 30, dur: 90 },
       tipos: [
-        { id: "pmoc",   nome: "PMOC / manutenção",   cor: 1, porMaquina: true,  preco: 250 },
-        { id: "instal", nome: "Instalação de ar",    cor: 2, porMaquina: true,  preco: 0 },
-        { id: "solar",  nome: "Fotovoltaico",        cor: 3, porMaquina: false, preco: 0 },
-        { id: "outro",  nome: "Outro",               cor: 4, porMaquina: false, preco: 0 }
+        { id: "pmoc",     nome: "PMOC / manutenção",        cor: 1, porMaquina: true,  preco: 250 },
+        { id: "limpeza",  nome: "Limpeza de ar-condicionado", cor: 5, porMaquina: true,  preco: 0 },
+        { id: "instal",   nome: "Instalação de ar",         cor: 2, porMaquina: true,  preco: 0 },
+        { id: "eletrica", nome: "Serviço elétrico",         cor: 4, porMaquina: false, preco: 0 },
+        { id: "solar",    nome: "Fotovoltaico",             cor: 3, porMaquina: false, preco: 0 },
+        { id: "outro",    nome: "Outro",                    cor: 6, porMaquina: false, preco: 0 }
       ],
       servicos: []
     };
@@ -723,7 +737,38 @@
     if (!store.cfg) store.cfg = padrao().cfg;
     if (!Array.isArray(store.tipos) || !store.tipos.length) store.tipos = padrao().tipos;
     if (!Array.isArray(store.servicos)) store.servicos = [];
+    migrar();
     return store;
+  }
+
+  /* agenda que já está no celular tem que ganhar o que é novo sem perder o que ele ajustou */
+  function migrar() {
+    if (Number(store.v || 1) < 2) {
+      var tem = {};
+      store.tipos.forEach(function (t) { tem[t.id] = true; });
+      padrao().tipos.forEach(function (t) {
+        if (tem[t.id]) return;
+        var novo = JSON.parse(JSON.stringify(t));
+        var usadas = {};
+        store.tipos.forEach(function (x) { usadas[x.cor] = true; });
+        // a cor padrão pode já estar ocupada por um tipo que ele mesmo pintou
+        if (usadas[novo.cor]) {
+          var livre = CORES.filter(function (c) { return !usadas[c.id]; })[0];
+          if (livre) novo.cor = livre.id;
+        }
+        store.tipos.push(novo);
+      });
+      store.v = 2;
+    }
+    store.servicos.forEach(function (s) {
+      // antes existia um valor só; ele vira mão de obra, e material começa zerado
+      if (s.mao === undefined) {
+        s.mao = Number(s.valor || 0);
+        s.mat = 0;
+        s.matCusto = 0;
+      }
+      s.valor = Number(s.mao || 0) + Number(s.mat || 0);
+    });
   }
 
   function save() {
@@ -1079,6 +1124,19 @@
         '<div class="cbar"><i style="width:' + (r.v / maxD * 100) + "%;background:" + r.c + '"></i></div></div>';
     }).join("");
 
+    var maoT = vivos.reduce(function (a, s) { return a + Number(s.mao || 0); }, 0);
+    var matT = vivos.reduce(function (a, s) { return a + Number(s.mat || 0); }, 0);
+    var custoT = vivos.reduce(function (a, s) { return a + Number(s.matCusto || 0); }, 0);
+    var sobra = maoT + matT - custoT;
+    $("matComp").innerHTML =
+      '<div class="readout"><span class="lbl">Mão de obra</span><b>' + brl(maoT) + "</b></div>" +
+      '<div class="readout"><span class="lbl">Material cobrado</span><b>' + brl(matT) + "</b></div>" +
+      '<div class="readout"><span class="lbl">Custo do material</span><b>' + (custoT ? "− " : "") + brl(custoT) + "</b></div>" +
+      '<div class="verdict ' + (custoT && sobra < maoT * 0.6 ? "warn" : "ok") + '">' +
+        '<span class="sig">SOBRA</span><span>' + brl(sobra) +
+        (custoT ? " depois de pagar o material do mês." : " — nenhum custo de material lançado neste mês.") +
+      "</span></div>";
+
     var orcAberto = orcamentos.filter(function (s) { return s.status === "agendado"; });
     $("orcCard").hidden = !orcamentos.length;
     if (orcamentos.length) {
@@ -1236,6 +1294,9 @@
       tel: "",
       endereco: "",
       maquinas: t.porMaquina ? 1 : 0,
+      mao: t.porMaquina ? precoMaq(t) : 0,
+      mat: 0,
+      matCusto: 0,
       valor: t.porMaquina ? precoMaq(t) : 0,
       status: "agendado",
       pago: false,
@@ -1266,6 +1327,22 @@
     };
   }
 
+  function resumoValores(s) {
+    var t = tipoDe(s.tipo);
+    var mao = Number(s.mao || 0), mat = Number(s.mat || 0), custo = Number(s.matCusto || 0);
+    var html = "";
+    if (t.porMaquina) {
+      html += '<div class="readout"><span class="lbl">' + Number(s.maquinas || 0) + " × " + brl(precoMaq(t)) +
+        '</span><b>' + brl(Number(s.maquinas || 0) * precoMaq(t)) + "</b></div>";
+    }
+    html += '<div class="readout"><span class="lbl">Total cobrado</span><b>' + brl(mao + mat) + "</b></div>";
+    if (custo) {
+      html += '<div class="readout"><span class="lbl">Sobra tirando o material</span><b>' +
+        brl(mao + mat - custo) + "</b></div>";
+    }
+    return html;
+  }
+
   function subFolha(s) {
     return DIAS[fromISO(s.data).getDay()] + ", " + curto(s.data) + " às " + esc(s.hora) +
       (s.dur ? " · " + durTxt(s.dur) : "");
@@ -1286,12 +1363,7 @@
       else el.setAttribute("aria-disabled", "true");
     });
     if ($("mSub")) $("mSub").innerHTML = subFolha(s);
-    var r = $("mRead");
-    if (r) {
-      var t = tipoDe(s.tipo);
-      r.innerHTML = '<span class="lbl">' + Number(s.maquinas || 0) + " × " + brl(precoMaq(t)) +
-        "</span><b>" + brl(Number(s.maquinas || 0) * precoMaq(t)) + "</b>";
-    }
+    if ($("mRead")) $("mRead").innerHTML = resumoValores(s);
   }
 
   function desenharPanel() {
@@ -1342,13 +1414,17 @@
         (t.porMaquina
           ? '<div class="f"><label for="fMaq">Máquinas</label><div class="fld has-unit">' +
             '<input id="fMaq" type="number" inputmode="numeric" min="0" step="1" value="' + Number(s.maquinas || 0) + '"><span class="unit">un</span></div></div>' +
-            '<div class="f"><label for="fValor">Valor</label><div class="fld has-pre"><span class="pre">R$</span>' +
-            '<input id="fValor" type="number" inputmode="decimal" min="0" step="10" value="' + valorDe(s) + '"></div></div>'
-          : '<div class="f wide"><label for="fValor">Valor</label><div class="fld has-pre"><span class="pre">R$</span>' +
-            '<input id="fValor" type="number" inputmode="decimal" min="0" step="10" value="' + valorDe(s) + '"></div></div>') +
+            '<div class="f"><label for="fMao">Mão de obra</label><div class="fld has-pre"><span class="pre">R$</span>' +
+            '<input id="fMao" type="number" inputmode="decimal" min="0" step="10" value="' + Number(s.mao || 0) + '"></div></div>'
+          : '<div class="f wide"><label for="fMao">Mão de obra</label><div class="fld has-pre"><span class="pre">R$</span>' +
+            '<input id="fMao" type="number" inputmode="decimal" min="0" step="10" value="' + Number(s.mao || 0) + '"></div></div>') +
 
-        (t.porMaquina ? '<div class="f wide"><div class="readout" id="mRead"><span class="lbl">' + Number(s.maquinas || 0) +
-          " × " + brl(precoMaq(t)) + '</span><b>' + brl(Number(s.maquinas || 0) * precoMaq(t)) + "</b></div></div>" : "") +
+        '<div class="f"><label for="fMat">Material — cobrado</label><div class="fld has-pre"><span class="pre">R$</span>' +
+          '<input id="fMat" type="number" inputmode="decimal" min="0" step="10" value="' + Number(s.mat || 0) + '"></div></div>' +
+        '<div class="f"><label for="fMatC">Material — custo</label><div class="fld has-pre"><span class="pre">R$</span>' +
+          '<input id="fMatC" type="number" inputmode="decimal" min="0" step="10" value="' + Number(s.matCusto || 0) + '"></div></div>' +
+
+        '<div class="f wide" id="mRead">' + resumoValores(s) + "</div>" +
 
         '<div class="f wide"><label for="fEnd">Endereço</label><div class="fld">' +
           '<input id="fEnd" class="txt" type="text" placeholder="Rua, nº — bairro, cidade" value="' + esc(s.endereco) + '"></div></div>' +
@@ -1410,7 +1486,10 @@
     s.tel = g("fTel").trim();
     s.obs = g("fObs").trim();
     if ($("fMaq")) s.maquinas = Number(g("fMaq") || 0);
-    s.valor = Number(g("fValor") || 0);
+    s.mao = Number(g("fMao") || 0);
+    s.mat = Number(g("fMat") || 0);
+    s.matCusto = Number(g("fMatC") || 0);
+    s.valor = s.mao + s.mat;   // valor = o que o cliente paga; custo fica de fora
   }
 
   function fecharModal() {
@@ -1554,16 +1633,17 @@
       var antigo = tipoDe(rascunho.tipo);
       // valor que o app mesmo calculou pode ser refeito; valor digitado à mão fica
       var eraAuto = antigo.porMaquina &&
-        Number(rascunho.valor || 0) === Number(rascunho.maquinas || 0) * precoMaq(antigo);
+        Number(rascunho.mao || 0) === Number(rascunho.maquinas || 0) * precoMaq(antigo);
       rascunho.tipo = novoTipo;
       var tp = tipoDe(novoTipo);
       if (tp.porMaquina) {
         if (!rascunho.maquinas) rascunho.maquinas = 1;
-        if (eraAuto || !Number(rascunho.valor || 0)) rascunho.valor = rascunho.maquinas * precoMaq(tp);
+        if (eraAuto || !Number(rascunho.mao || 0)) rascunho.mao = rascunho.maquinas * precoMaq(tp);
       } else {
         rascunho.maquinas = 0;
-        if (eraAuto) rascunho.valor = 0;
+        if (eraAuto) rascunho.mao = 0;
       }
+      rascunho.valor = Number(rascunho.mao || 0) + Number(rascunho.mat || 0);
       desenharPanel();
       return;
     }
@@ -1682,7 +1762,7 @@
     if (!rascunho) return;
     if (e.target.id === "fMaq") {
       var tp = tipoDe(rascunho.tipo);
-      var vEl = $("fValor");
+      var vEl = $("fMao");
       if (vEl && tp.porMaquina) vEl.value = Number(e.target.value || 0) * precoMaq(tp);
     }
     refrescarFolha();
@@ -1753,7 +1833,7 @@
       store.tipos.push({
         id: "t" + Date.now().toString(36),
         nome: "Novo tipo",
-        cor: CORES[store.tipos.length % 4].id,
+        cor: CORES[store.tipos.length % CORES.length].id,
         porMaquina: false,
         preco: 0
       });
@@ -1777,6 +1857,7 @@
 
   // ---------- start ----------
   load();
+  save();          // grava a migração, senão o marcador de versão nunca avança
   renderNav();
   irPara("agenda");
 })();
