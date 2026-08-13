@@ -198,6 +198,9 @@
   .d .dots i { width: 6px; height: 6px; border-radius: 50%; display: block; }
   .d .dots i.done { background: transparent !important; box-shadow: inset 0 0 0 1.5px currentColor; }
   .d .dots i.canc { background: var(--ink-3) !important; opacity: .4; height: 2px; width: 8px; border-radius: 1px; }
+  /* orçamento vira losango — dá pra distinguir de serviço sem depender só da cor */
+  .d .dots i.orc { border-radius: 1px; transform: rotate(45deg); }
+  .d .dots i.orc.canc { transform: none; }
 
   /* ---------- dia selecionado ---------- */
   .daybar {
@@ -245,6 +248,7 @@
   .chip i { width: 6px; height: 6px; border-radius: 50%; display: block; }
   .chip.ok { background: var(--ok-bg); border-color: transparent; color: var(--ok); }
   .chip.warn { background: var(--warn-bg); border-color: transparent; color: var(--warn); }
+  .chip.orc { background: transparent; border: 1px dashed var(--ink-3); color: var(--ink-2); }
   .chip-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
 
   /* ---------- campos ---------- */
@@ -563,6 +567,12 @@
         <div class="comp" id="dinComp"></div>
       </div>
 
+      <div class="card" id="orcCard" hidden>
+        <h3>Orçamentos</h3>
+        <p class="note">Visitas para cotar. Não entram no faturamento nem nas máquinas do mês — viram serviço só quando o cliente aprova.</p>
+        <div id="orcComp"></div>
+      </div>
+
       <div class="card">
         <h3>Por tipo de serviço</h3>
         <div class="comp" id="tipoComp"></div>
@@ -603,16 +613,7 @@
           </div>
           <div class="f wide">
             <label for="cfgDur">Duração padrão do serviço</label>
-            <div class="fld">
-              <select id="cfgDur">
-                <option value="60">1 hora</option>
-                <option value="90">1h30</option>
-                <option value="120">2 horas</option>
-                <option value="180">3 horas</option>
-                <option value="240">meio período</option>
-                <option value="480">dia inteiro</option>
-              </select>
-            </div>
+            <div class="fld"><select id="cfgDur"></select></div>
           </div>
         </div>
       </div>
@@ -758,11 +759,21 @@
   function durTxt(m) {
     m = Number(m || 0);
     if (!m) return "";
-    if (m >= 480) return "dia inteiro";
-    if (m >= 240) return "meio período";
     var h = Math.floor(m / 60), r = m % 60;
+    if (!h) return r + "min";
     return r ? h + "h" + String(r).padStart(2, "0") : h + "h";
   }
+
+  /* de 15 em 15 minutos até 12 horas */
+  function optsDur(sel) {
+    var out = "";
+    for (var m = 15; m <= 720; m += 15) {
+      out += '<option value="' + m + '"' + (Number(sel) === m ? " selected" : "") + ">" + durTxt(m) + "</option>";
+    }
+    return out;
+  }
+
+  function novoId() { return "s" + Date.now() + Math.random().toString(36).slice(2, 6); }
 
   // ---------- formato ----------
   function num(v) {
@@ -806,6 +817,11 @@
   }
   function valorDe(s) { return Number(s.valor || 0); }
   function ativos(lista) { return lista.filter(function (s) { return s.status !== "cancelado"; }); }
+  /* orçamento é visita pra cotar: ocupa a agenda, mas não é venda —
+     fica fora do faturamento, das máquinas do mês e do total do cliente */
+  function reais(lista) { return lista.filter(function (s) { return !s.orcamento; }); }
+  function orcas(lista) { return lista.filter(function (s) { return !!s.orcamento; }); }
+  function soma(lista) { return lista.reduce(function (a, s) { return a + valorDe(s); }, 0); }
 
   // ---------- UI base ----------
   var ui = {
@@ -888,7 +904,7 @@
       var lista = doDia(iso);
       var dots = lista.slice(0, 3).map(function (s) {
         var t = tipoDe(s.tipo);
-        var cls = s.status === "feito" ? " done" : (s.status === "cancelado" ? " canc" : "");
+        var cls = (s.status === "feito" ? "done " : (s.status === "cancelado" ? "canc " : "")) + (s.orcamento ? "orc" : "");
         var cor = corVar(t);
         return '<i class="' + cls.trim() + '" style="background:' + cor + ';color:' + cor + '"></i>';
       }).join("");
@@ -912,10 +928,13 @@
     var d = fromISO(ui.dia);
     var lista = doDia(ui.dia);
     var vivos = ativos(lista);
-    var total = vivos.reduce(function (a, s) { return a + valorDe(s); }, 0);
+    var total = soma(reais(vivos));
+    var nOrc = orcas(vivos).length;
 
     $("diaNome").textContent = DIAS[d.getDay()] + ", " + d.getDate() + " de " + MES[d.getMonth()];
-    $("diaTot").textContent = vivos.length ? brl(total) : "";
+    $("diaTot").textContent = vivos.length
+      ? (total ? brl(total) : "") + (nOrc ? (total ? " · " : "") + nOrc + " orç." : "")
+      : "";
 
     if (!lista.length) {
       $("dayList").innerHTML = '<div class="empty">Nenhum serviço nesse dia.<br>Toque em <b>+ Serviço</b> para marcar.</div>';
@@ -926,11 +945,14 @@
       var t = tipoDe(s.tipo);
       var cls = s.status === "feito" ? " done" : (s.status === "cancelado" ? " canc" : "");
       var sub = '<span class="chip"><i style="background:' + corVar(t) + '"></i>' + esc(t.nome) + "</span>";
+      if (s.orcamento) sub += ' <span class="chip orc">orçamento</span>';
       if (s.maquinas) sub += ' <span class="chip">' + s.maquinas + " máq</span>";
       if (s.status === "feito") sub += ' <span class="chip ok">feito</span>';
       if (s.status === "cancelado") sub += ' <span class="chip">cancelado</span>';
-      if (s.pago) sub += ' <span class="chip ok">pago</span>';
-      else if (s.status === "feito") sub += ' <span class="chip warn">a receber</span>';
+      if (!s.orcamento) {
+        if (s.pago) sub += ' <span class="chip ok">pago</span>';
+        else if (s.status === "feito") sub += ' <span class="chip warn">a receber</span>';
+      }
 
       return '<button class="sv' + cls + '" data-id="' + s.id + '">' +
         '<span class="stripe" style="background:' + corVar(t) + '"></span>' +
@@ -951,10 +973,13 @@
     store.servicos.forEach(function (s) {
       var nome = (s.cliente || "sem nome").trim();
       var k = nome.toLowerCase();
-      if (!mapa[k]) mapa[k] = { nome: nome, tel: "", end: "", itens: [], total: 0, ultimo: "", proximo: "" };
+      if (!mapa[k]) mapa[k] = { nome: nome, tel: "", end: "", itens: [], total: 0, orcados: 0, ultimo: "", proximo: "" };
       var c = mapa[k];
       c.itens.push(s);
-      if (s.status !== "cancelado") c.total += valorDe(s);
+      if (s.status !== "cancelado") {
+        if (s.orcamento) c.orcados++;
+        else c.total += valorDe(s);
+      }
       if (s.tel) c.tel = s.tel;
       if (s.endereco) c.end = s.endereco;
     });
@@ -986,6 +1011,7 @@
       var linha = "";
       if (c.proximo) linha = "próximo " + curto(c.proximo);
       else if (c.ultimo) linha = "último " + curto(c.ultimo);
+      if (c.orcados) linha += (linha ? " · " : "") + c.orcados + " orç.";
 
       var html = '<button class="row" data-cli="' + esc(c.nome.toLowerCase()) + '">' +
         '<span><span class="nm">' + esc(c.nome) + "</span>" +
@@ -998,6 +1024,7 @@
         html += '<div class="tline">' + c.itens.slice(0, 12).map(function (s) {
           var t = tipoDe(s.tipo);
           return '<div class="ti"><span>' + curto(s.data) + " · " + esc(t.nome) +
+                 (s.orcamento ? " (orçamento)" : "") +
                  (s.status === "cancelado" ? " (cancelado)" : "") + "</span><b>" + brl(valorDe(s)) + "</b></div>";
         }).join("") + "</div>" +
         '<div class="actions"><button class="btn btn-ghost btn-sm full" data-novo-cli="' + esc(c.nome) + '">+ Marcar serviço para ' + esc(c.nome) + "</button></div>";
@@ -1015,18 +1042,23 @@
   function renderResumo() {
     var p = ui.mes.split("-");
     var lista = doMes(ui.mes);
-    var vivos = ativos(lista);
+    var vivosTodos = ativos(lista);
+    var vivos = reais(vivosTodos);
+    var orcamentos = orcas(vivosTodos);
     var feitos = vivos.filter(function (s) { return s.status === "feito"; });
     var agendados = vivos.filter(function (s) { return s.status === "agendado"; });
-    var recebido = feitos.filter(function (s) { return s.pago; }).reduce(function (a, s) { return a + valorDe(s); }, 0);
-    var aReceber = feitos.filter(function (s) { return !s.pago; }).reduce(function (a, s) { return a + valorDe(s); }, 0);
-    var previsto = agendados.reduce(function (a, s) { return a + valorDe(s); }, 0);
+    var recebido = soma(feitos.filter(function (s) { return s.pago; }));
+    var aReceber = soma(feitos.filter(function (s) { return !s.pago; }));
+    var previsto = soma(agendados);
     var total = recebido + aReceber + previsto;
     var maquinas = vivos.reduce(function (a, s) { return a + Number(s.maquinas || 0); }, 0);
 
     $("resTitulo").textContent = MES[Number(p[1]) - 1] + " de " + p[0];
-    $("resMeta").textContent = lista.length - vivos.length
-      ? (lista.length - vivos.length) + " cancelado(s) fora da conta"
+    var fora = [];
+    if (lista.length - vivosTodos.length) fora.push((lista.length - vivosTodos.length) + " cancelado(s)");
+    if (orcamentos.length) fora.push(orcamentos.length + " orçamento(s)");
+    $("resMeta").textContent = fora.length
+      ? fora.join(" e ") + " fora desta conta"
       : "todos os serviços do mês contam";
 
     $("rServ").textContent = vivos.length;
@@ -1047,9 +1079,18 @@
         '<div class="cbar"><i style="width:' + (r.v / maxD * 100) + "%;background:" + r.c + '"></i></div></div>';
     }).join("");
 
+    var orcAberto = orcamentos.filter(function (s) { return s.status === "agendado"; });
+    $("orcCard").hidden = !orcamentos.length;
+    if (orcamentos.length) {
+      $("orcComp").innerHTML =
+        '<div class="readout"><span class="lbl">Ainda por visitar</span><b>' + orcAberto.length +
+        " de " + orcamentos.length + "</b></div>" +
+        '<div class="readout"><span class="lbl">Valor orçado no mês</span><b>' + brl(soma(orcamentos)) + "</b></div>";
+    }
+
     var porTipo = store.tipos.map(function (t) {
       var itens = vivos.filter(function (s) { return s.tipo === t.id; });
-      return { t: t, n: itens.length, v: itens.reduce(function (a, s) { return a + valorDe(s); }, 0) };
+      return { t: t, n: itens.length, v: soma(itens) };
     }).filter(function (r) { return r.n > 0; }).sort(function (a, b) { return b.v - a.v; });
 
     $("tipoComp").innerHTML = porTipo.length ? porTipo.map(function (r) {
@@ -1082,7 +1123,7 @@
       dados.push({
         ym: ym,
         rot: MES3[d.getMonth()],
-        v: ativos(doMes(ym)).reduce(function (a, s) { return a + valorDe(s); }, 0)
+        v: soma(reais(ativos(doMes(ym))))
       });
     }
     var max = Math.max.apply(null, dados.map(function (d) { return d.v; }).concat([1]));
@@ -1112,7 +1153,7 @@
   function renderAjustes() {
     $("cfgPreco").value = store.cfg.preco;
     $("cfgTeto").value = store.cfg.teto;
-    $("cfgDur").value = String(store.cfg.dur);
+    $("cfgDur").innerHTML = optsDur(store.cfg.dur);
 
     $("tipoList").innerHTML = store.tipos.map(function (t, i) {
       return '<div class="card flat" style="margin-top:10px">' +
@@ -1135,13 +1176,17 @@
 
   // ---------- barra ----------
   function renderBar() {
-    var lista = ativos(doMes(ui.mes));
-    var total = lista.reduce(function (a, s) { return a + valorDe(s); }, 0);
+    var vivos = ativos(doMes(ui.mes));
+    var lista = reais(vivos);
+    var nOrc = orcas(vivos).length;
+    var total = soma(lista);
     var maq = lista.reduce(function (a, s) { return a + Number(s.maquinas || 0); }, 0);
     var p = ui.mes.split("-");
     $("barK").textContent = MES[Number(p[1]) - 1] + " · total do mês";
     $("barV").textContent = brl(total);
-    $("barS").textContent = lista.length + " serviço" + (lista.length === 1 ? "" : "s") + (maq ? " · " + maq + " máq" : "");
+    $("barS").textContent = lista.length + " serviço" + (lista.length === 1 ? "" : "s") +
+      (maq ? " · " + maq + " máq" : "") +
+      (nOrc ? " · " + nOrc + " orç." : "");
   }
 
   function renderAviso() {
@@ -1181,8 +1226,9 @@
   function novoServico(data, cliente) {
     var t = store.tipos[0];
     return {
-      id: "s" + Date.now() + Math.random().toString(36).slice(2, 6),
+      id: novoId(),
       data: data || ui.dia,
+      orcamento: false,
       hora: "08:00",
       dur: Number(store.cfg.dur || 90),
       tipo: t.id,
@@ -1278,15 +1324,20 @@
               '<i style="background:' + corVar(x) + '"></i>' + esc(x.nome) + "</button>";
           }).join("") + "</div></div>" +
 
+        '<div class="f wide"><label>É serviço ou orçamento?</label><div class="opts cols2">' +
+          '<button class="opt" data-modo="servico" aria-pressed="' + (!s.orcamento) + '">Serviço</button>' +
+          '<button class="opt" data-modo="orcamento" aria-pressed="' + (!!s.orcamento) + '">Orçamento</button>' +
+          "</div>" +
+          (s.orcamento ? '<p class="note" style="margin-top:7px">Orçamento ocupa a agenda mas não entra no faturamento nem nas máquinas do mês. Quando fechar, use o botão lá embaixo.</p>' : "") +
+          "</div>" +
+
         '<div class="f"><label for="fData">Data</label><div class="fld">' +
           '<input id="fData" type="date" value="' + esc(s.data) + '"></div></div>' +
         '<div class="f"><label for="fHora">Hora</label><div class="fld">' +
           '<input id="fHora" type="time" value="' + esc(s.hora) + '"></div></div>' +
 
         '<div class="f wide"><label for="fDur">Duração</label><div class="fld"><select id="fDur">' +
-          [[60, "1 hora"], [90, "1h30"], [120, "2 horas"], [180, "3 horas"], [240, "meio período"], [480, "dia inteiro"]]
-            .map(function (o) { return '<option value="' + o[0] + '"' + (Number(s.dur) === o[0] ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") +
-          "</select></div></div>" +
+          optsDur(s.dur) + "</select></div></div>" +
 
         (t.porMaquina
           ? '<div class="f"><label for="fMaq">Máquinas</label><div class="fld has-unit">' +
@@ -1319,6 +1370,7 @@
       '<div class="actions">' +
         '<button class="btn btn-ghost" id="fCancel">Fechar</button>' +
         '<button class="btn btn-primary" id="fSalvar">Salvar</button>' +
+        (ui.editando && s.orcamento ? '<button class="btn btn-ghost full" id="fVirou">O cliente aprovou — virar serviço</button>' : "") +
         (ui.editando ? '<button class="btn btn-ghost full" id="fDuplicar">Repetir esse serviço em outra data</button>' : "") +
         (ui.editando ? '<button class="btn btn-danger full" id="fExcluir">Excluir serviço</button>' : "") +
       "</div>";
@@ -1516,6 +1568,16 @@
       return;
     }
 
+    var md = e.target.closest("[data-modo]");
+    if (md && rascunho) {
+      lerPanel();
+      var querOrc = md.getAttribute("data-modo") === "orcamento";
+      if (querOrc === !!rascunho.orcamento) return;
+      rascunho.orcamento = querOrc;
+      desenharPanel();
+      return;
+    }
+
     var st = e.target.closest("[data-status]");
     if (st && rascunho) {
       lerPanel();
@@ -1551,10 +1613,31 @@
       return;
     }
 
+    if (e.target.closest("#fVirou")) {
+      lerPanel();
+      // o orçamento fica no histórico como visita feita; o serviço nasce como um novo compromisso
+      var orc = rascunho;
+      orc.status = "feito";
+      if (ui.editando) store.servicos = store.servicos.map(function (x) { return x.id === orc.id ? orc : x; });
+      else store.servicos.push(orc);
+      save();
+      var job = JSON.parse(JSON.stringify(orc));
+      job.id = novoId();
+      job.orcamento = false;
+      job.status = "agendado";
+      job.pago = false;
+      var dj = fromISO(job.data);
+      dj.setDate(dj.getDate() + 7);
+      job.data = toISO(dj);
+      abrirServico(job);
+      toast("Orçamento fechado. Confira a data do serviço e salve.");
+      return;
+    }
+
     if (e.target.closest("#fDuplicar")) {
       lerPanel();
       var copia = JSON.parse(JSON.stringify(rascunho));
-      copia.id = "s" + Date.now() + Math.random().toString(36).slice(2, 6);
+      copia.id = novoId();
       copia.status = "agendado";
       copia.pago = false;
       var d = fromISO(copia.data);
