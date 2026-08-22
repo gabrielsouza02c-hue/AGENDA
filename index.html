@@ -1,21 +1,7 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Agenda — serviços</title>
-<meta name="description" content="Agenda de serviços de campo">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Agenda">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#171B21" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📅%3C/text%3E%3C/svg%3E">
-</head>
-<body>
+<title>Ficha — Meso 1 Corpo Inteiro</title>
+
 <style>
-  /* ---------- tokens: mesmo sistema da ficha de treino / preço da obra ---------- */
+  /* ---------- tokens: paleta derivada do código de cores de anilha olímpica ---------- */
   :root {
     --bg:        #EDEFF1;
     --surface:   #FFFFFF;
@@ -34,24 +20,24 @@
     --danger-bg: #F6E5E4;
     --shadow:    0 1px 2px rgba(20,28,38,.07), 0 6px 16px -8px rgba(20,28,38,.16);
 
-    /* dinheiro (mesma convenção dos outros apps) */
+    /* anilhas: 20kg azul, 25kg vermelho, 10kg verde, 15kg amarelo, 5kg branco */
+    --plate-a: #1F5FBF;
+    --plate-b: #A82E27;
+    --plate-e: #2E7D4F;
+    --plate-c: #A85E16;
+    --plate-d: #4A555F;
+
+    /* séries de gráfico — validadas para CVD e contraste no modo claro */
+    --s1: #1F5FBF;
     --s2: #A85E16;
     --grid: #E3E8EC;
-
-    /* tipos de serviço — validados para CVD (todos os pares) sobre superfície branca */
-    --t1: #1F5FBF;  /* azul       */
-    --t2: #0096A5;  /* verde-água */
-    --t3: #A85E16;  /* âmbar      */
-    --t4: #872D5A;  /* vinho      */
-    --t5: #8A84F6;  /* lilás      */
-    --t6: #5B6570;  /* cinza — categoria coringa, fora da escala de matizes */
 
     --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
   }
 
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
+    :root {
       --bg:        #0F1216;
       --surface:   #171B21;
       --surface-2: #1E242B;
@@ -68,14 +54,17 @@
       --warn-bg:   #2A2015;
       --danger-bg: #2C1917;
       --shadow:    0 1px 2px rgba(0,0,0,.4), 0 8px 20px -10px rgba(0,0,0,.6);
+
+      --plate-a: #5D9DF7;
+      --plate-b: #E86B60;
+      --plate-e: #52BB7B;
+      --plate-c: #E09545;
+      --plate-d: #94A0AC;
+
+      /* séries validadas contra a superfície escura #171B21 */
+      --s1: #4F8CE4;
       --s2: #C98230;
       --grid: #262E37;
-      --t1: #4F8CE4;
-      --t2: #2DAAA0;
-      --t3: #C98230;
-      --t4: #A0505A;
-      --t5: #844EBA;
-      --t6: #94A0AC;
     }
   }
 
@@ -85,8 +74,8 @@
     --accent:#5D9DF7; --ok:#52BB7B; --warn:#E09545; --danger:#E86B60;
     --ok-bg:#16281E; --warn-bg:#2A2015; --danger-bg:#2C1917;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 20px -10px rgba(0,0,0,.6);
-    --s2:#C98230; --grid:#262E37;
-    --t1:#4F8CE4; --t2:#2DAAA0; --t3:#C98230; --t4:#A0505A; --t5:#844EBA; --t6:#94A0AC;
+    --plate-a:#5D9DF7; --plate-b:#E86B60; --plate-e:#52BB7B; --plate-c:#E09545; --plate-d:#94A0AC;
+    --s1:#4F8CE4; --s2:#C98230; --grid:#262E37;
   }
 
   :root[data-theme="light"] {
@@ -95,22 +84,21 @@
     --accent:#1F5FBF; --ok:#2E7D4F; --warn:#A85E16; --danger:#A82E27;
     --ok-bg:#E4F1E9; --warn-bg:#F8EEE0; --danger-bg:#F6E5E4;
     --shadow:0 1px 2px rgba(20,28,38,.07), 0 6px 16px -8px rgba(20,28,38,.16);
-    --s2:#A85E16; --grid:#E3E8EC;
-    --t1:#1F5FBF; --t2:#0096A5; --t3:#A85E16; --t4:#872D5A; --t5:#8A84F6; --t6:#5B6570;
+    --plate-a:#1F5FBF; --plate-b:#A82E27; --plate-e:#2E7D4F; --plate-c:#A85E16; --plate-d:#4A555F;
+    --s1:#1F5FBF; --s2:#A85E16; --grid:#E3E8EC;
   }
 
   * { box-sizing: border-box; }
-
-  body { background: var(--bg); margin: 0; }
 
   .app {
     font-family: var(--sans);
     background: var(--bg);
     color: var(--ink);
     min-height: 100vh;
-    padding-bottom: 108px;
+    padding-bottom: 24px;
     -webkit-text-size-adjust: 100%;
   }
+  .app.on-treino { padding-bottom: 96px; }
 
   .wrap { max-width: 640px; margin: 0 auto; padding: 0 12px; }
 
@@ -121,12 +109,15 @@
     border-bottom: 1px solid var(--line);
   }
   .top-inner { max-width: 640px; margin: 0 auto; padding: 10px 12px 0; }
+
   .brand { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
   .brand h1 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
-  .brand .kicker {
+  .brand .meso {
     font-family: var(--mono); font-size: 11px; color: var(--ink-3);
     letter-spacing: .02em; white-space: nowrap;
   }
+
+  /* navegação principal */
   .nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 10px 0 0; }
   .nav button {
     min-height: 40px; padding: 0 4px;
@@ -137,262 +128,186 @@
   .nav button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
   .nav button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
-  /* ---------- cabeçalho de seção ---------- */
-  .sheet-head { padding: 16px 0 2px; }
+  .tabs { display: flex; gap: 6px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs[hidden] { display: none; }
+
+  .tab {
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 7px;
+    min-height: 44px; padding: 0 13px;
+    border: 1px solid var(--line); border-radius: 3px;
+    background: var(--surface-2); color: var(--ink-2);
+    font: 600 13px/1 var(--sans); cursor: pointer;
+    transition: background .12s, color .12s, border-color .12s;
+  }
+  .tab .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--tc); flex: 0 0 auto; }
+  .tab .day {
+    font-family: var(--mono); font-size: 10px; color: var(--ink-3);
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .tab[aria-selected="true"] {
+    background: var(--surface); border-color: var(--tc); color: var(--ink);
+    box-shadow: inset 0 -2px 0 var(--tc);
+  }
+  .tab[aria-selected="true"] .day { color: var(--ink-2); }
+
+  /* ---------- aviso fixo do joelho ---------- */
+  .knee {
+    display: flex; gap: 9px; align-items: flex-start;
+    margin: 12px 0 0; padding: 10px 12px;
+    background: var(--danger-bg);
+    border-left: 3px solid var(--danger);
+    border-radius: 0 3px 3px 0;
+    font-size: 12.5px; line-height: 1.45; color: var(--ink);
+  }
+  .knee strong { color: var(--danger); }
+
+  /* ---------- cabeçalhos de seção ---------- */
+  .sheet-head { padding: 18px 0 4px; }
   .eyebrow {
     font: 600 10.5px/1 var(--mono); letter-spacing: .12em;
-    text-transform: uppercase; color: var(--accent);
+    text-transform: uppercase; color: var(--tc);
   }
   .eyebrow.neutral { color: var(--ink-3); }
   .sheet-head h2 {
-    margin: 8px 0 0; font-size: 24px; font-weight: 700;
+    margin: 8px 0 0; font-size: 25px; font-weight: 700;
     letter-spacing: -.025em; line-height: 1.1; text-wrap: balance;
   }
   .sheet-head .meta { margin-top: 6px; font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
 
-  /* ---------- cartões ---------- */
-  .card {
+  .cues {
+    margin: 14px 0 0; padding: 12px 13px;
+    background: var(--surface-2); border: 1px solid var(--line-soft);
+    border-radius: 3px; font-size: 12.5px; line-height: 1.5; color: var(--ink-2);
+  }
+  .cues b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- cartão de exercício ---------- */
+  .list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+
+  .ex {
     background: var(--surface); border: 1px solid var(--line);
-    border-radius: 4px; box-shadow: var(--shadow);
-    padding: 14px 13px; margin-top: 12px;
+    border-radius: 4px; box-shadow: var(--shadow); overflow: hidden;
   }
-  .card > h3 { margin: 0; font-size: 14.5px; font-weight: 650; letter-spacing: -.012em; }
-  .card > p.note { margin: 5px 0 0; font-size: 12px; line-height: 1.5; color: var(--ink-2); }
-  .card.flat { box-shadow: none; }
+  .ex-head { padding: 12px 13px 10px; display: flex; gap: 11px; }
+  .ex-num {
+    flex: 0 0 auto; width: 24px; height: 24px; margin-top: 1px;
+    display: grid; place-items: center; border-radius: 2px;
+    background: var(--tc); color: #fff; font: 700 12px/1 var(--mono);
+  }
+  :root[data-theme="dark"] .ex-num { color: #0F1216; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .ex-num { color: #0F1216; }
+  }
+  :root[data-theme="light"] .ex-num { color: #fff; }
 
-  /* ---------- calendário ---------- */
-  .cal-head {
-    display: grid; grid-template-columns: 40px 1fr 40px auto;
-    align-items: center; gap: 6px; margin-top: 12px;
+  .ex-title { flex: 1 1 auto; min-width: 0; }
+  .ex-title h3 { margin: 0; font-size: 15px; font-weight: 650; line-height: 1.3; letter-spacing: -.012em; }
+  .presc {
+    margin-top: 5px; font-family: var(--mono); font-size: 11.5px;
+    color: var(--ink-2); letter-spacing: .01em;
   }
-  .navbtn {
-    height: 40px; width: 40px; border: 1px solid var(--line); border-radius: 3px;
-    background: var(--surface); color: var(--ink-2);
-    font: 400 20px/1 var(--sans); cursor: pointer;
+  .presc .sep { color: var(--ink-3); padding: 0 5px; }
+  .ex-cue {
+    margin-top: 7px; font-size: 12px; line-height: 1.45; color: var(--ink-2);
+    border-left: 2px solid var(--line); padding-left: 9px;
   }
-  .navbtn:hover { border-color: var(--accent); color: var(--accent); }
-  .cal-title { text-align: center; font-size: 16px; font-weight: 700; letter-spacing: -.02em; }
-  .cal-title span { font: 600 13px/1 var(--mono); color: var(--ink-3); margin-left: 4px; }
 
-  .dows {
-    display: grid; grid-template-columns: repeat(7, 1fr);
-    margin-top: 12px; padding: 0 2px;
-    font: 600 10px/1 var(--mono); letter-spacing: .06em;
-    text-transform: uppercase; color: var(--ink-3); text-align: center;
-  }
-  .grid {
-    display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px;
-    margin-top: 6px;
-  }
-  .d {
-    position: relative; min-height: 50px; padding: 5px 0 0;
-    border: 1px solid transparent; border-radius: 3px;
-    background: var(--surface); color: var(--ink);
-    font: inherit; cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-  }
-  .d.out { background: transparent; color: var(--ink-3); opacity: .55; }
-  .d .n { font: 600 14px/1 var(--mono); font-variant-numeric: tabular-nums; }
-  .d.today .n { color: var(--accent); font-weight: 700; }
-  .d.today { border-color: var(--accent); }
-  .d[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); }
-  .d[aria-pressed="true"] .n { color: var(--bg); }
-  .d:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-  .d .dots { display: flex; gap: 3px; align-items: center; min-height: 7px; }
-  .d .dots i { width: 6px; height: 6px; border-radius: 50%; display: block; }
-  .d .dots i.done { background: transparent !important; box-shadow: inset 0 0 0 1.5px currentColor; }
-  .d .dots i.canc { background: var(--ink-3) !important; opacity: .4; height: 2px; width: 8px; border-radius: 1px; }
-  /* orçamento vira losango — dá pra distinguir de serviço sem depender só da cor */
-  .d .dots i.orc { border-radius: 1px; transform: rotate(45deg); }
-  .d .dots i.orc.canc { transform: none; }
-
-  /* ---------- dia selecionado ---------- */
-  .daybar {
-    display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
-    margin-top: 18px; padding-bottom: 8px; border-bottom: 1px solid var(--line);
-  }
-  .daybar h3 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -.02em; }
-  .daybar .tot { font: 700 13px/1 var(--mono); color: var(--s2); font-variant-numeric: tabular-nums; white-space: nowrap; }
-
-  .sv {
-    width: 100%; text-align: left; margin-top: 9px;
-    display: grid; grid-template-columns: 3px auto 1fr auto; gap: 10px; align-items: start;
-    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
-    padding: 11px 11px 11px 0; cursor: pointer; font: inherit; color: var(--ink);
-    box-shadow: var(--shadow); overflow: hidden;
-  }
-  .sv:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .sv .stripe { align-self: stretch; border-radius: 0; margin: -11px 0; }
-  .sv .time {
-    font: 700 13px/1.25 var(--mono); font-variant-numeric: tabular-nums;
-    color: var(--ink); padding-top: 1px; white-space: nowrap;
-  }
-  .sv .time small { display: block; font-weight: 500; font-size: 10px; color: var(--ink-3); margin-top: 3px; }
-  .sv .body { min-width: 0; }
-  .sv .cli { display: block; font-size: 14px; font-weight: 650; letter-spacing: -.01em; }
-  .sv .sub { margin-top: 3px; font-size: 11.5px; line-height: 1.4; color: var(--ink-2); }
-  .sv .addr {
-    margin-top: 3px; font-size: 11.5px; color: var(--ink-3); line-height: 1.35;
-    display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
-  }
-  .sv .val {
-    font: 700 13px/1.25 var(--mono); color: var(--s2);
-    font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right;
-  }
-  .sv.done .cli, .sv.done .time { color: var(--ink-2); }
-  .sv.canc { opacity: .55; }
-  .sv.canc .cli { text-decoration: line-through; }
-
-  .chip {
+  /* substituições: fechadas por padrão, para quem treina fora e não tem o aparelho */
+  details.alt { margin-top: 8px; }
+  details.alt summary {
     display: inline-flex; align-items: center; gap: 5px;
-    font: 600 10px/1 var(--mono); letter-spacing: .04em; text-transform: uppercase;
-    padding: 4px 7px; border-radius: 3px; background: var(--surface-2);
-    border: 1px solid var(--line-soft); color: var(--ink-2); white-space: nowrap;
+    font: 600 11px/1 var(--sans); color: var(--tc);
+    cursor: pointer; list-style: none;
+    padding: 5px 0; min-height: 24px;
   }
-  .chip i { width: 6px; height: 6px; border-radius: 50%; display: block; }
-  .chip.ok { background: var(--ok-bg); border-color: transparent; color: var(--ok); }
-  .chip.warn { background: var(--warn-bg); border-color: transparent; color: var(--warn); }
-  .chip.orc { background: transparent; border: 1px dashed var(--ink-3); color: var(--ink-2); }
-  .chip-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+  details.alt summary::-webkit-details-marker { display: none; }
+  details.alt summary::before { content: "＋"; font-size: 12px; }
+  details.alt[open] summary::before { content: "－"; }
+  details.alt span {
+    display: block; margin-top: 3px; padding-left: 9px;
+    border-left: 2px solid var(--line);
+    font-size: 12px; line-height: 1.5; color: var(--ink-2);
+  }
 
-  /* ---------- campos ---------- */
-  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
-  .f { min-width: 0; }
-  .f.wide { grid-column: 1 / -1; }
-  .f label {
-    display: block; font: 600 10px/1.3 var(--mono);
-    text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); margin-bottom: 5px;
+  .last {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 7px 13px; background: var(--surface-2);
+    border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft);
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
   }
+  .last .lbl { color: var(--ink-3); text-transform: uppercase; letter-spacing: .07em; font-size: 10px; }
+
+  .bump, .fix {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 8px; border-radius: 2px;
+    font: 700 11px/1 var(--mono); letter-spacing: .03em; white-space: nowrap;
+  }
+  .bump { background: var(--ok-bg); color: var(--ok); }
+  .fix  { background: var(--warn-bg); color: var(--warn); }
+
+  /* ---------- grade de séries ---------- */
+  .sets { padding: 10px 13px 13px; display: flex; flex-direction: column; gap: 7px; }
+  .set-hd, .set-row {
+    display: grid; grid-template-columns: 22px 1fr 1fr 46px;
+    gap: 7px; align-items: center;
+  }
+  .set-hd.no-kg, .set-row.no-kg { grid-template-columns: 22px 1fr 46px; }
+  .set-hd {
+    font: 600 9.5px/1 var(--mono); letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-3); padding-bottom: 1px;
+  }
+  .set-hd span:first-child { text-align: center; }
+  .set-hd span:last-child { text-align: center; }
+
+  .set-n {
+    font: 600 12px/1 var(--mono); color: var(--ink-3); text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
   .fld { position: relative; }
-  .fld input, .fld select, .fld textarea {
-    width: 100%; height: 46px; padding: 0 11px;
+  .fld input {
+    width: 100%; height: 46px; padding: 0 30px 0 11px;
     border: 1px solid var(--line); border-radius: 3px;
     background: var(--surface-2); color: var(--ink);
-    font: 600 16px/1 var(--mono); font-variant-numeric: tabular-nums;
+    font: 600 17px/1 var(--mono); font-variant-numeric: tabular-nums;
     -webkit-appearance: none; appearance: none;
   }
-  .fld textarea { height: 74px; padding: 11px; font: 500 14px/1.45 var(--sans); resize: vertical; }
-  .fld select { font: 600 14px/1 var(--sans); }
-  .fld.has-pre input { padding-left: 34px; }
-  .fld.has-unit input { padding-right: 44px; }
-  .fld input.txt { font: 600 15px/1 var(--sans); }
-  .fld input::placeholder, .fld textarea::placeholder { color: var(--ink-3); font-weight: 500; }
-  .fld input:focus-visible, .fld select:focus-visible, .fld textarea:focus-visible {
-    outline: none; border-color: var(--accent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+  .fld input::placeholder { color: var(--ink-3); font-weight: 500; }
+  .fld input:focus-visible {
+    outline: none; border-color: var(--tc);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tc) 22%, transparent);
   }
-  .fld .unit, .fld .pre {
-    position: absolute; top: 50%; transform: translateY(-50%);
+  .fld .unit {
+    position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
     font: 600 10.5px/1 var(--mono); color: var(--ink-3);
     pointer-events: none; text-transform: uppercase; letter-spacing: .04em;
   }
-  .fld .unit { right: 10px; }
-  .fld .pre { left: 11px; font-size: 12px; text-transform: none; }
 
-  /* seletor de opção (tipo / status) */
-  .opts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
-  .opt {
-    flex: 1 1 auto; min-height: 42px; padding: 0 11px;
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  .chk {
+    height: 46px; width: 46px; display: grid; place-items: center;
     border: 1px solid var(--line); border-radius: 3px;
-    background: var(--surface-2); color: var(--ink-2);
-    font: 600 12.5px/1 var(--sans); cursor: pointer; white-space: nowrap;
+    background: var(--surface-2); color: var(--ink-3);
+    cursor: pointer; padding: 0;
+    transition: background .12s, color .12s, border-color .12s;
   }
-  .opt i { width: 8px; height: 8px; border-radius: 50%; display: block; }
-  .opt[aria-pressed="true"] { background: var(--surface); border-color: var(--accent); color: var(--ink); box-shadow: inset 0 -2px 0 var(--accent); }
-  .opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .opts.cols2 { display: grid; grid-template-columns: 1fr 1fr; }
-  .armado { background: var(--danger) !important; border-color: transparent !important; color: var(--bg) !important; box-shadow: none !important; }
+  .chk svg { width: 19px; height: 19px; }
+  .chk[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); color: #fff; }
+  :root[data-theme="dark"] .chk[aria-pressed="true"] { color: #0F1216; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .chk[aria-pressed="true"] { color: #0F1216; }
+  }
+  .set-row.done .fld input { border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
 
-  .switch {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    min-height: 46px; padding: 0 11px; margin-top: 5px;
-    border: 1px solid var(--line); border-radius: 3px; background: var(--surface-2);
-    color: var(--ink-2); font: 600 13px/1 var(--sans); cursor: pointer; width: 100%;
+  .rest-btn {
+    margin-top: 3px; width: 100%; min-height: 40px;
+    border: 1px dashed var(--line); border-radius: 3px;
+    background: transparent; color: var(--ink-2);
+    font: 600 12px/1 var(--sans); cursor: pointer;
   }
-  .switch .knob {
-    width: 40px; height: 24px; border-radius: 12px; background: var(--line);
-    position: relative; transition: background .14s; flex: 0 0 auto;
-  }
-  .switch .knob::after {
-    content: ""; position: absolute; top: 3px; left: 3px;
-    width: 18px; height: 18px; border-radius: 50%; background: var(--surface);
-    transition: transform .14s;
-  }
-  .switch[aria-pressed="true"] { color: var(--ink); }
-  .switch[aria-pressed="true"] .knob { background: var(--ok); }
-  .switch[aria-pressed="true"] .knob::after { transform: translateX(16px); }
-  .switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-  /* ---------- números ---------- */
-  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 12px; }
-  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 11px 10px; }
-  .stat .k { font: 600 9.5px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
-  .stat .v { margin-top: 6px; font: 700 19px/1 var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
-  .stat .v.money { color: var(--s2); }
-  .stat .u { font-size: 11px; font-weight: 600; color: var(--ink-3); margin-left: 2px; }
-  .stat .d { margin-top: 4px; font: 600 10.5px/1.2 var(--mono); color: var(--ink-3); }
-
-  .comp { margin-top: 12px; display: flex; flex-direction: column; gap: 11px; }
-  .crow .chead {
-    display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
-    font-size: 12.5px; color: var(--ink-2); margin-bottom: 5px;
-  }
-  .crow .chead b { font: 700 12.5px/1 var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .crow .chead em { font: 600 11px/1 var(--mono); color: var(--ink-3); font-style: normal; margin-left: 6px; }
-  .cbar { height: 8px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line-soft); overflow: hidden; }
-  .cbar i { display: block; height: 100%; border-radius: 0 2px 2px 0; transition: width .16s; }
-
-  .readout {
-    margin-top: 10px; padding: 8px 10px;
-    background: var(--surface-2); border: 1px solid var(--line-soft); border-radius: 3px;
-    font: 500 11.5px/1.45 var(--mono); color: var(--ink-2);
-    font-variant-numeric: tabular-nums;
-    display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
-  }
-  .readout .lbl { text-transform: uppercase; letter-spacing: .07em; font-size: 10px; color: var(--ink-3); }
-  .readout b { color: var(--ink); font-weight: 700; }
-
-  .verdict {
-    display: flex; gap: 9px; align-items: flex-start;
-    margin-top: 12px; padding: 10px 12px; border-radius: 0 3px 3px 0;
-    font-size: 12.5px; line-height: 1.45;
-  }
-  .verdict.ok { background: var(--ok-bg); border-left: 3px solid var(--ok); }
-  .verdict.warn { background: var(--warn-bg); border-left: 3px solid var(--warn); }
-  .verdict .sig { font: 700 12px/1.3 var(--mono); white-space: nowrap; }
-  .verdict.ok .sig { color: var(--ok); }
-  .verdict.warn .sig { color: var(--warn); }
-
-  /* ---------- gráfico ---------- */
-  .chart-wrap { margin-top: 14px; overflow-x: auto; }
-  .chart { display: block; width: 100%; height: auto; }
-  .chart .base { stroke: var(--line); stroke-width: 1; }
-  .chart .axis-t { fill: var(--ink-3); font: 500 9px var(--mono); }
-  .chart .bar { fill: var(--s2); opacity: .45; }
-  .chart .bar.now { opacity: 1; }
-  .chart .dlabel { font: 700 10px var(--mono); fill: var(--s2); }
-
-  /* ---------- listas ---------- */
-  .row {
-    width: 100%; text-align: left; margin-top: 9px;
-    display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
-    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
-    padding: 12px 12px; cursor: pointer; font: inherit; color: var(--ink);
-  }
-  .row:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .row .nm { display: block; font-size: 14px; font-weight: 650; letter-spacing: -.01em; }
-  .row .dt { display: block; margin-top: 3px; font: 500 11.5px/1.4 var(--mono); color: var(--ink-3); }
-  .row .rv { font: 700 13px/1.25 var(--mono); color: var(--s2); font-variant-numeric: tabular-nums; text-align: right; }
-  .row .rv small { display: block; font: 500 10px/1.3 var(--mono); color: var(--ink-3); margin-top: 3px; }
-
-  .tline { margin-top: 8px; padding-left: 12px; border-left: 1px solid var(--line); }
-  .tline .ti {
-    display: flex; justify-content: space-between; gap: 10px; align-items: baseline;
-    padding: 7px 0; font-size: 12px; color: var(--ink-2); border-bottom: 1px solid var(--line-soft);
-  }
-  .tline .ti:last-child { border-bottom: 0; }
-  .tline .ti b { font: 600 11.5px/1 var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .rest-btn:hover { border-color: var(--tc); color: var(--tc); }
 
   /* ---------- barra inferior ---------- */
   .bar {
@@ -400,13 +315,27 @@
     background: var(--surface); border-top: 1px solid var(--line);
     padding: 9px 12px calc(9px + env(safe-area-inset-bottom));
   }
+  .bar[hidden] { display: none; }
   .bar-inner {
     max-width: 640px; margin: 0 auto;
-    display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
+    display: grid; grid-template-columns: auto 1fr auto; gap: 9px; align-items: center;
   }
-  .bar .k { font: 600 9.5px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
-  .bar .v { margin-top: 4px; font: 700 24px/1 var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -.03em; color: var(--s2); }
-  .bar .s { margin-top: 4px; font: 500 11px/1 var(--mono); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .timer {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 11px; height: 48px;
+    border: 1px solid var(--line); border-radius: 3px; background: var(--surface-2);
+  }
+  .timer.run { border-color: var(--tc); }
+  .timer.done { border-color: var(--ok); background: var(--ok-bg); }
+  .timer .t {
+    font: 700 19px/1 var(--mono); font-variant-numeric: tabular-nums;
+    letter-spacing: -.01em; min-width: 56px; text-align: center;
+  }
+  .timer button {
+    border: 0; background: transparent; color: var(--ink-2);
+    font: 600 11px/1 var(--sans); cursor: pointer; padding: 6px 2px;
+  }
+  .timer button:hover { color: var(--ink); }
 
   .btn {
     height: 48px; padding: 0 15px;
@@ -420,27 +349,16 @@
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) .btn-primary { color: #0F1216; }
   }
-  :root[data-theme="light"] .btn-primary { color: #fff; }
   .btn-ghost { background: var(--surface-2); border-color: var(--line); color: var(--ink-2); }
-  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-  .btn-danger { background: var(--danger-bg); border-color: transparent; color: var(--danger); }
   .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .btn[disabled] { opacity: .45; cursor: default; }
-  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 12px; }
-  .actions .full { grid-column: 1 / -1; }
 
-  .quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 12px; }
-  .quick a, .quick button {
-    min-height: 54px; border: 1px solid var(--line); border-radius: 3px;
-    background: var(--surface-2); color: var(--ink-2); text-decoration: none;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-    font: 600 10px/1 var(--sans); cursor: pointer;
+  .progress {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-2);
+    text-align: center; line-height: 1.35;
   }
-  .quick a svg, .quick button svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.7; }
-  .quick a:hover, .quick button:hover { border-color: var(--accent); color: var(--accent); }
-  .quick a[aria-disabled="true"] { opacity: .4; pointer-events: none; }
+  .progress b { color: var(--ink); font-size: 13px; }
 
-  /* ---------- folha ---------- */
+  /* ---------- painel de registro ---------- */
   .modal {
     position: fixed; inset: 0; z-index: 50;
     background: rgba(8,11,15,.6);
@@ -451,41 +369,207 @@
     width: 100%; max-width: 640px; background: var(--surface);
     border-radius: 8px 8px 0 0; border-top: 3px solid var(--accent);
     padding: 16px 14px calc(16px + env(safe-area-inset-bottom));
-    max-height: 92vh; overflow-y: auto;
+    max-height: 88vh; overflow-y: auto;
   }
   .panel h3 { margin: 0 0 3px; font-size: 17px; font-weight: 700; letter-spacing: -.02em; }
-  .panel p.sub { margin: 0 0 12px; font-size: 12.5px; color: var(--ink-2); line-height: 1.45; }
-  .panel .out {
-    width: 100%; min-height: 180px; padding: 11px;
+  .panel p.sub { margin: 0 0 14px; font-size: 12.5px; color: var(--ink-2); line-height: 1.45; }
+
+  .measures { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 12px; }
+  .measures label {
+    display: block; font: 600 10px/1 var(--mono);
+    text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); margin-bottom: 5px;
+  }
+  .measures input {
+    width: 100%; height: 44px; padding: 0 11px;
     border: 1px solid var(--line); border-radius: 3px;
     background: var(--surface-2); color: var(--ink);
-    font: 400 12px/1.5 var(--mono); resize: vertical;
+    font: 600 15px/1 var(--mono); -webkit-appearance: none; appearance: none;
   }
+  .measures input:focus-visible { outline: none; border-color: var(--accent); }
+
+  .out {
+    width: 100%; min-height: 176px; padding: 11px;
+    border: 1px solid var(--line); border-radius: 3px;
+    background: var(--surface-2); color: var(--ink);
+    font: 400 12.5px/1.55 var(--mono); resize: vertical;
+  }
+  .panel-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 11px; }
 
   .toast {
-    position: fixed; left: 50%; bottom: 110px; transform: translateX(-50%) translateY(8px);
+    position: fixed; left: 50%; bottom: 108px; transform: translateX(-50%) translateY(8px);
     z-index: 60; background: var(--ink); color: var(--bg);
     padding: 10px 15px; border-radius: 3px; font: 600 12.5px/1 var(--sans);
     opacity: 0; pointer-events: none; transition: opacity .18s, transform .18s;
-    max-width: 88vw; text-align: center;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* ---------- aviso de armazenamento ---------- */
-  .alerta {
-    margin-top: 12px; padding: 12px 13px;
-    background: var(--danger-bg); border-left: 3px solid var(--danger);
-    border-radius: 0 3px 3px 0; font-size: 12.5px; line-height: 1.5; color: var(--ink);
+  .foot {
+    margin: 22px 0 6px; padding-top: 14px;
+    border-top: 1px solid var(--line-soft);
+    font-size: 11.5px; line-height: 1.5; color: var(--ink-3);
   }
-  .alerta[hidden] { display: none; }
-  .alerta b.tit {
-    display: block; color: var(--danger);
-    font: 700 10.5px/1.3 var(--mono); letter-spacing: .1em;
-    text-transform: uppercase; margin-bottom: 6px;
+  .foot button {
+    background: none; border: 0; padding: 0; color: var(--ink-3);
+    text-decoration: underline; cursor: pointer; font: inherit;
   }
-  .alerta.ok { background: var(--ok-bg); border-left-color: var(--ok); }
-  .alerta.ok b.tit { color: var(--ok); }
-  .alerta .btn { margin-top: 10px; width: 100%; }
+
+  /* ---------- cartões genéricos, gráficos e estatísticas ---------- */
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 4px; box-shadow: var(--shadow);
+    padding: 14px 13px; margin-top: 12px;
+  }
+  .card > h3 {
+    margin: 0 0 2px; font-size: 14.5px; font-weight: 650; letter-spacing: -.012em;
+  }
+  .card > p.note { margin: 4px 0 0; font-size: 12px; line-height: 1.5; color: var(--ink-2); }
+
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 12px; }
+  .stat {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 4px; padding: 11px 10px;
+  }
+  .stat .k {
+    font: 600 9.5px/1.2 var(--mono); letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .stat .v {
+    margin-top: 6px; font: 700 21px/1 var(--mono);
+    font-variant-numeric: tabular-nums; letter-spacing: -.02em;
+  }
+  .stat .u { font-size: 11px; font-weight: 600; color: var(--ink-3); margin-left: 2px; }
+  .stat .d { margin-top: 4px; font: 600 10.5px/1.2 var(--mono); color: var(--ink-3); }
+  .stat .d.up { color: var(--ok); }
+  .stat .d.dn { color: var(--warn); }
+
+  .hero {
+    display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .hero .big {
+    font: 700 44px/1 var(--mono); font-variant-numeric: tabular-nums;
+    letter-spacing: -.035em; color: var(--s2);
+  }
+  .hero .cap { font-size: 12.5px; line-height: 1.45; color: var(--ink-2); flex: 1 1 140px; }
+
+  .meter { margin-top: 12px; }
+  .meter-track {
+    height: 10px; border-radius: 2px; background: var(--surface-2);
+    border: 1px solid var(--line-soft); overflow: hidden;
+  }
+  .meter-fill { height: 100%; background: var(--s1); }
+  .meter-fill.amber { background: var(--s2); }
+  .meter-fill.good { background: var(--ok); }
+  .meter-scale {
+    display: flex; justify-content: space-between; margin-top: 5px;
+    font: 600 10px/1 var(--mono); color: var(--ink-3);
+  }
+
+  .chart-wrap { margin-top: 12px; overflow-x: auto; }
+  .chart { display: block; width: 100%; height: auto; }
+  .chart .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .chart .axis-t { fill: var(--ink-3); font: 500 9px var(--mono); }
+  .chart .ser { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .chart .ser1 { stroke: var(--s1); }
+  .chart .ser2 { stroke: var(--s2); }
+  .chart .dot1 { fill: var(--s1); }
+  .chart .dot2 { fill: var(--s2); }
+  .chart .ring { stroke: var(--surface); stroke-width: 2; }
+  .chart .dlabel { font: 700 10px var(--mono); }
+  .chart .dlabel1 { fill: var(--s1); }
+  .chart .dlabel2 { fill: var(--s2); }
+  .chart .hit { fill: transparent; cursor: pointer; }
+
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 9px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--ink-2); }
+  .legend i { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+  .legend i.c1 { background: var(--s1); }
+  .legend i.c2 { background: var(--s2); }
+
+  .readout {
+    margin-top: 8px; padding: 7px 10px;
+    background: var(--surface-2); border: 1px solid var(--line-soft); border-radius: 3px;
+    font: 500 11.5px/1.4 var(--mono); color: var(--ink-2);
+    font-variant-numeric: tabular-nums; min-height: 32px;
+  }
+  .readout b { color: var(--ink); font-weight: 700; }
+
+  select.pick {
+    width: 100%; height: 44px; padding: 0 34px 0 11px; margin-top: 10px;
+    border: 1px solid var(--line); border-radius: 3px;
+    background: var(--surface-2); color: var(--ink);
+    font: 600 13px/1 var(--sans);
+    -webkit-appearance: none; appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: calc(100% - 18px) 19px, calc(100% - 13px) 19px;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+  }
+  select.pick:focus-visible { outline: none; border-color: var(--accent); }
+
+  /* tabelas */
+  .tbl-wrap { overflow-x: auto; margin-top: 10px; }
+  table.data { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.data th {
+    text-align: left; padding: 6px 8px 6px 0;
+    font: 600 9.5px/1.2 var(--mono); letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink-3);
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  table.data td {
+    padding: 7px 8px 7px 0; border-bottom: 1px solid var(--line-soft);
+    font-variant-numeric: tabular-nums; color: var(--ink-2);
+  }
+  table.data td.n { font-family: var(--mono); color: var(--ink); }
+  table.data tr:last-child td { border-bottom: 0; }
+
+  /* linha do tempo de marcos */
+  .marks { margin-top: 12px; display: flex; flex-direction: column; gap: 0; }
+  .mark {
+    display: grid; grid-template-columns: 14px 1fr auto; gap: 11px;
+    align-items: start; padding: 10px 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .mark:last-child { border-bottom: 0; }
+  .mark .pip {
+    width: 10px; height: 10px; border-radius: 50%; margin-top: 3px;
+    border: 2px solid var(--ink-3); background: var(--surface);
+  }
+  .mark.done .pip { background: var(--ok); border-color: var(--ok); }
+  .mark.next .pip { background: var(--s2); border-color: var(--s2); }
+  .mark .t { font-size: 12.5px; line-height: 1.45; color: var(--ink); }
+  .mark .t small { display: block; color: var(--ink-2); font-size: 11.5px; margin-top: 2px; }
+  .mark .when {
+    font: 700 11px/1.3 var(--mono); color: var(--ink-3);
+    text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums;
+  }
+  .mark.next .when { color: var(--s2); }
+
+  /* dieta */
+  .meal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .meal {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+    min-height: 60px; padding: 10px 11px; text-align: left;
+    border: 1px solid var(--line); border-radius: 3px;
+    background: var(--surface-2); color: var(--ink);
+    font: 600 12.5px/1.25 var(--sans); cursor: pointer;
+  }
+  .meal:hover { border-color: var(--accent); }
+  .meal .g { font: 700 11px/1 var(--mono); color: var(--ink-3); }
+
+  .today-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .today-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 8px 10px; background: var(--surface-2);
+    border: 1px solid var(--line-soft); border-radius: 3px; font-size: 12.5px;
+  }
+  .today-item .g { font: 700 12px/1 var(--mono); color: var(--ink); }
+  .today-item button {
+    border: 0; background: transparent; color: var(--ink-3);
+    font: 600 16px/1 var(--sans); cursor: pointer; padding: 2px 4px;
+  }
+  .today-item button:hover { color: var(--danger); }
 
   .empty {
     margin-top: 12px; padding: 22px 14px; text-align: center;
@@ -493,1375 +577,1235 @@
     color: var(--ink-3); font-size: 12.5px; line-height: 1.5;
   }
 
-  .foot {
-    margin: 22px 0 6px; padding-top: 14px;
-    border-top: 1px solid var(--line-soft);
-    font-size: 11.5px; line-height: 1.5; color: var(--ink-3);
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
   }
-  .foot button { background: none; border: 0; padding: 0; color: var(--ink-3); text-decoration: underline; cursor: pointer; font: inherit; }
-  .foot button.armado { padding: 5px 9px; border-radius: 3px; text-decoration: none; font-weight: 700; }
-
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 
-<div class="app" id="app">
+<div class="app on-treino" id="app">
 
   <header class="top">
     <div class="top-inner">
       <div class="brand">
-        <h1>Agenda</h1>
-        <span class="kicker" id="kicker">SERVIÇOS</span>
+        <h1>Ficha do Gabriel</h1>
+        <span class="meso">MESO 1 · CORPO INTEIRO · 6 SEM</span>
       </div>
       <nav class="nav" id="nav" role="tablist" aria-label="Seções"></nav>
+      <nav class="tabs" id="tabs" role="tablist" aria-label="Treinos"></nav>
     </div>
   </header>
 
-  <main class="wrap">
+  <main class="wrap" id="main"></main>
 
-    <div class="alerta" id="alerta" hidden></div>
-
-    <!-- ================= AGENDA ================= -->
-    <section id="sec-agenda">
-      <div class="cal-head">
-        <button class="navbtn" id="prevM" aria-label="Mês anterior">‹</button>
-        <div class="cal-title"><b id="mesNome">—</b><span id="anoNome"></span></div>
-        <button class="navbtn" id="nextM" aria-label="Próximo mês">›</button>
-        <button class="btn btn-sm btn-ghost" id="hojeBtn">hoje</button>
-      </div>
-
-      <div class="dows"><span>dom</span><span>seg</span><span>ter</span><span>qua</span><span>qui</span><span>sex</span><span>sáb</span></div>
-      <div class="grid" id="grid"></div>
-
-      <div class="chip-row" id="legenda"></div>
-
-      <div class="daybar">
-        <h3 id="diaNome">—</h3>
-        <span class="tot" id="diaTot"></span>
-      </div>
-      <div id="dayList"></div>
-    </section>
-
-    <!-- ================= CLIENTES ================= -->
-    <section id="sec-clientes" hidden>
-      <div class="sheet-head">
-        <div class="eyebrow">Carteira</div>
-        <h2>Clientes</h2>
-        <div class="meta" id="cliMeta">—</div>
-      </div>
-      <div id="cliList"></div>
-    </section>
-
-    <!-- ================= RESUMO ================= -->
-    <section id="sec-resumo" hidden>
-      <div class="sheet-head">
-        <div class="eyebrow">Fechamento</div>
-        <h2 id="resTitulo">—</h2>
-        <div class="meta" id="resMeta">—</div>
-      </div>
-
-      <div class="stat-row">
-        <div class="stat"><div class="k">Serviços</div><div class="v" id="rServ">0</div><div class="d" id="rServD">—</div></div>
-        <div class="stat"><div class="k">Máquinas</div><div class="v" id="rMaq">0</div><div class="d" id="rMaqD">—</div></div>
-        <div class="stat"><div class="k">Total</div><div class="v money" id="rTot">—</div><div class="d" id="rTotD">—</div></div>
-      </div>
-
-      <div class="card">
-        <h3>Dinheiro do mês</h3>
-        <p class="note">Serviço cancelado sai da conta. “A receber” é o que já foi feito e ainda não entrou.</p>
-        <div class="comp" id="dinComp"></div>
-      </div>
-
-      <div class="card">
-        <h3>Mão de obra e material</h3>
-        <p class="note">O custo é o que você pagou pelo material. A sobra é o que fica do mês depois de descontá-lo.</p>
-        <div id="matComp"></div>
-      </div>
-
-      <div class="card" id="orcCard" hidden>
-        <h3>Orçamentos</h3>
-        <p class="note">Visitas para cotar. Não entram no faturamento nem nas máquinas do mês — viram serviço só quando o cliente aprova.</p>
-        <div id="orcComp"></div>
-      </div>
-
-      <div class="card">
-        <h3>Por tipo de serviço</h3>
-        <div class="comp" id="tipoComp"></div>
-      </div>
-
-      <div class="card">
-        <h3>Capacidade</h3>
-        <p class="note">Máquinas atendidas no mês contra o teto que a sua equipe dá conta.</p>
-        <div class="comp" id="capComp"></div>
-        <div id="capVer"></div>
-      </div>
-
-      <div class="card">
-        <h3>Últimos 6 meses</h3>
-        <p class="note">Soma dos serviços de cada mês, cancelados fora.</p>
-        <div class="chart-wrap"><svg class="chart" id="chart6" viewBox="0 0 320 128" role="img" aria-label="Faturamento por mês nos últimos 6 meses"></svg></div>
-      </div>
-    </section>
-
-    <!-- ================= AJUSTES ================= -->
-    <section id="sec-ajustes" hidden>
-      <div class="sheet-head">
-        <div class="eyebrow neutral">Configuração</div>
-        <h2>Ajustes</h2>
-        <div class="meta">Valores padrão, tipos de serviço e backup.</div>
-      </div>
-
-      <div class="card">
-        <h3>Padrões</h3>
-        <div class="fields">
-          <div class="f">
-            <label for="cfgPreco">Preço por máquina</label>
-            <div class="fld has-pre"><span class="pre">R$</span><input id="cfgPreco" type="number" inputmode="decimal" min="0" step="10"></div>
-          </div>
-          <div class="f">
-            <label for="cfgTeto">Teto de máquinas/mês</label>
-            <div class="fld has-unit"><input id="cfgTeto" type="number" inputmode="numeric" min="1" step="1"><span class="unit">máq</span></div>
-          </div>
-          <div class="f wide">
-            <label for="cfgDur">Duração padrão do serviço</label>
-            <div class="fld"><select id="cfgDur"></select></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Tipos de serviço</h3>
-        <p class="note">A cor aparece na bolinha do calendário. Marque “cobra por máquina” para o valor sair sozinho.</p>
-        <div id="tipoList"></div>
-        <div class="actions"><button class="btn btn-ghost full" id="addTipo">+ Novo tipo</button></div>
-      </div>
-
-      <div class="card">
-        <h3>Onde a agenda está salva</h3>
-        <div id="guardaInfo"></div>
-      </div>
-
-      <div class="card">
-        <h3>Backup</h3>
-        <p class="note">A agenda fica salva só neste navegador, neste aparelho. Baixe o backup de vez em quando — se limpar os dados do navegador, ela some.</p>
-        <div class="actions">
-          <button class="btn btn-ghost" id="btnExport">Baixar backup</button>
-          <button class="btn btn-ghost" id="btnImport">Restaurar</button>
-        </div>
-      </div>
-
-      <div class="foot">
-        Agenda de serviços · tudo salvo neste aparelho, nada vai para servidor nenhum.
-        <br><button id="wipe">apagar tudo que está salvo</button>
-      </div>
-    </section>
-
-  </main>
-
-  <div class="bar">
+  <div class="bar" id="bar">
     <div class="bar-inner">
-      <div>
-        <div class="k" id="barK">—</div>
-        <div class="v" id="barV">R$ 0</div>
-        <div class="s" id="barS">—</div>
+      <div class="timer" id="timer">
+        <button type="button" id="timerMinus" aria-label="Menos 30 segundos">−30</button>
+        <span class="t" id="timerT">0:00</span>
+        <button type="button" id="timerPlus" aria-label="Mais 30 segundos">+30</button>
       </div>
-      <button class="btn btn-primary" id="btnNovo">+ Serviço</button>
+      <div class="progress" id="prog"><b>0/0</b><br>séries</div>
+      <button type="button" class="btn btn-primary" id="finish">Fechar treino</button>
     </div>
   </div>
 
-  <!-- folha do serviço -->
-  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitulo">
-    <div class="panel" id="panel"></div>
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="panel">
+      <h3 id="modalTitle">Registro da sessão</h3>
+      <p class="sub">Copia e cola no chat. A sessão entra no histórico e as cargas viram a “última vez” da próxima.</p>
+      <div class="measures">
+        <div>
+          <label for="mPeso">Peso (kg)</label>
+          <input id="mPeso" type="text" inputmode="decimal" placeholder="—">
+        </div>
+        <div>
+          <label for="mCint">Cintura (cm)</label>
+          <input id="mCint" type="text" inputmode="decimal" placeholder="—">
+        </div>
+      </div>
+      <textarea class="out" id="out" readonly></textarea>
+      <div class="panel-actions">
+        <button type="button" class="btn btn-ghost" id="closeModal">Voltar</button>
+        <button type="button" class="btn btn-primary" id="copy">Copiar registro</button>
+      </div>
+    </div>
   </div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="toast" id="toast"></div>
 </div>
 
 <script>
 (function () {
   "use strict";
 
-  var KEY = "agenda-servicos-v1";
-  var MES = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
-  var MES3 = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
-  var DIAS = ["domingo","segunda","terça","quarta","quinta","sexta","sábado"];
-  var CORES = [
-    { id: 1, var: "--t1", nome: "azul" },
-    { id: 2, var: "--t2", nome: "verde-água" },
-    { id: 3, var: "--t3", nome: "âmbar" },
-    { id: 4, var: "--t4", nome: "vinho" },
-    { id: 5, var: "--t5", nome: "lilás" },
-    { id: 6, var: "--t6", nome: "cinza" }
+  /* ==================== dados do mesociclo ==================== */
+
+  var WORKOUTS = [
+    {
+      key: "P1", day: "seg", color: "--plate-e",
+      name: "Perna 1", sub: "Extensores e core", dur: "~55 min",
+      cues: "Primeira fase da perna: <b>a carga certa é a que você controla</b>. RIR 2-3 em tudo — nada de falha. Na extensora, só de 90° a 45° na perna direita até 03/09. A flexora começa leve de propósito: os isquiotibiais foram o sítio doador do teu enxerto.",
+      ex: [
+        { id:"p1a", n:"Leg press", sets:3, lo:10, hi:12, rir:"2-3", rest:120, inc:10, coachKg:50, coachOn:"2026-08-11", cue:"Pés na largura do ombro. Não deixa o quadril sair do encosto no fundo. Progressão contida de propósito: enxerto em fase de revascularização.", alt:"Agachamento guiado no Smith · Hack machine · Agachamento com halter no peito (goblet)" },
+        { id:"p1b_d", n:"Cadeira extensora — DIREITA (operada)", sets:3, lo:10, hi:12, rir:"2-3", rest:90, inc:5, coachKg:30, coachOn:"2026-08-20", cue:"SÓ de 90° a 45° até 03/09. Se der inchaço ou dor no joelho no dia seguinte, volta pra 5 kg e avisa.", alt:"Extensão com caneleira sentado · Elástico preso no pé, sentado na cadeira · Extensora bilateral fazendo uma perna de cada vez" },
+        { id:"p1b_e", n:"Cadeira extensora — esquerda", sets:3, lo:10, hi:12, rir:"2-3", rest:90, inc:5, coachKg:50, coachOn:"2026-08-11", cue:"Amplitude completa.", alt:"Extensão com caneleira sentado · Elástico preso no pé · Extensora bilateral uma perna por vez" },
+        { id:"p1c", n:"Cadeira flexora", sets:3, lo:10, hi:12, rir:"3", rest:90, inc:5, coachKg:55, coachOn:"2026-08-11", cue:"Sítio doador do enxerto. Começa bem leve e sobe devagar.", alt:"Mesa flexora deitado · Flexora em pé · Flexão de joelho com elástico" },
+        { id:"p1d", n:"Abdução de quadril na máquina", sets:3, lo:12, hi:15, rir:"2", rest:60, inc:5, coachKg:30, coachOn:"2026-08-20", alt:"Abdução com elástico acima do joelho · Abdução na polia baixa em pé · Abdução deitado de lado" },
+        { id:"p1e", n:"Panturrilha sentado", sets:3, lo:12, hi:20, rir:"1-2", rest:60, inc:5, alt:"Panturrilha em pé · Panturrilha no leg press · No degrau, com halter na mão" },
+        { id:"p1f", n:"Prancha lateral", sets:3, lo:30, hi:40, rir:"—", rest:45, inc:0, noLoad:true, repsUnit:"seg", cue:"Segundos por lado." },
+        { id:"p1g", n:"Dead bug", sets:3, lo:10, hi:10, rir:"—", rest:45, inc:0, noLoad:true, repsUnit:"rp/lado", cue:"Lombar colada no chão." }
+      ]
+    },
+    {
+      key: "B", day: "ter", color: "--plate-b",
+      name: "Empurrar", sub: "Peito superior e ombro", dur: "~65 min",
+      cues: "Inclinado vem primeiro porque é teu ponto fraco — <b>o primeiro exercício do dia recebe tua melhor energia</b>. Banco em 30°, não 45°: acima disso vira desenvolvimento. No crossover, cruze as mãos no topo e aperte 1 segundo.",
+      ex: [
+        { id:"b1", n:"Supino inclinado halteres (30°)", sets:4, lo:6, hi:8, rir:"1-2", rest:150, inc:2, start:30, cue:"Carga por haltere.", alt:"Supino inclinado na barra · Supino inclinado máquina · Crossover de baixo para cima" },
+        { id:"d1", n:"Supino reto barra", sets:3, lo:6, hi:8, rir:"1-2", rest:150, inc:2.5, start:70, cue:"Carga total da barra.", alt:"Supino reto máquina · Supino reto halteres · Flexão de braço com pés elevados" },
+        { id:"b2", n:"Desenvolvimento halteres sentado", sets:3, lo:8, hi:10, rir:"1-2", rest:120, inc:2, cue:"Carga por haltere.", alt:"Desenvolvimento máquina · Desenvolvimento barra sentado · Arnold press" },
+        { id:"b3", n:"Crossover polia baixa → alta", sets:3, lo:12, hi:15, rir:"0-1", rest:90, inc:2.5, coachKg:20, coachOn:"2026-08-13", alt:"Peck deck (voador) · Crucifixo com halteres no banco · Crossover na altura do peito" },
+        { id:"b4", n:"Elevação lateral halteres (em pé)", sets:3, lo:12, hi:15, rir:"0-1", rest:60, inc:1, cue:"Cotovelo lidera, sobe até a altura do ombro, desce em 2 s. Sem balanço de tronco.", alt:"Elevação lateral na polia · Elevação lateral máquina · Com garrafa de água, se não tiver halter" },
+        { id:"b5", n:"Tríceps testa barra W", sets:3, lo:8, hi:12, rir:"1", rest:90, inc:2.5, alt:"Tríceps corda · Tríceps francês com halter · Paralela na máquina" }
+      ]
+    },
+    {
+      key: "A", day: "qua", color: "--plate-a",
+      name: "Puxar", sub: "Espessura de costas", dur: "~65 min",
+      cues: "<b>Puxe com o cotovelo</b>, não com a mão — pensa em levar o cotovelo pro bolso de trás. Nos exercícios 1 e 3, segura 1 segundo com a escápula fechada: espessura se constrói aí. No crucifixo inverso, carga leve e cotovelo semi-flexionado fixo.",
+      ex: [
+        { id:"a1", n:"Remada máquina sentada (anilha)", sets:4, lo:6, hi:8, rir:"1-2", rest:150, inc:5, coachKg:55, coachOn:"2026-08-21", cue:"Se não sair nem 6 reps, volta pra 50 kg.", alt:"Remada curvada com halteres apoiado no banco inclinado · Remada baixa na polia · Remada T" },
+        { id:"a2", n:"Puxada alta pegada aberta pronada", sets:3, lo:8, hi:10, rir:"1-2", rest:120, inc:5, coachKg:70, coachOn:"2026-08-04", alt:"Barra fixa assistida · Puxada na máquina · Puxada com pegada supinada" },
+        { id:"a3", n:"Remada baixa polia, pegada neutra", sets:3, lo:12, hi:15, rir:"1-2", rest:120, inc:5, coachKg:55, coachOn:"2026-08-21", cue:"Reset para quebrar platô: 3 sessões travado em 60 kg × 10. Faz 12-15 aqui, depois volta pra 60 com mais reps.", alt:"Remada máquina sentada · Serrote com halter · Remada com elástico" },
+        { id:"a4", n:"Pullover na polia alta (braço reto)", sets:3, lo:12, hi:15, rir:"1", rest:90, inc:2.5, cue:"Subiu de 2 para 3 séries — progressão por volume, já que a carga travou.", alt:"Pullover com halter no banco · Puxada de braço reto com elástico" },
+        { id:"a5", n:"Crucifixo inverso peck deck", sets:3, lo:15, hi:20, rir:"0-1", rest:60, inc:5, alt:"Crucifixo inverso com halteres no banco a 45° · Face pull na polia · Polia cruzada na altura do rosto" },
+        { id:"a6", n:"Rosca alternada halteres", sets:3, lo:10, hi:12, rir:"1", rest:90, inc:2, coachKg:18, coachOn:"2026-08-21", cue:"Carga por haltere. Baixou de 20 para chegar em 12 reps — 3 sessões travado em 8.", alt:"Rosca direta com barra · Rosca martelo · Rosca no banco Scott" }
+      ]
+    },
+    {
+      key: "P2", day: "qui", color: "--plate-c",
+      name: "Perna 2", sub: "Flexores, unilateral e core", dur: "~55 min",
+      cues: "72h depois da P1, como o médico pediu. <b>Agachamento guiado</b>: desce até onde o joelho não reclama, não força profundidade. RIR 2-3 em tudo. Na extensora, mesma regra dos 90° a 45° na direita até 03/09.",
+      ex: [
+        { id:"p2a", n:"Agachamento guiado (Smith)", sets:3, lo:8, hi:12, rir:"2-3", rest:120, inc:5, coachKg:45, coachOn:"2026-08-20", cue:"Cadeia fechada bilateral. Desce controlado, sem quicar no fundo.", alt:"Leg press · Hack machine · Agachamento com halter no peito, apoiado na parede" },
+        { id:"p2b", n:"Elevação pélvica (bridge hamstring)", sets:3, lo:10, hi:12, rir:"2-3", rest:90, inc:5, coachKg:45, coachOn:"2026-08-06", alt:"Glúteo na máquina · Elevação pélvica no chão com anilha no quadril · Elevação pélvica no banco" },
+        { id:"p1b_d", n:"Cadeira extensora — DIREITA (operada)", sets:3, lo:10, hi:12, rir:"2-3", rest:90, inc:5, coachKg:30, coachOn:"2026-08-20", cue:"SÓ de 90° a 45° até 03/09.", alt:"Extensão com caneleira sentado · Elástico preso no pé, sentado na cadeira · Extensora bilateral fazendo uma perna de cada vez" },
+        { id:"p1b_e", n:"Cadeira extensora — esquerda", sets:3, lo:10, hi:12, rir:"2-3", rest:90, inc:5, coachKg:50, coachOn:"2026-08-11", alt:"Extensão com caneleira sentado · Elástico preso no pé · Extensora bilateral uma perna por vez" },
+        { id:"p2d", n:"Cadeira abdutora", sets:3, lo:12, hi:15, rir:"2", rest:60, inc:5, coachKg:45, coachOn:"2026-08-06", cue:"Rotadores laterais do quadril — pedido do médico.", alt:"Abdução com elástico · Abdução na polia baixa · Abdução deitado de lado" },
+        { id:"p2e", n:"Panturrilha em pé", sets:3, lo:12, hi:20, rir:"1-2", rest:60, inc:5, coachKg:55, coachOn:"2026-08-20", alt:"Panturrilha sentado · No leg press · No degrau com halter" },
+        { id:"p2f", n:"Pallof press na polia", sets:3, lo:12, hi:12, rir:"—", rest:45, inc:2.5, coachKg:18, coachOn:"2026-08-06", repsUnit:"rp/lado", cue:"Anti-rotação. Pedi 12 por lado — se sair 10, está pesado.", alt:"Elástico preso na maçaneta da porta · Prancha lateral com braço estendido" },
+        { id:"p2g", n:"Prancha frontal", sets:3, lo:45, hi:60, rir:"—", rest:45, inc:0, noLoad:true, repsUnit:"seg" }
+      ]
+    },
+    {
+      key: "U", day: "sex", color: "--plate-d",
+      name: "Upper misto", sub: "Peito, costas, ombro e braços", dur: "~65 min",
+      cues: "Segunda dose semanal de peito e costas — por isso alterna empurrar e puxar. <b>Ritmo mais rápido</b>, descanso menor: o objetivo aqui é volume, não recorde de carga.",
+      ex: [
+        { id:"u1", n:"Supino inclinado halteres (30°)", sets:3, lo:8, hi:10, rir:"1-2", rest:120, inc:2, coachKg:32, coachOn:"2026-08-07", cue:"Carga por haltere. Se a academia não tiver 32, fica em 30 e faz 4 séries.", alt:"Supino inclinado barra ou máquina · Crossover de baixo para cima" },
+        { id:"c3", n:"Puxada alta pegada neutra (triângulo)", sets:3, lo:10, hi:12, rir:"1-2", rest:120, inc:5, coachKg:55, coachOn:"2026-08-16", alt:"Puxada alta pegada aberta · Barra fixa pegada neutra · Remada baixa com triângulo" },
+        { id:"c2", n:"Remada unilateral halter (serrote)", sets:3, lo:10, hi:12, rir:"1-2", rest:120, inc:2, coachKg:40, coachOn:"2026-07-30", alt:"Remada máquina unilateral · Remada baixa unilateral na polia · Remada curvada com halteres" },
+        { id:"d4", n:"Elevação lateral halteres (em pé)", sets:3, lo:12, hi:15, rir:"0-1", rest:60, inc:1, cue:"Mesma execução do treino B. Sem balanço de tronco.", alt:"Elevação lateral na polia · Elevação lateral máquina" },
+        { id:"c5", n:"Peck deck invertido", sets:3, lo:15, hi:20, rir:"0-1", rest:60, inc:5, coachKg:45, coachOn:"2026-08-04", cue:"15-20 reps é a prescrição — se sair 8, está pesado demais.", alt:"Crucifixo inverso com halteres no banco a 45° · Face pull · Polia cruzada" },
+        { id:"c6", n:"Rosca Scott", sets:3, lo:8, hi:12, rir:"1", rest:90, inc:2.5, start:30, alt:"Rosca direta na barra W · Rosca concentrada · Rosca alternada" },
+        { id:"e4", n:"Tríceps corda", sets:3, lo:12, hi:15, rir:"0-1", rest:60, inc:2.5, alt:"Tríceps na barra reta · Tríceps francês · Paralela na máquina" }
+      ]
+    }
   ];
 
-  // ---------- estado ----------
-  function padrao() {
-    return {
-      v: 2,
-      cfg: { preco: 250, teto: 30, dur: 90 },
-      tipos: [
-        { id: "pmoc",     nome: "PMOC / manutenção",        cor: 1, porMaquina: true,  preco: 250 },
-        { id: "limpeza",  nome: "Limpeza de ar-condicionado", cor: 5, porMaquina: true,  preco: 0 },
-        { id: "instal",   nome: "Instalação de ar",         cor: 2, porMaquina: true,  preco: 0 },
-        { id: "eletrica", nome: "Serviço elétrico",         cor: 4, porMaquina: false, preco: 0 },
-        { id: "solar",    nome: "Fotovoltaico",             cor: 3, porMaquina: false, preco: 0 },
-        { id: "outro",    nome: "Outro",                    cor: 6, porMaquina: false, preco: 0 }
-      ],
-      servicos: []
-    };
-  }
+  var DAYORD = { seg:1, ter:2, qua:3, qui:4, sex:5, sab:6, dom:7 };
+  /* Plano B de viagem (17–23/08): sem academia, só peso corporal e mochila.
+     Mochila com garrafas de água: 1 L = 1 kg. Ficam no fim da lista de abas. */
+  WORKOUTS.push(
+    {
+      key: "H1", day: "viagem", ord: 8, color: "--plate-e",
+      name: "Hotel — Perna", sub: "Sem equipamento", dur: "~40 min",
+      cues: "Substitui P1 e P2 na semana fora. <b>Mesmas regras do joelho</b>: sem salto, sem giro, sem descer além do confortável. Carga = mochila com garrafas de água (1 L = 1 kg). Se a perna direita não sustentar o exercício unilateral, faz bilateral primeiro.",
+      ex: [
+        { id:"h1a", n:"Sentar e levantar da cadeira", sets:3, lo:12, hi:15, rir:"2-3", rest:90, inc:2, cue:"Sem usar as mãos. Desce em 3 segundos. Mochila nas costas quando ficar fácil." },
+        { id:"h1b", n:"Afundo estático com apoio (por perna)", sets:3, lo:10, hi:12, rir:"2-3", rest:90, inc:2, repsUnit:"rp/lado", cue:"Mão na parede. Amplitude confortável, sem forçar profundidade." },
+        { id:"h1c", n:"Elevação pélvica unilateral (por perna)", sets:3, lo:10, hi:12, rir:"2-3", rest:60, inc:0, noLoad:true, repsUnit:"rp/lado", cue:"Ombros no chão, pé apoiado. Sobe o quadril, aperta o glúteo 1 s." },
+        { id:"h1d", n:"Panturrilha em pé no degrau", sets:3, lo:15, hi:20, rir:"1-2", rest:60, inc:2, cue:"Amplitude completa, desce devagar." },
+        { id:"h1e", n:"Abdução deitado de lado (por perna)", sets:3, lo:15, hi:20, rir:"2", rest:45, inc:0, noLoad:true, repsUnit:"rp/lado" },
+        { id:"h1f", n:"Prancha lateral", sets:3, lo:30, hi:40, rir:"—", rest:45, inc:0, noLoad:true, repsUnit:"seg" },
+        { id:"h1g", n:"Dead bug", sets:3, lo:10, hi:10, rir:"—", rest:45, inc:0, noLoad:true, repsUnit:"rp/lado" }
+      ]
+    },
+    {
+      key: "H2", day: "viagem", ord: 9, color: "--plate-b",
+      name: "Hotel — Superior", sub: "Sem equipamento", dur: "~40 min",
+      cues: "Substitui B, A e U na semana fora. A flexão com <b>pés elevados</b> ataca o peito superior — teu ponto fraco — melhor que a flexão normal. Se ficar fácil, põe a mochila nas costas.",
+      ex: [
+        { id:"h2a", n:"Flexão com pés elevados", sets:4, lo:8, hi:15, rir:"1-2", rest:120, inc:0, noLoad:true, cue:"Pés na cama ou cadeira. Quanto mais alto o pé, mais peito superior." },
+        { id:"h2b", n:"Remada invertida (mesa firme ou toalha na porta)", sets:4, lo:8, hi:12, rir:"1-2", rest:120, inc:0, noLoad:true, cue:"Corpo reto, puxa com o cotovelo. É o único puxar que você tem — não pula." },
+        { id:"h2c", n:"Flexão normal", sets:3, lo:10, hi:20, rir:"1", rest:90, inc:0, noLoad:true },
+        { id:"h2d", n:"Elevação lateral com garrafas ou mochila", sets:3, lo:15, hi:20, rir:"0-1", rest:60, inc:1, cue:"Garrafa de 1,5 L em cada mão. Sem balanço." },
+        { id:"h2e", n:"Tríceps na cadeira (banco)", sets:3, lo:10, hi:15, rir:"1", rest:60, inc:0, noLoad:true, cue:"Mãos na borda da cadeira, pés no chão. Não desce até doer o ombro." },
+        { id:"h2f", n:"Prancha frontal", sets:3, lo:40, hi:60, rir:"—", rest:45, inc:0, noLoad:true, repsUnit:"seg" }
+      ]
+    }
+  );
 
-  var store;
-  var guardaOK = false;   // este navegador realmente grava?
-  var ultimoSave = 0;
+  DAYORD.viagem = 8;
+  WORKOUTS.sort(function (a, b) {
+    return (a.ord || DAYORD[a.day]) - (b.ord || DAYORD[b.day]);
+  });
 
-  /* grava, lê de volta e apaga: só isso prova que o navegador guarda de verdade.
-     Dentro de moldura isolada (artifact, file://, aba anônima) o setItem estoura
-     ou vira faz-de-conta — e o app não pode fingir que salvou. */
-  function testarGuarda() {
-    try {
-      var probe = KEY + "--teste";
-      localStorage.setItem(probe, "1");
-      var lido = localStorage.getItem(probe);
-      localStorage.removeItem(probe);
-      return lido === "1";
-    } catch (e) { return false; }
+  /* marcos da carta médica de 06/08/2026 */
+  var MARCOS = [
+    { d:"2026-05-27", t:"Cirurgia — reconstrução de LCA", s:"Enxerto com tendões flexores" },
+    { d:"2026-08-06", t:"Liberação para academia", s:"Perna liberada, 8-12 reps, 2-3x/semana" },
+    { d:"2026-09-03", t:"Fim da restrição de amplitude", s:"Extensora volta à amplitude completa · trote gradual liberado" },
+    { d:"2026-11-27", t:"Reavaliação do 6º mês", s:"Libera corrida em rua, saltos e mudança de direção" },
+    { d:"2027-02-01", t:"Retorno ao jiu-jitsu", s:"Alvo — depende da reavaliação e da simetria de força" }
+  ];
+
+  var PROT_ALVO = 175;
+  var MEALS = [
+    { l:"Prato padrão", g:45, s:"200 g carne + feijão + arroz" },
+    { l:"4 ovos", g:24, s:"café da manhã" },
+    { l:"Whey (30 g)", g:21, s:"3 colheres de sopa" },
+    { l:"Frango 200 g", g:45, s:"peito, sem pele" },
+    { l:"Carne moída 150 g", g:38, s:"patinho" },
+    { l:"Feijão (concha)", g:5, s:"1,5 concha" }
+  ];
+
+  /* histórico já registrado no chat — semeado uma única vez */
+  var SEED_SESSIONS = [
+    { date:"2026-07-29", key:"E", name:"Braços, ombro e core", ex:[
+      { id:"e1", n:"Elevação lateral na polia (unilateral)", kg:"15", reps:["10","10","10"] },
+      { id:"e2", n:"Face pull na polia", kg:"45", reps:["10","10","10"] },
+      { id:"e3", n:"Rosca martelo halteres", kg:"24", reps:["10","10","10"] },
+      { id:"e4", n:"Tríceps corda", kg:"60", reps:["10","10","9"] }
+    ]},
+    { date:"2026-07-30", key:"C", name:"Puxar 2", ex:[
+      { id:"c1", n:"Barra fixa pronada", kg:"0", reps:["6","6","5"] },
+      { id:"c2", n:"Remada unilateral halter (serrote)", kg:"45", reps:["8","8","8"] },
+      { id:"c3", n:"Puxada alta pegada neutra (triângulo)", kg:"55", reps:["8","8","8"] },
+      { id:"c4", n:"Encolhimento na máquina", kg:"50", reps:["8","10","10"] },
+      { id:"c5", n:"Peck deck invertido", kg:"60", reps:["8","8","8"] },
+      { id:"c6", n:"Rosca Scott", kg:"30", reps:["8","8","8"] }
+    ]},
+    { date:"2026-08-01", key:"D", name:"Empurrar 2", ex:[
+      { id:"d1", n:"Supino reto barra", kg:"70", reps:["8","8","7","8"] },
+      { id:"d2", n:"Supino inclinado máquina", kg:"30", reps:["10","10","10"] },
+      { id:"d3", n:"Crucifixo halteres banco 30°", kg:"18", reps:["12","12"] },
+      { id:"d4", n:"Elevação lateral halteres", kg:"14", reps:["12","12","12"] },
+      { id:"d5", n:"Tríceps francês", kg:"20", reps:["10","10","10","10"] }
+    ]},
+    { date:"2026-08-04", key:"A", name:"Puxar", ex:[
+      { id:"a1", n:"Remada máquina sentada (anilha)", kg:"40", reps:["10","10","10","10"] },
+      { id:"a2", n:"Puxada alta pegada aberta pronada", kg:"65", reps:["10","10","10"] },
+      { id:"a3", n:"Remada baixa polia, pegada neutra", kg:"60", reps:["10","10","10"] },
+      { id:"a4", n:"Pullover na polia alta (braço reto)", kg:"60", reps:["12","12"] },
+      { id:"a5", n:"Crucifixo inverso peck deck", kg:"45", reps:["15","15","15"] },
+      { id:"a6", n:"Rosca alternada halteres", kg:"20", reps:["8","8","8"] }
+    ]},
+    { date:"2026-08-06", key:"P2", name:"Perna 2", ex:[
+      { id:"p2a", n:"Agachamento guiado (Smith)", kg:"30", reps:["12","12","12"] },
+      { id:"p2b", n:"Elevação pélvica (bridge hamstring)", kg:"40", reps:["15","12","12"] },
+      { id:"p1b_d", n:"Cadeira extensora — DIREITA (operada)", kg:"5", reps:["12","12","12"] },
+      { id:"p1b_e", n:"Cadeira extensora — esquerda", kg:"40", reps:["12","12","12"] },
+      { id:"p2d", n:"Cadeira abdutora", kg:"40", reps:["15","15","15"] },
+      { id:"p2e", n:"Panturrilha em pé", kg:"40", reps:["15","15","15"] },
+      { id:"p2f", n:"Pallof press na polia", kg:"25", reps:["10","10","10"], repsUnit:"rp/lado" },
+      { id:"p2g", n:"Prancha frontal", kg:"", reps:["30","30","30"], noLoad:true, repsUnit:"seg" }
+    ]},
+    { date:"2026-08-07", key:"U", name:"Upper misto", ex:[
+      { id:"u1", n:"Supino inclinado halteres (30°)", kg:"30", reps:["10","10","10"] },
+      { id:"c3", n:"Puxada alta pegada neutra (triângulo)", kg:"50", reps:["10","10","10"] },
+      { id:"c2", n:"Remada unilateral halter (serrote)", kg:"40", reps:["10","10","10"] },
+      { id:"d4", n:"Elevação lateral halteres", kg:"10", reps:["10","10","10"] },
+      { id:"c5", n:"Peck deck invertido", kg:"45", reps:["15","15","10"] },
+      { id:"c6", n:"Rosca Scott", kg:"30", reps:["10","10","10"] },
+      { id:"e4", n:"Tríceps corda", kg:"60", reps:["12","12","12"] }
+    ]},
+    { date:"2026-08-11", key:"P1", name:"Perna 1", ex:[
+      { id:"p1a", n:"Leg press", kg:"40", reps:["12","12","12"] },
+      { id:"p1b_d", n:"Cadeira extensora — DIREITA (operada)", kg:"20", reps:["12","12","12"] },
+      { id:"p1b_e", n:"Cadeira extensora — esquerda", kg:"45", reps:["12","12","12"] },
+      { id:"p1c", n:"Cadeira flexora", kg:"50", reps:["12","12","12"] },
+      { id:"p1d", n:"Abdução de quadril na máquina", kg:"25", reps:["12","12","12"] }
+    ]},
+    { date:"2026-08-13", key:"B", name:"Empurrar", ex:[
+      { id:"b1", n:"Supino inclinado halteres (30°)", kg:"30", reps:["8","8","6","6"] },
+      { id:"d1", n:"Supino reto barra", kg:"70", reps:["8","6","6"] },
+      { id:"b2", n:"Desenvolvimento halteres sentado", kg:"20", reps:["9","8","7"] },
+      { id:"b3", n:"Crossover polia baixa → alta", kg:"25", reps:["12","9","9"] },
+      { id:"b4", n:"Elevação lateral halteres (em pé)", kg:"14", reps:["12","12","10"] },
+      { id:"b5", n:"Tríceps testa barra W", kg:"20", reps:["8","8","8"] }
+    ]},
+    { date:"2026-08-14", key:"P2", name:"Perna 2", ex:[
+      { id:"p2a", n:"Agachamento guiado (Smith)", kg:"35", reps:["12","12","12"] },
+      { id:"p2b", n:"Elevação pélvica (bridge hamstring)", kg:"45", reps:["10","10","10"] },
+      { id:"p1b_d", n:"Cadeira extensora — DIREITA (operada)", kg:"25", reps:["10","10","10"] },
+      { id:"p1b_e", n:"Cadeira extensora — esquerda", kg:"50", reps:["10","10","10"] },
+      { id:"p2d", n:"Cadeira abdutora", kg:"45", reps:["12","12","12"] },
+      { id:"p2e", n:"Panturrilha em pé", kg:"40", reps:["12","12","12"] },
+      { id:"p2f", n:"Pallof press na polia", kg:"18", reps:[], repsUnit:"rp/lado" },
+      { id:"p2g", n:"Prancha frontal", kg:"", reps:["60","30","30"], noLoad:true, repsUnit:"seg" }
+    ]},
+    { date:"2026-08-15", key:"A", name:"Puxar", ex:[
+      { id:"a1", n:"Remada máquina sentada (anilha)", kg:"50", reps:["6","6","6","6"] },
+      { id:"a2", n:"Puxada alta pegada aberta pronada", kg:"70", reps:["8","8","8"] },
+      { id:"a3", n:"Remada baixa polia, pegada neutra", kg:"60", reps:["10","10","10"] },
+      { id:"a4", n:"Pullover na polia alta (braço reto)", kg:"60", reps:["12","12"] },
+      { id:"a5", n:"Crucifixo inverso peck deck", kg:"45", reps:["15","10","10"] },
+      { id:"a6", n:"Rosca alternada halteres", kg:"20", reps:["8","8","8"] }
+    ]},
+    { date:"2026-08-16", key:"U", name:"Upper misto", ex:[
+      { id:"u1", n:"Supino inclinado halteres (30°)", kg:"30", reps:["6","8","8"] },
+      { id:"c3", n:"Puxada alta pegada neutra (triângulo)", kg:"50", reps:["12","12","12"] },
+      { id:"c2", n:"Remada unilateral halter (serrote)", kg:"40", reps:["10","10","10"] },
+      { id:"d4", n:"Elevação lateral halteres (em pé)", kg:"14", reps:["12","12","10"] },
+      { id:"c5", n:"Peck deck invertido", kg:"45", reps:[] },
+      { id:"c6", n:"Rosca Scott", kg:"30", reps:["10","8","8"] },
+      { id:"e4", n:"Tríceps corda", kg:"60", reps:["12","12","12"] }
+    ]},
+    { date:"2026-08-18", key:"P1", name:"Perna 1", ex:[
+      { id:"p1a", n:"Leg press", kg:"50", reps:["10","10","10"] },
+      { id:"p1b_d", n:"Cadeira extensora — DIREITA (operada)", kg:"25", reps:["10","10","10"] },
+      { id:"p1b_e", n:"Cadeira extensora — esquerda", kg:"50", reps:["10","10","10"] },
+      { id:"p1c", n:"Cadeira flexora", kg:"55", reps:["10","10","10"] },
+      { id:"p1d", n:"Abdução de quadril na máquina", kg:"25", reps:["12","12","12"] }
+    ]},
+    { date:"2026-08-20", key:"P2", name:"Perna 2", ex:[
+      { id:"p2a", n:"Agachamento guiado (Smith)", kg:"40", reps:["12","12","12"] },
+      { id:"p2b", n:"Elevação pélvica (bridge hamstring)", kg:"45", reps:["10","10","10"] },
+      { id:"p1b_d", n:"Cadeira extensora — DIREITA (operada)", kg:"25", reps:["12","12","12"] },
+      { id:"p1b_e", n:"Cadeira extensora — esquerda", kg:"50", reps:["12","12","10"] },
+      { id:"p2d", n:"Cadeira abdutora", kg:"45", reps:[] },
+      { id:"p2e", n:"Panturrilha em pé", kg:"55", reps:["13","13","13"] },
+      { id:"p2f", n:"Pallof press na polia", kg:"18", reps:[], repsUnit:"rp/lado" }
+    ]},
+    { date:"2026-08-21", key:"A", name:"Puxar", ex:[
+      { id:"a1", n:"Remada máquina sentada (anilha)", kg:"50", reps:["8","8","8","8"] },
+      { id:"a2", n:"Puxada alta pegada aberta pronada", kg:"70", reps:["8","8","8"] },
+      { id:"a3", n:"Remada baixa polia, pegada neutra", kg:"60", reps:["10","10","10"] },
+      { id:"a4", n:"Pullover na polia alta (braço reto)", kg:"60", reps:["12","12"] },
+      { id:"a5", n:"Crucifixo inverso peck deck", kg:"45", reps:["15","15","15"] },
+      { id:"a6", n:"Rosca alternada halteres", kg:"20", reps:["8","8","8"] }
+    ]}
+  ];
+
+  var SEED_BODY = [
+    { date:"2026-07-29", peso:92.55, cintura:90.5 },
+    { date:"2026-07-30", peso:87.10, cintura:90 },
+    { date:"2026-08-01", peso:92.55, cintura:90.5 },
+    { date:"2026-08-04", peso:93.75, cintura:null },
+    { date:"2026-08-06", peso:93.00, cintura:null },
+    { date:"2026-08-07", peso:92.77, cintura:null },
+    { date:"2026-08-11", peso:93.90, cintura:null },
+    { date:"2026-08-12", peso:null, cintura:91.0 },
+    { date:"2026-08-13", peso:93.30, cintura:null },
+    { date:"2026-08-14", peso:92.70, cintura:null },
+    { date:"2026-08-15", peso:91.96, cintura:null },
+    { date:"2026-08-16", peso:92.70, cintura:null },
+    { date:"2026-08-18", peso:null, cintura:null },
+    { date:"2026-08-20", peso:94.00, cintura:null },
+    { date:"2026-08-21", peso:93.40, cintura:null }
+  ];
+
+  /* ==================== estado ==================== */
+
+  var KEY = "ficha-gabriel-v1";
+  var SEED_REV = "2026-08-21";
+
+  var store = load();
+  var view = "treino";
+  var current = pickToday();
+  var timer = { left: 0, id: null, total: 0, end: null };
+  var histPick = null;
+
+  var elNav = document.getElementById("nav");
+  var elTabs = document.getElementById("tabs");
+  var elMain = document.getElementById("main");
+  var elBar = document.getElementById("bar");
+  var elApp = document.getElementById("app");
+  var elProg = document.getElementById("prog");
+  var elTimer = document.getElementById("timer");
+  var elTimerT = document.getElementById("timerT");
+  var elModal = document.getElementById("modal");
+  var elOut = document.getElementById("out");
+  var elToast = document.getElementById("toast");
+
+  function blank() {
+    return { last:{}, draft:{}, measures:{}, timer:null,
+             sessions:[], body:[], food:{}, seeded:null };
   }
 
   function load() {
-    guardaOK = testarGuarda();
+    var s;
     try {
-      var raw = guardaOK ? localStorage.getItem(KEY) : null;
-      store = raw ? JSON.parse(raw) : padrao();
-    } catch (e) { store = padrao(); }
-    if (!store || typeof store !== "object") store = padrao();
-    if (!store.cfg) store.cfg = padrao().cfg;
-    if (!Array.isArray(store.tipos) || !store.tipos.length) store.tipos = padrao().tipos;
-    if (!Array.isArray(store.servicos)) store.servicos = [];
-    migrar();
-    return store;
-  }
+      var raw = localStorage.getItem(KEY);
+      s = raw ? JSON.parse(raw) : blank();
+    } catch (e) { s = blank(); }
+    var base = blank();
+    for (var k in base) if (s[k] == null) s[k] = base[k];
 
-  /* agenda que já está no celular tem que ganhar o que é novo sem perder o que ele ajustou */
-  function migrar() {
-    if (Number(store.v || 1) < 2) {
-      var tem = {};
-      store.tipos.forEach(function (t) { tem[t.id] = true; });
-      padrao().tipos.forEach(function (t) {
-        if (tem[t.id]) return;
-        var novo = JSON.parse(JSON.stringify(t));
-        var usadas = {};
-        store.tipos.forEach(function (x) { usadas[x.cor] = true; });
-        // a cor padrão pode já estar ocupada por um tipo que ele mesmo pintou
-        if (usadas[novo.cor]) {
-          var livre = CORES.filter(function (c) { return !usadas[c.id]; })[0];
-          if (livre) novo.cor = livre.id;
-        }
-        store.tipos.push(novo);
+    /* semeia o histórico do chat uma única vez, sem apagar o que já existe */
+    if (s.seeded !== SEED_REV) {
+      var have = {};
+      s.sessions.forEach(function (x) { have[x.date + "|" + x.key] = true; });
+      SEED_SESSIONS.forEach(function (x) {
+        if (!have[x.date + "|" + x.key]) s.sessions.push(JSON.parse(JSON.stringify(x)));
       });
-      store.v = 2;
+      var haveB = {};
+      s.body.forEach(function (x) { haveB[x.date] = true; });
+      SEED_BODY.forEach(function (x) { if (!haveB[x.date]) s.body.push(Object.assign({}, x)); });
+      s.sessions.sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+      s.body.sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+      /* "última vez" vem da sessão mais recente de cada exercício, sem
+         sobrescrever registro que o aparelho já tenha de data igual ou posterior */
+      s.sessions.forEach(function (sess) {
+        sess.ex.forEach(function (e) {
+          var cur = s.last[e.id];
+          if (!cur || cur.date <= sess.date) {
+            s.last[e.id] = { kg: e.kg, reps: e.reps, date: sess.date };
+          }
+        });
+      });
+      s.seeded = SEED_REV;
     }
-    store.servicos.forEach(function (s) {
-      // antes existia um valor só; ele vira mão de obra, e material começa zerado
-      if (s.mao === undefined) {
-        s.mao = Number(s.valor || 0);
-        s.mat = 0;
-        s.matCusto = 0;
-      }
-      s.valor = Number(s.mao || 0) + Number(s.mat || 0);
-    });
+    return s;
   }
 
   function save() {
-    if (!guardaOK) { renderAviso(); return; }
-    try {
-      var txt = JSON.stringify(store);
-      localStorage.setItem(KEY, txt);
-      if (localStorage.getItem(KEY) !== txt) throw new Error("gravou diferente");
-      ultimoSave = Date.now();
-    } catch (e) {
-      guardaOK = false;          // quota estourada ou storage revogado no meio do uso
-      renderAviso();
-      toast("Não consegui salvar — veja o aviso vermelho.");
+    try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {}
+  }
+
+  function pickToday() {
+    var map = { 1:"P1", 2:"B", 3:"A", 4:"P2", 5:"U" };
+    return map[new Date().getDay()] || "P1";
+  }
+
+  function wk(key) {
+    for (var i = 0; i < WORKOUTS.length; i++) if (WORKOUTS[i].key === key) return WORKOUTS[i];
+    return WORKOUTS[0];
+  }
+
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  }
+  function br(iso) { var p = iso.split("-"); return p[2] + "/" + p[1]; }
+  function dayms(iso) { var p = iso.split("-"); return Date.UTC(+p[0], +p[1] - 1, +p[2]); }
+  function num(v) { return v == null ? NaN : parseFloat(String(v).replace(",", ".")); }
+  function fmt(n) {
+    if (!isFinite(n)) return "—";
+    return (Math.round(n * 10) / 10).toString().replace(".", ",");
+  }
+  function esc(v) {
+    return String(v == null ? "" : v)
+      .replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  }
+
+  /* ==================== estado de treino ==================== */
+
+  function draftFor(key) {
+    var d = store.draft[key];
+    if (!d || d.date !== today()) { d = { date: today(), ex: {} }; store.draft[key] = d; }
+    return d;
+  }
+
+  /* A carga que eu prescrevo (coachKg) só vale enquanto for mais nova que o
+     último registro do aparelho. Assim que ele treina depois da orientação,
+     o registro dele passa a mandar e a progressão nunca é apagada. */
+  function coachActive(ex, prev) {
+    if (ex.coachKg == null) return false;
+    if (!prev) return true;
+    return prev.date <= (ex.coachOn || "0000-00-00");
+  }
+
+  function exState(key, ex) {
+    var d = draftFor(key);
+    if (!d.ex[ex.id]) {
+      var prev = store.last[ex.id];
+      var kg = coachActive(ex, prev)
+        ? String(ex.coachKg)
+        : (prev ? prev.kg : (ex.start != null ? String(ex.start) : ""));
+      d.ex[ex.id] = { kg: kg, reps: new Array(ex.sets).fill(""), done: new Array(ex.sets).fill(false) };
     }
+    var s = d.ex[ex.id];
+    while (s.reps.length < ex.sets) { s.reps.push(""); s.done.push(false); }
+    return s;
   }
 
-  // ---------- datas ----------
-  function hojeISO() { return toISO(new Date()); }
-  function toISO(d) {
-    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
-  }
-  function fromISO(s) {
-    var p = String(s || "").split("-");
-    return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
-  }
-  function mesDe(iso) { return String(iso || "").slice(0, 7); }
-  function somaMin(hora, min) {
-    var p = String(hora || "08:00").split(":");
-    var t = Number(p[0]) * 60 + Number(p[1]) + Number(min || 0);
-    t = ((t % 1440) + 1440) % 1440;
-    return String(Math.floor(t / 60)).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0");
-  }
-  function durTxt(m) {
-    m = Number(m || 0);
-    if (!m) return "";
-    var h = Math.floor(m / 60), r = m % 60;
-    if (!h) return r + "min";
-    return r ? h + "h" + String(r).padStart(2, "0") : h + "h";
-  }
-
-  /* de 15 em 15 minutos até 12 horas */
-  function optsDur(sel) {
-    var out = "";
-    for (var m = 15; m <= 720; m += 15) {
-      out += '<option value="' + m + '"' + (Number(sel) === m ? " selected" : "") + ">" + durTxt(m) + "</option>";
+  /* dupla progressão: topo da faixa em TODAS as séries → sobe a carga */
+  function bumpTarget(ex, st) {
+    if (!ex.inc) return null;
+    var kg = num(st.kg);
+    if (!isFinite(kg)) return null;
+    for (var i = 0; i < ex.sets; i++) {
+      var r = num(st.reps[i]);
+      if (!isFinite(r) || r < ex.hi) return null;
     }
-    return out;
+    return round25(kg + ex.inc, ex.inc);
   }
+  function round25(v, inc) { var f = inc >= 2.5 ? 2 : 1; return Math.round(v * f) / f; }
 
-  function novoId() { return "s" + Date.now() + Math.random().toString(36).slice(2, 6); }
-
-  // ---------- formato ----------
-  function num(v) {
-    v = Number(v || 0);
-    var casas = Math.abs(v % 1) > 0.001 ? 2 : 0;
-    return v.toLocaleString("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: casas });
-  }
-  function brl(v) { return "R$ " + num(v); }
-  function esc(s) {
-    return String(s == null ? "" : s)
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-  }
-  function soDigitos(t) { return String(t || "").replace(/\D/g, ""); }
-  function telFmt(t) {
-    var d = soDigitos(t);
-    if (d.length === 11) return "(" + d.slice(0, 2) + ") " + d[2] + " " + d.slice(3, 7) + "-" + d.slice(7);
-    if (d.length === 10) return "(" + d.slice(0, 2) + ") " + d.slice(2, 6) + "-" + d.slice(6);
-    return String(t || "");
-  }
-  function telE164(t) {
-    var d = soDigitos(t);
-    if (!d) return "";
-    return d.length <= 11 ? "55" + d : d;
-  }
-  function corVar(t) {
-    var c = CORES.filter(function (x) { return x.id === (t ? t.cor : 1); })[0] || CORES[0];
-    return "var(" + c.var + ")";
-  }
-  function tipoDe(id) {
-    return store.tipos.filter(function (t) { return t.id === id; })[0] || store.tipos[0];
-  }
-
-  // ---------- consultas ----------
-  function doDia(iso) {
-    return store.servicos.filter(function (s) { return s.data === iso; })
-      .sort(function (a, b) { return (a.hora || "").localeCompare(b.hora || ""); });
-  }
-  function doMes(ym) {
-    return store.servicos.filter(function (s) { return mesDe(s.data) === ym; });
-  }
-  function valorDe(s) { return Number(s.valor || 0); }
-  function ativos(lista) { return lista.filter(function (s) { return s.status !== "cancelado"; }); }
-  /* orçamento é visita pra cotar: ocupa a agenda, mas não é venda —
-     fica fora do faturamento, das máquinas do mês e do total do cliente */
-  function reais(lista) { return lista.filter(function (s) { return !s.orcamento; }); }
-  function orcas(lista) { return lista.filter(function (s) { return !!s.orcamento; }); }
-  function soma(lista) { return lista.reduce(function (a, s) { return a + valorDe(s); }, 0); }
-
-  // ---------- UI base ----------
-  var ui = {
-    sec: "agenda",
-    mes: new Date().getFullYear() + "-" + String(new Date().getMonth() + 1).padStart(2, "0"),
-    dia: hojeISO(),
-    editando: null,
-    cliAberto: null
-  };
-
-  var $ = function (id) { return document.getElementById(id); };
-  var toastT;
-  function toast(msg) {
-    var el = $("toast");
-    el.textContent = msg;
-    el.classList.add("show");
-    clearTimeout(toastT);
-    toastT = setTimeout(function () { el.classList.remove("show"); }, 2200);
-  }
-
-  /* confirmação em dois toques — o confirm() do navegador pode vir bloqueado
-     dentro do artifact, e aí a ação sumiria sem aviso */
-  var armadoEl = null, armadoT;
-  function armar(el, textoNormal, textoArmado) {
-    if (armadoEl === el) { desarmar(); return true; }
-    desarmar();
-    armadoEl = el;
-    el.setAttribute("data-normal", textoNormal);
-    el.textContent = textoArmado;
-    el.classList.add("armado");
-    armadoT = setTimeout(desarmar, 4500);
-    return false;
-  }
-  function desarmar() {
-    clearTimeout(armadoT);
-    if (!armadoEl) return;
-    if (armadoEl.isConnected) {
-      armadoEl.textContent = armadoEl.getAttribute("data-normal") || armadoEl.textContent;
-      armadoEl.classList.remove("armado");
+  function lastLine(ex, prev, bump) {
+    var body = prev
+      ? (ex.noLoad ? prev.reps.join("/") : fmt(num(prev.kg)) + " kg — " + prev.reps.join("/"))
+      : "sem registro";
+    var tag = "";
+    if (bump) {
+      tag = '<span class="bump">↑ SOBE PARA ' + fmt(bump) + " KG</span>";
+    } else if (coachActive(ex, prev) && prev && num(prev.kg) !== ex.coachKg) {
+      /* seta e cor seguem a direção real do ajuste — subir de verde, descer de âmbar */
+      var up = ex.coachKg > num(prev.kg);
+      tag = '<span class="' + (up ? "bump" : "fix") + '">' + (up ? "↑" : "↓") +
+            " AJUSTE: " + fmt(ex.coachKg) + " KG</span>";
     }
-    armadoEl = null;
+    return '<span><span class="lbl">Última</span> ' + body + "</span>" + tag;
   }
 
-  var SECOES = [
-    { id: "agenda", nome: "Agenda" },
-    { id: "clientes", nome: "Clientes" },
-    { id: "resumo", nome: "Resumo" },
-    { id: "ajustes", nome: "Ajustes" }
-  ];
-
-  function renderNav() {
-    $("nav").innerHTML = SECOES.map(function (s) {
-      return '<button role="tab" data-sec="' + s.id + '" aria-selected="' + (ui.sec === s.id) + '">' + s.nome + "</button>";
-    }).join("");
+  function restLabel(sec) {
+    if (sec >= 120) return "2-3 min";
+    if (sec >= 90) return "90 s";
+    return sec + " s";
+  }
+  function checkSvg() {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
   }
 
-  function irPara(sec) {
-    ui.sec = sec;
-    SECOES.forEach(function (s) { $("sec-" + s.id).hidden = (s.id !== sec); });
-    renderNav();
-    window.scrollTo({ top: 0, behavior: "instant" in document.documentElement.style ? "instant" : "auto" });
-    render();
-  }
+  /* ==================== gráfico de linhas ==================== */
+  /* SVG puro: sem libs, escala com o container e responde a toque.
+     Marca fina (2px), grade recessiva, ponto final destacado e rotulado. */
+  function lineChart(id, series, opts) {
+    opts = opts || {};
+    var W = 340, H = 168, ml = 36, mr = 14, mt = 12, mb = 24;
+    var pts = [];
+    series.forEach(function (s) { s.data.forEach(function (p) { pts.push(p); }); });
+    if (!pts.length) return '<div class="empty">Sem dados ainda.</div>';
 
-  // ---------- calendário ----------
-  function renderCal() {
-    var p = ui.mes.split("-"), ano = Number(p[0]), mes = Number(p[1]) - 1;
-    $("mesNome").textContent = MES[mes];
-    $("anoNome").textContent = ano;
+    var xs = pts.map(function (p) { return dayms(p.date); });
+    var ys = pts.map(function (p) { return p.v; });
+    var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs);
+    var y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+    if (opts.zeroBase) y0 = 0;
+    var padY = (y1 - y0) * 0.15 || Math.max(1, y1 * 0.05);
+    y0 = Math.max(0, y0 - padY); y1 = y1 + padY;
+    if (y1 - y0 < 0.5) { y1 = y0 + 1; }
+    if (x1 === x0) { x0 -= 86400000; x1 += 86400000; }
 
-    var primeiro = new Date(ano, mes, 1);
-    var inicio = new Date(ano, mes, 1 - primeiro.getDay());
-    var hoje = hojeISO();
-    var html = "";
+    var px = function (d) { return ml + (dayms(d) - x0) / (x1 - x0) * (W - ml - mr); };
+    var py = function (v) { return mt + (1 - (v - y0) / (y1 - y0)) * (H - mt - mb); };
 
-    for (var i = 0; i < 42; i++) {
-      var d = new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate() + i);
-      var iso = toISO(d);
-      var fora = d.getMonth() !== mes;
-      var lista = doDia(iso);
-      var dots = lista.slice(0, 3).map(function (s) {
-        var t = tipoDe(s.tipo);
-        var cls = (s.status === "feito" ? "done " : (s.status === "cancelado" ? "canc " : "")) + (s.orcamento ? "orc" : "");
-        var cor = corVar(t);
-        return '<i class="' + cls.trim() + '" style="background:' + cor + ';color:' + cor + '"></i>';
-      }).join("");
+    var s = '<svg class="chart" viewBox="0 0 ' + W + " " + H + '" role="img" ' +
+            'aria-label="' + esc(opts.aria || "gráfico") + '">';
 
-      html += '<button class="d' + (fora ? " out" : "") + (iso === hoje ? " today" : "") + '"' +
-              ' data-d="' + iso + '" aria-pressed="' + (iso === ui.dia) + '"' +
-              ' aria-label="' + d.getDate() + " de " + MES[d.getMonth()] + ", " + lista.length + ' serviços">' +
-              '<span class="n">' + d.getDate() + "</span>" +
-              '<span class="dots">' + dots + "</span></button>";
+    /* grade e rótulos do eixo Y */
+    for (var g = 0; g <= 2; g++) {
+      var v = y0 + (y1 - y0) * (g / 2), y = py(v);
+      s += '<line class="grid-line" x1="' + ml + '" y1="' + y.toFixed(1) +
+           '" x2="' + (W - mr) + '" y2="' + y.toFixed(1) + '"/>';
+      s += '<text class="axis-t" x="' + (ml - 6) + '" y="' + (y + 3).toFixed(1) +
+           '" text-anchor="end">' + fmt(v) + "</text>";
     }
-    $("grid").innerHTML = html;
+    /* rótulos do eixo X: só primeiro e último */
+    var allDates = pts.map(function (p) { return p.date; }).sort();
+    s += '<text class="axis-t" x="' + ml + '" y="' + (H - 7) + '">' + br(allDates[0]) + "</text>";
+    s += '<text class="axis-t" x="' + (W - mr) + '" y="' + (H - 7) +
+         '" text-anchor="end">' + br(allDates[allDates.length - 1]) + "</text>";
 
-    var usados = {};
-    doMes(ui.mes).forEach(function (s) { usados[s.tipo] = true; });
-    $("legenda").innerHTML = store.tipos.filter(function (t) { return usados[t.id]; }).map(function (t) {
-      return '<span class="chip"><i style="background:' + corVar(t) + '"></i>' + esc(t.nome) + "</span>";
-    }).join("");
-  }
-
-  function renderDia() {
-    var d = fromISO(ui.dia);
-    var lista = doDia(ui.dia);
-    var vivos = ativos(lista);
-    var total = soma(reais(vivos));
-    var nOrc = orcas(vivos).length;
-
-    $("diaNome").textContent = DIAS[d.getDay()] + ", " + d.getDate() + " de " + MES[d.getMonth()];
-    $("diaTot").textContent = vivos.length
-      ? (total ? brl(total) : "") + (nOrc ? (total ? " · " : "") + nOrc + " orç." : "")
-      : "";
-
-    if (!lista.length) {
-      $("dayList").innerHTML = '<div class="empty">Nenhum serviço nesse dia.<br>Toque em <b>+ Serviço</b> para marcar.</div>';
-      return;
-    }
-
-    $("dayList").innerHTML = lista.map(function (s) {
-      var t = tipoDe(s.tipo);
-      var cls = s.status === "feito" ? " done" : (s.status === "cancelado" ? " canc" : "");
-      var sub = '<span class="chip"><i style="background:' + corVar(t) + '"></i>' + esc(t.nome) + "</span>";
-      if (s.orcamento) sub += ' <span class="chip orc">orçamento</span>';
-      if (s.maquinas) sub += ' <span class="chip">' + s.maquinas + " máq</span>";
-      if (s.status === "feito") sub += ' <span class="chip ok">feito</span>';
-      if (s.status === "cancelado") sub += ' <span class="chip">cancelado</span>';
-      if (!s.orcamento) {
-        if (s.pago) sub += ' <span class="chip ok">pago</span>';
-        else if (s.status === "feito") sub += ' <span class="chip warn">a receber</span>';
-      }
-
-      return '<button class="sv' + cls + '" data-id="' + s.id + '">' +
-        '<span class="stripe" style="background:' + corVar(t) + '"></span>' +
-        '<span class="time">' + esc(s.hora || "--:--") + (s.dur ? "<small>" + durTxt(s.dur) + "</small>" : "") + "</span>" +
-        '<span class="body">' +
-          '<b class="cli">' + esc(s.cliente || "sem nome") + "</b>" +
-          '<span class="sub">' + sub + "</span>" +
-          (s.endereco ? '<span class="addr">' + esc(s.endereco) + "</span>" : "") +
-        "</span>" +
-        '<span class="val">' + (valorDe(s) ? brl(valorDe(s)) : "") + "</span>" +
-      "</button>";
-    }).join("");
-  }
-
-  // ---------- clientes ----------
-  function carteira() {
-    var mapa = {};
-    store.servicos.forEach(function (s) {
-      var nome = (s.cliente || "sem nome").trim();
-      var k = nome.toLowerCase();
-      if (!mapa[k]) mapa[k] = { nome: nome, tel: "", end: "", itens: [], total: 0, orcados: 0, ultimo: "", proximo: "" };
-      var c = mapa[k];
-      c.itens.push(s);
-      if (s.status !== "cancelado") {
-        if (s.orcamento) c.orcados++;
-        else c.total += valorDe(s);
-      }
-      if (s.tel) c.tel = s.tel;
-      if (s.endereco) c.end = s.endereco;
-    });
-    var hoje = hojeISO();
-    return Object.keys(mapa).map(function (k) {
-      var c = mapa[k];
-      c.itens.sort(function (a, b) { return (b.data + b.hora).localeCompare(a.data + a.hora); });
-      var passados = c.itens.filter(function (s) { return s.data <= hoje; });
-      var futuros = c.itens.filter(function (s) { return s.data > hoje && s.status !== "cancelado"; });
-      c.ultimo = passados.length ? passados[0].data : "";
-      c.proximo = futuros.length ? futuros[futuros.length - 1].data : "";
-      return c;
-    }).sort(function (a, b) { return b.total - a.total; });
-  }
-
-  function renderClientes() {
-    var lista = carteira();
-    $("cliMeta").textContent = lista.length
-      ? lista.length + (lista.length === 1 ? " cliente" : " clientes") + " · " + store.servicos.length + " serviços no histórico"
-      : "nenhum cliente ainda";
-
-    if (!lista.length) {
-      $("cliList").innerHTML = '<div class="empty">Os clientes aparecem aqui sozinhos<br>conforme você marca os serviços.</div>';
-      return;
-    }
-
-    $("cliList").innerHTML = lista.map(function (c) {
-      var aberto = ui.cliAberto === c.nome.toLowerCase();
-      var linha = "";
-      if (c.proximo) linha = "próximo " + curto(c.proximo);
-      else if (c.ultimo) linha = "último " + curto(c.ultimo);
-      if (c.orcados) linha += (linha ? " · " : "") + c.orcados + " orç.";
-
-      var html = '<button class="row" data-cli="' + esc(c.nome.toLowerCase()) + '">' +
-        '<span><span class="nm">' + esc(c.nome) + "</span>" +
-        '<span class="dt">' + c.itens.length + " serviço" + (c.itens.length === 1 ? "" : "s") +
-        (linha ? " · " + linha : "") + "</span></span>" +
-        '<span class="rv">' + brl(c.total) + "<small>" + (c.tel ? esc(telFmt(c.tel)) : "sem telefone") + "</small></span>" +
-      "</button>";
-
-      if (aberto) {
-        html += '<div class="tline">' + c.itens.slice(0, 12).map(function (s) {
-          var t = tipoDe(s.tipo);
-          return '<div class="ti"><span>' + curto(s.data) + " · " + esc(t.nome) +
-                 (s.orcamento ? " (orçamento)" : "") +
-                 (s.status === "cancelado" ? " (cancelado)" : "") + "</span><b>" + brl(valorDe(s)) + "</b></div>";
-        }).join("") + "</div>" +
-        '<div class="actions"><button class="btn btn-ghost btn-sm full" data-novo-cli="' + esc(c.nome) + '">+ Marcar serviço para ' + esc(c.nome) + "</button></div>";
-      }
-      return html;
-    }).join("");
-  }
-
-  function curto(iso) {
-    var d = fromISO(iso);
-    return d.getDate() + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + String(d.getFullYear()).slice(2);
-  }
-
-  // ---------- resumo ----------
-  function renderResumo() {
-    var p = ui.mes.split("-");
-    var lista = doMes(ui.mes);
-    var vivosTodos = ativos(lista);
-    var vivos = reais(vivosTodos);
-    var orcamentos = orcas(vivosTodos);
-    var feitos = vivos.filter(function (s) { return s.status === "feito"; });
-    var agendados = vivos.filter(function (s) { return s.status === "agendado"; });
-    var recebido = soma(feitos.filter(function (s) { return s.pago; }));
-    var aReceber = soma(feitos.filter(function (s) { return !s.pago; }));
-    var previsto = soma(agendados);
-    var total = recebido + aReceber + previsto;
-    var maquinas = vivos.reduce(function (a, s) { return a + Number(s.maquinas || 0); }, 0);
-
-    $("resTitulo").textContent = MES[Number(p[1]) - 1] + " de " + p[0];
-    var fora = [];
-    if (lista.length - vivosTodos.length) fora.push((lista.length - vivosTodos.length) + " cancelado(s)");
-    if (orcamentos.length) fora.push(orcamentos.length + " orçamento(s)");
-    $("resMeta").textContent = fora.length
-      ? fora.join(" e ") + " fora desta conta"
-      : "todos os serviços do mês contam";
-
-    $("rServ").textContent = vivos.length;
-    $("rServD").textContent = feitos.length + " feito(s)";
-    $("rMaq").textContent = maquinas;
-    $("rMaqD").textContent = "teto " + store.cfg.teto;
-    $("rTot").textContent = brl(total);
-    $("rTotD").textContent = vivos.length ? "média " + brl(Math.round(total / vivos.length)) : "—";
-
-    var maxD = Math.max(total, 1);
-    $("dinComp").innerHTML = [
-      { n: "Recebido", v: recebido, c: "var(--ok)" },
-      { n: "A receber", v: aReceber, c: "var(--s2)" },
-      { n: "Ainda por fazer", v: previsto, c: "var(--ink-3)" }
-    ].map(function (r) {
-      return '<div class="crow"><div class="chead"><span>' + r.n + "</span><b>" + brl(r.v) +
-        "<em>" + Math.round(r.v / maxD * 100) + "%</em></b></div>" +
-        '<div class="cbar"><i style="width:' + (r.v / maxD * 100) + "%;background:" + r.c + '"></i></div></div>';
-    }).join("");
-
-    var maoT = vivos.reduce(function (a, s) { return a + Number(s.mao || 0); }, 0);
-    var matT = vivos.reduce(function (a, s) { return a + Number(s.mat || 0); }, 0);
-    var custoT = vivos.reduce(function (a, s) { return a + Number(s.matCusto || 0); }, 0);
-    var sobra = maoT + matT - custoT;
-    $("matComp").innerHTML =
-      '<div class="readout"><span class="lbl">Mão de obra</span><b>' + brl(maoT) + "</b></div>" +
-      '<div class="readout"><span class="lbl">Material cobrado</span><b>' + brl(matT) + "</b></div>" +
-      '<div class="readout"><span class="lbl">Custo do material</span><b>' + (custoT ? "− " : "") + brl(custoT) + "</b></div>" +
-      '<div class="verdict ' + (custoT && sobra < maoT * 0.6 ? "warn" : "ok") + '">' +
-        '<span class="sig">SOBRA</span><span>' + brl(sobra) +
-        (custoT ? " depois de pagar o material do mês." : " — nenhum custo de material lançado neste mês.") +
-      "</span></div>";
-
-    var orcAberto = orcamentos.filter(function (s) { return s.status === "agendado"; });
-    $("orcCard").hidden = !orcamentos.length;
-    if (orcamentos.length) {
-      $("orcComp").innerHTML =
-        '<div class="readout"><span class="lbl">Ainda por visitar</span><b>' + orcAberto.length +
-        " de " + orcamentos.length + "</b></div>" +
-        '<div class="readout"><span class="lbl">Valor orçado no mês</span><b>' + brl(soma(orcamentos)) + "</b></div>";
-    }
-
-    var porTipo = store.tipos.map(function (t) {
-      var itens = vivos.filter(function (s) { return s.tipo === t.id; });
-      return { t: t, n: itens.length, v: soma(itens) };
-    }).filter(function (r) { return r.n > 0; }).sort(function (a, b) { return b.v - a.v; });
-
-    $("tipoComp").innerHTML = porTipo.length ? porTipo.map(function (r) {
-      return '<div class="crow"><div class="chead"><span>' + esc(r.t.nome) + "</span><b>" + brl(r.v) +
-        "<em>" + r.n + "×</em></b></div>" +
-        '<div class="cbar"><i style="width:' + (r.v / Math.max(porTipo[0].v, 1) * 100) + "%;background:" + corVar(r.t) + '"></i></div></div>';
-    }).join("") : '<div class="empty">Nenhum serviço nesse mês.</div>';
-
-    var teto = Math.max(Number(store.cfg.teto || 30), 1);
-    var pct = Math.min(maquinas / teto * 100, 100);
-    $("capComp").innerHTML = '<div class="crow"><div class="chead"><span>Máquinas no mês</span><b>' +
-      maquinas + " / " + teto + "<em>" + Math.round(maquinas / teto * 100) + "%</em></b></div>" +
-      '<div class="cbar"><i style="width:' + pct + "%;background:" + (maquinas > teto ? "var(--danger)" : maquinas / teto > 0.8 ? "var(--s2)" : "var(--accent)") + '"></i></div></div>';
-
-    $("capVer").innerHTML = maquinas > teto
-      ? '<div class="verdict warn"><span class="sig">ESTOUROU</span><span>' + (maquinas - teto) + ' máquina(s) acima do que a equipe dá conta. Ou remarca, ou entra mais gente.</span></div>'
-      : maquinas / teto > 0.8
-        ? '<div class="verdict warn"><span class="sig">' + Math.round(maquinas / teto * 100) + '%</span><span>Perto do teto. Sobra para ' + (teto - maquinas) + ' máquina(s) nesse mês.</span></div>'
-        : '<div class="verdict ok"><span class="sig">FOLGA</span><span>Cabe mais ' + (teto - maquinas) + ' máquina(s) nesse mês.</span></div>';
-
-    renderChart();
-  }
-
-  function renderChart() {
-    var p = ui.mes.split("-"), ano = Number(p[0]), mes = Number(p[1]) - 1;
-    var dados = [];
-    for (var i = 5; i >= 0; i--) {
-      var d = new Date(ano, mes - i, 1);
-      var ym = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
-      dados.push({
-        ym: ym,
-        rot: MES3[d.getMonth()],
-        v: soma(reais(ativos(doMes(ym))))
+    series.forEach(function (ser, si) {
+      var cls = si === 0 ? "1" : "2";
+      var d = ser.data.slice().sort(function (a, b) { return dayms(a.date) - dayms(b.date); });
+      if (!d.length) return;
+      var path = d.map(function (p, i) {
+        return (i ? "L" : "M") + px(p.date).toFixed(1) + " " + py(p.v).toFixed(1);
+      }).join(" ");
+      s += '<path class="ser ser' + cls + '" d="' + path + '"/>';
+      d.forEach(function (p, i) {
+        var isLast = i === d.length - 1;
+        var r = isLast ? 5 : 3.5;
+        s += '<circle class="dot' + cls + (isLast ? " ring" : "") + '" cx="' + px(p.date).toFixed(1) +
+             '" cy="' + py(p.v).toFixed(1) + '" r="' + r + '"/>';
       });
-    }
-    var max = Math.max.apply(null, dados.map(function (d) { return d.v; }).concat([1]));
-    var W = 320, H = 128, base = 100, topo = 22, larg = 30, passo = W / 6;
+      var lastp = d[d.length - 1];
+      var lx = px(lastp.date), ly = py(lastp.v);
+      var anchor = lx > W - 60 ? "end" : "start";
+      s += '<text class="dlabel dlabel' + cls + '" x="' + (anchor === "end" ? lx - 8 : lx + 8).toFixed(1) +
+           '" y="' + (ly - 8).toFixed(1) + '" text-anchor="' + anchor + '">' +
+           fmt(lastp.v) + (opts.unit || "") + "</text>";
+    });
 
-    var svg = dados.map(function (d, i) {
-      var x = i * passo + (passo - larg) / 2;
-      var h = Math.max(d.v / max * (base - topo), d.v > 0 ? 3 : 0);
-      var y = base - h;
-      var r = Math.min(4, h);
-      var atual = d.ym === ui.mes;
-      var path = h > 0
-        ? "M" + x + " " + base + " V" + (y + r) + " Q" + x + " " + y + " " + (x + r) + " " + y +
-          " H" + (x + larg - r) + " Q" + (x + larg) + " " + y + " " + (x + larg) + " " + (y + r) + " V" + base + " Z"
-        : "";
-      return (path ? '<path class="bar' + (atual ? " now" : "") + '" d="' + path + '"></path>' : "") +
-        (atual && d.v > 0 ? '<text class="dlabel" x="' + (x + larg / 2) + '" y="' + (y - 6) + '" text-anchor="middle">' + brl(d.v) + "</text>" : "") +
-        '<text class="axis-t" x="' + (x + larg / 2) + '" y="' + (base + 14) + '" text-anchor="middle">' + d.rot + "</text>" +
-        (!atual && d.v > 0 ? '<text class="axis-t" x="' + (x + larg / 2) + '" y="' + (y - 5) + '" text-anchor="middle">' +
-          (d.v >= 1000 ? Math.round(d.v / 100) / 10 + "k" : num(d.v)) + "</text>" : "");
-    }).join("");
+    /* alvos de toque: uma faixa por data, maior que a marca */
+    var uniq = [];
+    allDates.forEach(function (d) { if (uniq.indexOf(d) < 0) uniq.push(d); });
+    uniq.forEach(function (dt) {
+      var cx = px(dt), bw = (W - ml - mr) / Math.max(1, uniq.length);
+      s += '<rect class="hit" x="' + (cx - bw / 2).toFixed(1) + '" y="' + mt +
+           '" width="' + bw.toFixed(1) + '" height="' + (H - mt - mb) +
+           '" data-chart="' + id + '" data-date="' + dt + '"></rect>';
+    });
 
-    $("chart6").innerHTML = svg + '<line class="base" x1="0" y1="' + base + '" x2="' + W + '" y2="' + base + '"></line>';
+    s += "</svg>";
+    return s;
   }
 
-  // ---------- ajustes ----------
-  function renderAjustes() {
-    $("cfgPreco").value = store.cfg.preco;
-    $("cfgTeto").value = store.cfg.teto;
-    $("cfgDur").innerHTML = optsDur(store.cfg.dur);
-
-    $("tipoList").innerHTML = store.tipos.map(function (t, i) {
-      return '<div class="card flat" style="margin-top:10px">' +
-        '<div class="fields">' +
-          '<div class="f wide"><label>Nome</label><div class="fld">' +
-            '<input class="txt" type="text" data-tnome="' + i + '" value="' + esc(t.nome) + '"></div></div>' +
-          '<div class="f wide"><label>Cor no calendário</label><div class="opts cols2">' +
-            CORES.map(function (c) {
-              return '<button class="opt" data-tcor="' + i + '" data-cor="' + c.id + '" aria-pressed="' + (t.cor === c.id) + '">' +
-                '<i style="background:var(' + c.var + ')"></i>' + c.nome + "</button>";
-            }).join("") + "</div></div>" +
-          '<div class="f wide"><button class="switch" data-tmaq="' + i + '" aria-pressed="' + (!!t.porMaquina) + '">' +
-            "<span>Cobra por máquina</span><span class=\"knob\"></span></button></div>" +
-          (t.porMaquina ? '<div class="f wide"><label>Preço por máquina (0 = usa o padrão)</label>' +
-            '<div class="fld has-pre"><span class="pre">R$</span><input type="number" inputmode="decimal" min="0" step="10" data-tpreco="' + i + '" value="' + Number(t.preco || 0) + '"></div></div>' : "") +
-          '<div class="f wide"><button class="btn btn-ghost btn-sm" data-tdel="' + i + '">Apagar tipo</button></div>' +
-        "</div></div>";
-    }).join("");
+  function chartReadout(id, series, dt, unit) {
+    var parts = [];
+    series.forEach(function (ser) {
+      var hit = null;
+      ser.data.forEach(function (p) { if (p.date === dt) hit = p; });
+      if (hit) parts.push(ser.name + " <b>" + fmt(hit.v) + (unit || "") + "</b>");
+    });
+    if (!parts.length) return "Toque no gráfico para ver um dia.";
+    return br(dt) + " · " + parts.join(" · ");
   }
 
-  // ---------- barra ----------
-  function renderBar() {
-    var vivos = ativos(doMes(ui.mes));
-    var lista = reais(vivos);
-    var nOrc = orcas(vivos).length;
-    var total = soma(lista);
-    var maq = lista.reduce(function (a, s) { return a + Number(s.maquinas || 0); }, 0);
-    var p = ui.mes.split("-");
-    $("barK").textContent = MES[Number(p[1]) - 1] + " · total do mês";
-    $("barV").textContent = brl(total);
-    $("barS").textContent = lista.length + " serviço" + (lista.length === 1 ? "" : "s") +
-      (maq ? " · " + maq + " máq" : "") +
-      (nOrc ? " · " + nOrc + " orç." : "");
+  function wireChart(id, series, unit) {
+    var host = document.getElementById("ro-" + id);
+    if (!host) return;
+    elMain.querySelectorAll('[data-chart="' + id + '"]').forEach(function (r) {
+      r.addEventListener("click", function () {
+        host.innerHTML = chartReadout(id, series, r.getAttribute("data-date"), unit);
+      });
+    });
   }
 
-  function renderAviso() {
-    var el = $("alerta");
-    if (!el) return;
-    if (guardaOK) { el.hidden = true; return; }
-    el.hidden = false;
-    el.innerHTML = '<b class="tit">Este aparelho não está guardando</b>' +
-      "Este navegador não deixa a agenda salvar nada. O que você marcar <b>some assim que a página fechar</b> — não é falha sua. " +
-      "Abra este mesmo link direto no Chrome, e não por dentro do app do Claude." +
-      '<button class="btn btn-sm btn-ghost" id="alertaExport">Baixar o que está na tela</button>';
+  /* ==================== consultas sobre o histórico ==================== */
+
+  function allExercises() {
+    var map = {};
+    store.sessions.forEach(function (s) {
+      s.ex.forEach(function (e) { if (!map[e.id]) map[e.id] = e.n; });
+    });
+    WORKOUTS.forEach(function (w) { w.ex.forEach(function (e) { if (!map[e.id]) map[e.id] = e.n; }); });
+    return map;
   }
 
-  function renderGuarda() {
-    var el = $("guardaInfo");
-    if (!el) return;
-    el.className = "alerta" + (guardaOK ? " ok" : "");
-    el.innerHTML = guardaOK
-      ? '<b class="tit">Salvando neste aparelho</b>Testei agora e este navegador guarda a agenda. Ela fica só aqui: não sobe para servidor nenhum e não aparece em outro celular.' +
-        (ultimoSave ? " Última gravação às " + new Date(ultimoSave).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) + "." : "")
-      : '<b class="tit">Não está guardando</b>Este navegador bloqueia o armazenamento. Abra o mesmo link direto no Chrome do celular — se este quadro ficar verde, é só usar por lá.';
+  function seriesFor(exId) {
+    var out = [];
+    store.sessions.forEach(function (s) {
+      s.ex.forEach(function (e) {
+        if (e.id !== exId) return;
+        var v = num(e.kg);
+        if (isFinite(v)) out.push({ date: s.date, v: v });
+      });
+    });
+    return out.sort(function (a, b) { return dayms(a.date) - dayms(b.date); });
   }
+
+  function bodySeries(field) {
+    return store.body.filter(function (b) { return b[field] != null && isFinite(b[field]); })
+      .map(function (b) { return { date: b.date, v: +b[field] }; })
+      .sort(function (a, b) { return dayms(a.date) - dayms(b.date); });
+  }
+
+  function sessionVolume(s) {
+    var n = 0;
+    s.ex.forEach(function (e) { n += e.reps.length; });
+    return n;
+  }
+
+  function daysTo(iso) {
+    return Math.round((dayms(iso) - dayms(today())) / 86400000);
+  }
+
+  /* ==================== renderização ==================== */
 
   function render() {
-    renderAviso();
-    renderGuarda();
-    if (ui.sec === "agenda") { renderCal(); renderDia(); }
-    if (ui.sec === "clientes") renderClientes();
-    if (ui.sec === "resumo") renderResumo();
-    if (ui.sec === "ajustes") renderAjustes();
-    renderBar();
+    renderNav();
+    elTabs.hidden = view !== "treino";
+    elBar.hidden = view !== "treino";
+    elApp.classList.toggle("on-treino", view === "treino");
+    if (view === "treino") renderTreino();
+    else if (view === "hist") renderHist();
+    else if (view === "corpo") renderCorpo();
+    else renderDieta();
   }
 
-  // ---------- folha do serviço ----------
-  var rascunho = null;
-
-  function novoServico(data, cliente) {
-    var t = store.tipos[0];
-    return {
-      id: novoId(),
-      data: data || ui.dia,
-      orcamento: false,
-      hora: "08:00",
-      dur: Number(store.cfg.dur || 90),
-      tipo: t.id,
-      cliente: cliente || "",
-      tel: "",
-      endereco: "",
-      maquinas: t.porMaquina ? 1 : 0,
-      mao: t.porMaquina ? precoMaq(t) : 0,
-      mat: 0,
-      matCusto: 0,
-      valor: t.porMaquina ? precoMaq(t) : 0,
-      status: "agendado",
-      pago: false,
-      obs: ""
-    };
-  }
-
-  function precoMaq(t) {
-    return Number(t && t.preco ? t.preco : store.cfg.preco || 0);
-  }
-
-  function abrirServico(s) {
-    rascunho = JSON.parse(JSON.stringify(s));
-    ui.editando = store.servicos.some(function (x) { return x.id === s.id; }) ? s.id : null;
-    desenharPanel();
-    $("modal").classList.add("open");
-  }
-
-  function links(s) {
-    var e164 = telE164(s.tel);
-    return {
-      tel: e164 ? "tel:+" + e164 : "",
-      wa: e164 ? "https://wa.me/" + e164 + "?text=" + encodeURIComponent(
-        "Olá" + (s.cliente ? ", " + s.cliente : "") + "! Confirmando o serviço no dia " +
-        curto(s.data) + " às " + s.hora + ".") : "",
-      mapa: s.endereco ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(s.endereco) : "",
-      gcal: linkGoogle(s)
-    };
-  }
-
-  function resumoValores(s) {
-    var t = tipoDe(s.tipo);
-    var mao = Number(s.mao || 0), mat = Number(s.mat || 0), custo = Number(s.matCusto || 0);
-    var html = "";
-    if (t.porMaquina) {
-      html += '<div class="readout"><span class="lbl">' + Number(s.maquinas || 0) + " × " + brl(precoMaq(t)) +
-        '</span><b>' + brl(Number(s.maquinas || 0) * precoMaq(t)) + "</b></div>";
-    }
-    html += '<div class="readout"><span class="lbl">Total cobrado</span><b>' + brl(mao + mat) + "</b></div>";
-    if (custo) {
-      html += '<div class="readout"><span class="lbl">Sobra tirando o material</span><b>' +
-        brl(mao + mat - custo) + "</b></div>";
-    }
-    return html;
-  }
-
-  function subFolha(s) {
-    return DIAS[fromISO(s.data).getDay()] + ", " + curto(s.data) + " às " + esc(s.hora) +
-      (s.dur ? " · " + durTxt(s.dur) : "");
-  }
-
-  /* mantém links, subtítulo e a conta de máquinas acompanhando o que está digitado,
-     sem redesenhar a folha (redesenhar tiraria o foco do campo) */
-  function refrescarFolha() {
-    if (!rascunho) return;
-    lerPanel();
-    var s = rascunho, l = links(s);
-    var por = [["qTel", l.tel], ["qWa", l.wa], ["qMapa", l.mapa], ["qCal", l.gcal]];
-    por.forEach(function (p) {
-      var el = $(p[0]);
-      if (!el) return;
-      el.setAttribute("href", p[1] || "#");
-      if (p[1]) el.removeAttribute("aria-disabled");
-      else el.setAttribute("aria-disabled", "true");
+  function renderNav() {
+    var items = [["treino","Treino"],["hist","Histórico"],["corpo","Corpo"],["dieta","Dieta"]];
+    elNav.innerHTML = "";
+    items.forEach(function (it) {
+      var b = document.createElement("button");
+      b.type = "button"; b.setAttribute("role", "tab");
+      b.setAttribute("aria-selected", view === it[0] ? "true" : "false");
+      b.textContent = it[1];
+      b.addEventListener("click", function () {
+        view = it[0]; render(); window.scrollTo({ top: 0 });
+      });
+      elNav.appendChild(b);
     });
-    if ($("mSub")) $("mSub").innerHTML = subFolha(s);
-    if ($("mRead")) $("mRead").innerHTML = resumoValores(s);
   }
 
-  function desenharPanel() {
-    var s = rascunho;
-    var t = tipoDe(s.tipo);
-    var l = links(s);
-
-    $("panel").innerHTML =
-      '<h3 id="mTitulo">' + (ui.editando ? "Serviço" : "Novo serviço") + "</h3>" +
-      '<p class="sub" id="mSub">' + subFolha(s) + "</p>" +
-
-      '<div class="quick">' +
-        '<a id="qTel" href="' + (l.tel || "#") + '"' + (l.tel ? "" : ' aria-disabled="true"') + ">" +
-          icon("phone") + "Ligar</a>" +
-        '<a id="qWa" href="' + (l.wa || "#") + '" target="_blank" rel="noopener"' + (l.wa ? "" : ' aria-disabled="true"') + ">" +
-          icon("chat") + "WhatsApp</a>" +
-        '<a id="qMapa" href="' + (l.mapa || "#") + '" target="_blank" rel="noopener"' + (l.mapa ? "" : ' aria-disabled="true"') + ">" +
-          icon("pin") + "Rota</a>" +
-        '<a id="qCal" href="' + l.gcal + '" target="_blank" rel="noopener">' + icon("bell") + "Lembrete</a>" +
-      "</div>" +
-
-      '<div class="fields">' +
-        '<div class="f wide"><label for="fCli">Cliente</label><div class="fld">' +
-          '<input id="fCli" class="txt" type="text" list="clientes-dl" placeholder="Clínica Vida" value="' + esc(s.cliente) + '"></div></div>' +
-        '<datalist id="clientes-dl">' + carteira().map(function (c) { return "<option>" + esc(c.nome) + "</option>"; }).join("") + "</datalist>" +
-
-        '<div class="f wide"><label>Tipo de serviço</label><div class="opts">' +
-          store.tipos.map(function (x) {
-            return '<button class="opt" data-tipo="' + x.id + '" aria-pressed="' + (x.id === s.tipo) + '">' +
-              '<i style="background:' + corVar(x) + '"></i>' + esc(x.nome) + "</button>";
-          }).join("") + "</div></div>" +
-
-        '<div class="f wide"><label>É serviço ou orçamento?</label><div class="opts cols2">' +
-          '<button class="opt" data-modo="servico" aria-pressed="' + (!s.orcamento) + '">Serviço</button>' +
-          '<button class="opt" data-modo="orcamento" aria-pressed="' + (!!s.orcamento) + '">Orçamento</button>' +
-          "</div>" +
-          (s.orcamento ? '<p class="note" style="margin-top:7px">Orçamento ocupa a agenda mas não entra no faturamento nem nas máquinas do mês. Quando fechar, use o botão lá embaixo.</p>' : "") +
-          "</div>" +
-
-        '<div class="f"><label for="fData">Data</label><div class="fld">' +
-          '<input id="fData" type="date" value="' + esc(s.data) + '"></div></div>' +
-        '<div class="f"><label for="fHora">Hora</label><div class="fld">' +
-          '<input id="fHora" type="time" value="' + esc(s.hora) + '"></div></div>' +
-
-        '<div class="f wide"><label for="fDur">Duração</label><div class="fld"><select id="fDur">' +
-          optsDur(s.dur) + "</select></div></div>" +
-
-        (t.porMaquina
-          ? '<div class="f"><label for="fMaq">Máquinas</label><div class="fld has-unit">' +
-            '<input id="fMaq" type="number" inputmode="numeric" min="0" step="1" value="' + Number(s.maquinas || 0) + '"><span class="unit">un</span></div></div>' +
-            '<div class="f"><label for="fMao">Mão de obra</label><div class="fld has-pre"><span class="pre">R$</span>' +
-            '<input id="fMao" type="number" inputmode="decimal" min="0" step="10" value="' + Number(s.mao || 0) + '"></div></div>'
-          : '<div class="f wide"><label for="fMao">Mão de obra</label><div class="fld has-pre"><span class="pre">R$</span>' +
-            '<input id="fMao" type="number" inputmode="decimal" min="0" step="10" value="' + Number(s.mao || 0) + '"></div></div>') +
-
-        '<div class="f"><label for="fMat">Material — cobrado</label><div class="fld has-pre"><span class="pre">R$</span>' +
-          '<input id="fMat" type="number" inputmode="decimal" min="0" step="10" value="' + Number(s.mat || 0) + '"></div></div>' +
-        '<div class="f"><label for="fMatC">Material — custo</label><div class="fld has-pre"><span class="pre">R$</span>' +
-          '<input id="fMatC" type="number" inputmode="decimal" min="0" step="10" value="' + Number(s.matCusto || 0) + '"></div></div>' +
-
-        '<div class="f wide" id="mRead">' + resumoValores(s) + "</div>" +
-
-        '<div class="f wide"><label for="fEnd">Endereço</label><div class="fld">' +
-          '<input id="fEnd" class="txt" type="text" placeholder="Rua, nº — bairro, cidade" value="' + esc(s.endereco) + '"></div></div>' +
-        '<div class="f wide"><label for="fTel">Telefone</label><div class="fld">' +
-          '<input id="fTel" type="tel" inputmode="tel" placeholder="31 9 9999-9999" value="' + esc(s.tel) + '"></div></div>' +
-
-        '<div class="f wide"><label>Situação</label><div class="opts">' +
-          [["agendado", "Agendado"], ["feito", "Feito"], ["cancelado", "Cancelado"]].map(function (o) {
-            return '<button class="opt" data-status="' + o[0] + '" aria-pressed="' + (s.status === o[0]) + '">' + o[1] + "</button>";
-          }).join("") + "</div></div>" +
-
-        '<div class="f wide"><button class="switch" id="fPago" aria-pressed="' + (!!s.pago) + '">' +
-          "<span>Já recebi</span><span class=\"knob\"></span></button></div>" +
-
-        '<div class="f wide"><label for="fObs">Observação</label><div class="fld">' +
-          '<textarea id="fObs" placeholder="portaria pede aviso · trocar filtro do 2º andar">' + esc(s.obs) + "</textarea></div></div>" +
-      "</div>" +
-
-      '<div class="actions">' +
-        '<button class="btn btn-ghost" id="fCancel">Fechar</button>' +
-        '<button class="btn btn-primary" id="fSalvar">Salvar</button>' +
-        (ui.editando && s.orcamento ? '<button class="btn btn-ghost full" id="fVirou">O cliente aprovou — virar serviço</button>' : "") +
-        (ui.editando ? '<button class="btn btn-ghost full" id="fDuplicar">Repetir esse serviço em outra data</button>' : "") +
-        (ui.editando ? '<button class="btn btn-danger full" id="fExcluir">Excluir serviço</button>' : "") +
-      "</div>";
-  }
-
-  function icon(nome) {
-    var d = {
-      phone: '<path d="M4 4h3l2 4-2 1a10 10 0 0 0 5 5l1-2 4 2v3a2 2 0 0 1-2 2A15 15 0 0 1 2 6a2 2 0 0 1 2-2z"/>',
-      chat: '<path d="M20 12a8 8 0 1 1-3.2-6.4"/><path d="M21 3v5h-5"/><path d="M8 11h8M8 15h5"/>',
-      pin: '<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
-      bell: '<path d="M18 15V10a6 6 0 1 0-12 0v5l-2 3h16l-2-3z"/><path d="M10 21h4"/>'
-    }[nome];
-    return '<svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round">' + d + "</svg>";
-  }
-
-  function linkGoogle(s) {
-    var t = tipoDe(s.tipo);
-    var ini = s.data.replace(/-/g, "") + "T" + String(s.hora || "08:00").replace(":", "") + "00";
-    var fim = s.data.replace(/-/g, "") + "T" + somaMin(s.hora, s.dur).replace(":", "") + "00";
-    var det = [t.nome, s.maquinas ? s.maquinas + " máquina(s)" : "", valorDe(s) ? brl(valorDe(s)) : "", telFmt(s.tel), s.obs]
-      .filter(Boolean).join(" · ");
-    return "https://calendar.google.com/calendar/render?action=TEMPLATE" +
-      "&text=" + encodeURIComponent((s.cliente || "Serviço") + " — " + t.nome) +
-      "&dates=" + ini + "/" + fim +
-      "&details=" + encodeURIComponent(det) +
-      "&location=" + encodeURIComponent(s.endereco || "");
-  }
-
-  function lerPanel() {
-    var s = rascunho;
-    var g = function (id) { var el = $(id); return el ? el.value : ""; };
-    s.cliente = g("fCli").trim();
-    s.data = g("fData") || s.data;
-    s.hora = g("fHora") || s.hora;
-    s.dur = Number(g("fDur") || s.dur);
-    s.endereco = g("fEnd").trim();
-    s.tel = g("fTel").trim();
-    s.obs = g("fObs").trim();
-    if ($("fMaq")) s.maquinas = Number(g("fMaq") || 0);
-    s.mao = Number(g("fMao") || 0);
-    s.mat = Number(g("fMat") || 0);
-    s.matCusto = Number(g("fMatC") || 0);
-    s.valor = s.mao + s.mat;   // valor = o que o cliente paga; custo fica de fora
-  }
-
-  function fecharModal() {
-    desarmar();
-    $("modal").classList.remove("open");
-    rascunho = null;
-    ui.editando = null;
-  }
-
-  // ---------- backup ----------
-  function exportar() {
-    var nome = "agenda-" + hojeISO() + ".json";
-    var dados = JSON.stringify(store, null, 2);
-    if (window.claude && window.claude.downloads) {
-      window.claude.downloads.save({ filename: nome, data: dados }).then(function () {
-        toast("Backup salvo.");
-      }).catch(function (err) {
-        if (err && err.code === "declined") return;
-        mostrarTexto("Backup", "Copie esse texto e guarde num bloco de notas ou no seu e-mail.", dados);
+  function renderTabs() {
+    elTabs.innerHTML = "";
+    WORKOUTS.forEach(function (w) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "tab"; b.setAttribute("role", "tab");
+      b.setAttribute("aria-selected", w.key === current ? "true" : "false");
+      b.style.setProperty("--tc", "var(" + w.color + ")");
+      b.innerHTML = '<span class="dot"></span>' + w.key + ' <span class="day">' + w.day + "</span>";
+      b.addEventListener("click", function () {
+        current = w.key; stopTimer(); render(); window.scrollTo({ top: 0, behavior: "smooth" });
       });
+      elTabs.appendChild(b);
+    });
+  }
+
+  function renderTreino() {
+    renderTabs();
+    var w = wk(current);
+    elMain.style.setProperty("--tc", "var(" + w.color + ")");
+    elBar.style.setProperty("--tc", "var(" + w.color + ")");
+
+    var html = '<div class="knee"><span>🦵</span><span><strong>Carta médica de 06/08:</strong> ' +
+      'cadeira extensora só de <b>90° a 45°</b> na perna direita até <b>03/09</b>. ' +
+      'Perna: 8-12 reps, RIR 2-3, 1-2 min de intervalo. Sem saltos, pliometria ou mudança de direção ' +
+      'até <b>27/11</b>. Dor que irradia ou formigamento — para na hora.</span></div>';
+
+    html += '<div class="sheet-head">' +
+      '<div class="eyebrow">Treino ' + w.key + " · " + w.day + "-feira</div>" +
+      "<h2>" + w.name + "</h2>" +
+      '<div class="meta">' + w.sub + "  ·  " + w.dur + "</div></div>";
+    html += '<div class="cues">' + w.cues + "</div>";
+
+    html += '<div class="list">';
+    w.ex.forEach(function (ex, i) {
+      var st = exState(w.key, ex);
+      var prev = store.last[ex.id];
+      var bump = bumpTarget(ex, st);
+
+      html += '<article class="ex" data-ex="' + ex.id + '">';
+      html += '<div class="ex-head"><div class="ex-num">' + (i + 1) + "</div>" +
+        '<div class="ex-title"><h3>' + ex.n + "</h3>" +
+        '<div class="presc">' + ex.sets + " × " + (ex.lo === ex.hi ? ex.lo : ex.lo + "-" + ex.hi) +
+        '<span class="sep">·</span>RIR ' + ex.rir +
+        '<span class="sep">·</span>' + restLabel(ex.rest) + "</div>" +
+        (ex.cue ? '<div class="ex-cue">' + ex.cue + "</div>" : "") +
+        (ex.alt ? '<details class="alt"><summary>Não tem esse aparelho?</summary>' +
+                  "<span>" + ex.alt + "</span></details>" : "") +
+        "</div></div>";
+
+      html += '<div class="last">' + lastLine(ex, prev, bump) + "</div>";
+
+      var ru = ex.repsUnit || "rp";
+      html += '<div class="sets">';
+      html += '<div class="set-hd' + (ex.noLoad ? " no-kg" : "") + '"><span>#</span>' +
+        (ex.noLoad ? "" : "<span>Carga</span>") +
+        "<span>" + (ex.noLoad ? "Registro" : "Reps feitas") + "</span><span>OK</span></div>";
+      for (var s = 0; s < ex.sets; s++) {
+        html += '<div class="set-row' + (st.done[s] ? " done" : "") + (ex.noLoad ? " no-kg" : "") +
+          '" data-set="' + s + '"><span class="set-n">' + (s + 1) + "</span>" +
+          (ex.noLoad ? "" :
+            '<div class="fld"><input type="text" inputmode="decimal" class="in-kg" value="' +
+            esc(st.kg) + '" placeholder="—" aria-label="Carga série ' + (s + 1) + '">' +
+            '<span class="unit">kg</span></div>') +
+          '<div class="fld"><input type="text" inputmode="numeric" class="in-reps" value="' +
+          esc(st.reps[s]) + '" placeholder="—" aria-label="' + ru + " série " + (s + 1) + '">' +
+          '<span class="unit">' + ru + "</span></div>" +
+          '<button type="button" class="chk" aria-pressed="' + (st.done[s] ? "true" : "false") +
+          '" aria-label="Concluir série ' + (s + 1) + '">' + checkSvg() + "</button></div>";
+      }
+      html += '<button type="button" class="rest-btn" data-rest="' + ex.rest + '">Descanso ' +
+        restLabel(ex.rest) + "</button></div></article>";
+    });
+    html += "</div>";
+
+    html += '<div class="foot">Salvo automaticamente neste aparelho. ' +
+      'Semana 6 (07–13/09) é deload: metade das séries, mesma carga.<br><br>' +
+      '<button type="button" id="wipe">Apagar tudo que está salvo</button></div>';
+
+    elMain.innerHTML = html;
+    wireTreino();
+    updateProgress();
+  }
+
+  function wireTreino() {
+    var w = wk(current);
+    elMain.querySelectorAll(".ex").forEach(function (card) {
+      var exId = card.getAttribute("data-ex");
+      var ex = null;
+      w.ex.forEach(function (e) { if (e.id === exId) ex = e; });
+      if (!ex) return;
+      var st = exState(w.key, ex);
+
+      card.querySelectorAll(".in-kg").forEach(function (input) {
+        input.addEventListener("input", function () {
+          st.kg = input.value;
+          card.querySelectorAll(".in-kg").forEach(function (o) { if (o !== input) o.value = input.value; });
+          save(); refreshLast(card, ex, st);
+        });
+      });
+
+      card.querySelectorAll(".set-row").forEach(function (row) {
+        var idx = parseInt(row.getAttribute("data-set"), 10);
+        row.querySelector(".in-reps").addEventListener("input", function (e) {
+          st.reps[idx] = e.target.value; save(); refreshLast(card, ex, st);
+        });
+        row.querySelector(".chk").addEventListener("click", function (e) {
+          st.done[idx] = !st.done[idx];
+          e.currentTarget.setAttribute("aria-pressed", st.done[idx] ? "true" : "false");
+          row.classList.toggle("done", st.done[idx]);
+          if (st.done[idx]) startTimer(ex.rest);
+          save(); updateProgress();
+        });
+      });
+
+      card.querySelector(".rest-btn").addEventListener("click", function (e) {
+        startTimer(parseInt(e.currentTarget.getAttribute("data-rest"), 10));
+      });
+    });
+
+    var wipe = document.getElementById("wipe");
+    if (wipe) wipe.addEventListener("click", function () {
+      if (window.confirm("Apagar TUDO: treinos, histórico, medidas e dieta. Não dá pra desfazer.")) {
+        store = blank(); save(); store = load(); save(); render(); toast("Tudo apagado");
+      }
+    });
+  }
+
+  function refreshLast(card, ex, st) {
+    card.querySelector(".last").innerHTML = lastLine(ex, store.last[ex.id], bumpTarget(ex, st));
+  }
+
+  function updateProgress() {
+    var w = wk(current), done = 0, total = 0;
+    w.ex.forEach(function (ex) {
+      var st = exState(w.key, ex);
+      total += ex.sets;
+      for (var i = 0; i < ex.sets; i++) if (st.done[i]) done++;
+    });
+    elProg.innerHTML = "<b>" + done + "/" + total + "</b><br>séries";
+  }
+
+  /* ---------- histórico ---------- */
+
+  function renderHist() {
+    var map = allExercises();
+    if (!histPick || !map[histPick]) histPick = "d1";
+    if (!map[histPick]) histPick = Object.keys(map)[0];
+
+    var data = seriesFor(histPick);
+    var series = [{ name: "Carga", data: data }];
+    var first = data.length ? data[0].v : null;
+    var last = data.length ? data[data.length - 1].v : null;
+    var delta = (first != null && last != null) ? last - first : null;
+
+    var html = '<div class="sheet-head"><div class="eyebrow neutral">Histórico</div>' +
+      "<h2>Evolução de carga</h2>" +
+      '<div class="meta">' + store.sessions.length + " sessões registradas</div></div>";
+
+    var opts = "";
+    Object.keys(map).forEach(function (id) {
+      opts += '<option value="' + id + '"' + (id === histPick ? " selected" : "") + ">" +
+        esc(map[id]) + "</option>";
+    });
+
+    html += '<div class="card"><h3>Por exercício</h3>' +
+      '<select class="pick" id="exPick" aria-label="Escolher exercício">' + opts + "</select>";
+
+    if (data.length < 2) {
+      html += '<div class="empty">Só ' + data.length + ' registro' + (data.length === 1 ? "" : "s") +
+        ' desse exercício. O gráfico aparece a partir do segundo.</div>';
     } else {
-      mostrarTexto("Backup", "Copie esse texto e guarde num bloco de notas ou no seu e-mail.", dados);
-    }
-  }
-
-  function mostrarTexto(titulo, sub, texto) {
-    $("panel").innerHTML = "<h3>" + esc(titulo) + '</h3><p class="sub">' + esc(sub) + "</p>" +
-      '<textarea class="out" id="txtOut" spellcheck="false">' + esc(texto) + "</textarea>" +
-      '<div class="actions"><button class="btn btn-ghost" id="fCancel">Fechar</button>' +
-      '<button class="btn btn-primary" id="txtCopy">Copiar</button></div>';
-    $("modal").classList.add("open");
-    setTimeout(function () { var t = $("txtOut"); if (t) { t.focus(); t.select(); } }, 60);
-  }
-
-  function copiaAntiga() {
-    try { document.execCommand("copy"); toast("Copiado."); }
-    catch (err) { toast("Selecione o texto e copie na mão."); }
-  }
-
-  function importar() {
-    $("panel").innerHTML = '<h3>Restaurar backup</h3>' +
-      '<p class="sub">Escolha o arquivo <b>.json</b> que você baixou — ele pode estar no Drive, no Downloads ou onde você salvou. Isso troca a agenda que está no aparelho pela do arquivo.</p>' +
-      '<div class="actions"><label class="btn btn-primary full" for="fileIn">Escolher arquivo</label>' +
-      '<input id="fileIn" type="file" accept=".json,application/json" hidden></div>' +
-      '<p class="sub" style="margin:16px 0 0">Ou cole o conteúdo na mão:</p>' +
-      '<textarea class="out" id="txtIn" spellcheck="false" placeholder="{ ... }"></textarea>' +
-      '<div class="actions"><button class="btn btn-ghost" id="fCancel">Fechar</button>' +
-      '<button class="btn btn-primary" id="txtLoad">Restaurar</button></div>';
-    $("modal").classList.add("open");
-  }
-
-  function aplicarBackup(txt) {
-    var novo;
-    try {
-      novo = JSON.parse(txt);
-      if (!novo || !Array.isArray(novo.servicos)) throw new Error("formato");
-    } catch (err) {
-      toast("Esse arquivo não é um backup da agenda.");
-      return;
-    }
-    store = novo;
-    if (!store.cfg) store.cfg = padrao().cfg;
-    if (!Array.isArray(store.tipos) || !store.tipos.length) store.tipos = padrao().tipos;
-    save();
-    fecharModal();
-    render();
-    toast("Restaurado: " + store.servicos.length + " serviço(s).");
-  }
-
-  // ---------- eventos ----------
-  $("nav").addEventListener("click", function (e) {
-    var b = e.target.closest("button[data-sec]");
-    if (b) irPara(b.getAttribute("data-sec"));
-  });
-
-  $("alerta").addEventListener("click", function (e) {
-    if (e.target.closest("#alertaExport")) exportar();
-  });
-
-  $("prevM").addEventListener("click", function () { pulaMes(-1); });
-  $("nextM").addEventListener("click", function () { pulaMes(1); });
-  $("hojeBtn").addEventListener("click", function () {
-    ui.dia = hojeISO();
-    ui.mes = ui.dia.slice(0, 7);
-    render();
-  });
-
-  function pulaMes(n) {
-    var p = ui.mes.split("-");
-    var d = new Date(Number(p[0]), Number(p[1]) - 1 + n, 1);
-    ui.mes = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
-    if (mesDe(ui.dia) !== ui.mes) ui.dia = ui.mes + "-01";
-    render();
-  }
-
-  $("grid").addEventListener("click", function (e) {
-    var b = e.target.closest("button[data-d]");
-    if (!b) return;
-    var iso = b.getAttribute("data-d");
-    ui.dia = iso;
-    if (mesDe(iso) !== ui.mes) ui.mes = mesDe(iso);
-    render();
-  });
-
-  $("dayList").addEventListener("click", function (e) {
-    var b = e.target.closest("button[data-id]");
-    if (!b) return;
-    var s = store.servicos.filter(function (x) { return x.id === b.getAttribute("data-id"); })[0];
-    if (s) abrirServico(s);
-  });
-
-  $("cliList").addEventListener("click", function (e) {
-    var novo = e.target.closest("button[data-novo-cli]");
-    if (novo) {
-      var c = carteira().filter(function (x) { return x.nome === novo.getAttribute("data-novo-cli"); })[0];
-      var s = novoServico(ui.dia, novo.getAttribute("data-novo-cli"));
-      if (c) { s.tel = c.tel; s.endereco = c.end; }
-      abrirServico(s);
-      return;
-    }
-    var b = e.target.closest("button[data-cli]");
-    if (!b) return;
-    var k = b.getAttribute("data-cli");
-    ui.cliAberto = ui.cliAberto === k ? null : k;
-    renderClientes();
-  });
-
-  $("btnNovo").addEventListener("click", function () {
-    if (ui.sec !== "agenda") irPara("agenda");
-    abrirServico(novoServico(ui.dia));
-  });
-
-  $("modal").addEventListener("click", function (e) {
-    if (e.target === $("modal")) { fecharModal(); return; }
-
-    var t = e.target.closest("[data-tipo]");
-    if (t && rascunho) {
-      lerPanel();
-      var novoTipo = t.getAttribute("data-tipo");
-      if (novoTipo === rascunho.tipo) return;
-      var antigo = tipoDe(rascunho.tipo);
-      // valor que o app mesmo calculou pode ser refeito; valor digitado à mão fica
-      var eraAuto = antigo.porMaquina &&
-        Number(rascunho.mao || 0) === Number(rascunho.maquinas || 0) * precoMaq(antigo);
-      rascunho.tipo = novoTipo;
-      var tp = tipoDe(novoTipo);
-      if (tp.porMaquina) {
-        if (!rascunho.maquinas) rascunho.maquinas = 1;
-        if (eraAuto || !Number(rascunho.mao || 0)) rascunho.mao = rascunho.maquinas * precoMaq(tp);
-      } else {
-        rascunho.maquinas = 0;
-        if (eraAuto) rascunho.mao = 0;
-      }
-      rascunho.valor = Number(rascunho.mao || 0) + Number(rascunho.mat || 0);
-      desenharPanel();
-      return;
+      html += '<div class="chart-wrap">' +
+        lineChart("ex", series, { unit: " kg", aria: "carga de " + map[histPick] + " ao longo do tempo" }) +
+        "</div>";
+      html += '<div class="readout" id="ro-ex">' +
+        chartReadout("ex", series, data[data.length - 1].date, " kg") + "</div>";
     }
 
-    var md = e.target.closest("[data-modo]");
-    if (md && rascunho) {
-      lerPanel();
-      var querOrc = md.getAttribute("data-modo") === "orcamento";
-      if (querOrc === !!rascunho.orcamento) return;
-      rascunho.orcamento = querOrc;
-      desenharPanel();
-      return;
+    if (delta != null && data.length > 1) {
+      var pct = first > 0 ? (delta / first) * 100 : 0;
+      html += '<div class="stat-row">' +
+        stat("Início", fmt(first), "kg", br(data[0].date)) +
+        stat("Agora", fmt(last), "kg", br(data[data.length - 1].date)) +
+        stat("Variação", (delta >= 0 ? "+" : "") + fmt(delta), "kg",
+             (pct >= 0 ? "+" : "") + fmt(pct) + "%", delta >= 0 ? "up" : "dn") +
+        "</div>";
     }
+    html += "</div>";
 
-    var st = e.target.closest("[data-status]");
-    if (st && rascunho) {
-      lerPanel();
-      rascunho.status = st.getAttribute("data-status");
-      desenharPanel();
-      return;
-    }
-
-    if (e.target.closest("#fPago") && rascunho) {
-      lerPanel();
-      rascunho.pago = !rascunho.pago;
-      desenharPanel();
-      return;
-    }
-
-    if (e.target.closest("#fCancel")) { fecharModal(); return; }
-
-    if (e.target.closest("#fSalvar")) {
-      lerPanel();
-      if (!rascunho.cliente) { toast("Falta o nome do cliente."); return; }
-      var s = rascunho;
-      if (ui.editando) {
-        store.servicos = store.servicos.map(function (x) { return x.id === s.id ? s : x; });
-      } else {
-        store.servicos.push(s);
-      }
-      save();
-      ui.dia = s.data;
-      ui.mes = mesDe(s.data);
-      fecharModal();
-      render();
-      toast("Serviço salvo.");
-      return;
-    }
-
-    if (e.target.closest("#fVirou")) {
-      lerPanel();
-      // o orçamento fica no histórico como visita feita; o serviço nasce como um novo compromisso
-      var orc = rascunho;
-      orc.status = "feito";
-      if (ui.editando) store.servicos = store.servicos.map(function (x) { return x.id === orc.id ? orc : x; });
-      else store.servicos.push(orc);
-      save();
-      var job = JSON.parse(JSON.stringify(orc));
-      job.id = novoId();
-      job.orcamento = false;
-      job.status = "agendado";
-      job.pago = false;
-      var dj = fromISO(job.data);
-      dj.setDate(dj.getDate() + 7);
-      job.data = toISO(dj);
-      abrirServico(job);
-      toast("Orçamento fechado. Confira a data do serviço e salve.");
-      return;
-    }
-
-    if (e.target.closest("#fDuplicar")) {
-      lerPanel();
-      var copia = JSON.parse(JSON.stringify(rascunho));
-      copia.id = novoId();
-      copia.status = "agendado";
-      copia.pago = false;
-      var d = fromISO(copia.data);
-      d.setMonth(d.getMonth() + 3);
-      copia.data = toISO(d);
-      abrirServico(copia);
-      toast("Cópia 3 meses à frente — mude a data se precisar.");
-      return;
-    }
-
-    var ex = e.target.closest("#fExcluir");
-    if (ex) {
-      if (!armar(ex, "Excluir serviço", "toque de novo para excluir")) return;
-      var id = rascunho.id;
-      store.servicos = store.servicos.filter(function (x) { return x.id !== id; });
-      save();
-      fecharModal();
-      render();
-      toast("Serviço excluído.");
-      return;
-    }
-
-    if (e.target.closest("#txtCopy")) {
-      var ta = $("txtOut");
-      ta.select();
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(ta.value)
-          .then(function () { toast("Copiado."); })
-          .catch(function () { copiaAntiga(); });
-      } else { copiaAntiga(); }
-      return;
-    }
-
-    if (e.target.closest("#txtLoad")) {
-      aplicarBackup($("txtIn").value.trim());
-      return;
-    }
-  });
-
-  // recalcula o valor e mantém links/subtítulo acompanhando o que está digitado
-  function aoDigitar(e) {
-    if (!rascunho) return;
-    if (e.target.id === "fMaq") {
-      var tp = tipoDe(rascunho.tipo);
-      var vEl = $("fMao");
-      if (vEl && tp.porMaquina) vEl.value = Number(e.target.value || 0) * precoMaq(tp);
-    }
-    refrescarFolha();
-  }
-  $("modal").addEventListener("input", aoDigitar);
-  $("modal").addEventListener("change", aoDigitar);
-
-  // restaurar escolhendo o arquivo — no celular é bem menos sofrido que copiar e colar
-  $("modal").addEventListener("change", function (e) {
-    if (e.target.id !== "fileIn" || !e.target.files || !e.target.files[0]) return;
-    var leitor = new FileReader();
-    leitor.onload = function () { aplicarBackup(String(leitor.result)); };
-    leitor.onerror = function () { toast("Não consegui ler esse arquivo."); };
-    leitor.readAsText(e.target.files[0]);
-  });
-
-  // arruma o telefone quando sai do campo — blur não borbulha, daí o capture
-  $("modal").addEventListener("blur", function (e) {
-    if (e.target && e.target.id === "fTel" && e.target.value) {
-      e.target.value = telFmt(e.target.value);
-      refrescarFolha();
-    }
-  }, true);
-
-  // ---------- ajustes ----------
-  $("sec-ajustes").addEventListener("input", function (e) {
-    var el = e.target;
-    if (el.id === "cfgPreco") { store.cfg.preco = Number(el.value || 0); save(); renderBar(); return; }
-    if (el.id === "cfgTeto") { store.cfg.teto = Math.max(Number(el.value || 1), 1); save(); return; }
-    if (el.hasAttribute("data-tnome")) { store.tipos[Number(el.getAttribute("data-tnome"))].nome = el.value; save(); return; }
-    if (el.hasAttribute("data-tpreco")) { store.tipos[Number(el.getAttribute("data-tpreco"))].preco = Number(el.value || 0); save(); return; }
-  });
-
-  $("sec-ajustes").addEventListener("change", function (e) {
-    if (e.target.id === "cfgDur") { store.cfg.dur = Number(e.target.value); save(); }
-  });
-
-  $("sec-ajustes").addEventListener("click", function (e) {
-    var cor = e.target.closest("[data-tcor]");
-    if (cor) {
-      store.tipos[Number(cor.getAttribute("data-tcor"))].cor = Number(cor.getAttribute("data-cor"));
-      save(); renderAjustes(); return;
-    }
-    var maq = e.target.closest("[data-tmaq]");
-    if (maq) {
-      var t = store.tipos[Number(maq.getAttribute("data-tmaq"))];
-      t.porMaquina = !t.porMaquina;
-      save(); renderAjustes(); return;
-    }
-    var del = e.target.closest("[data-tdel]");
-    if (del) {
-      var i = Number(del.getAttribute("data-tdel"));
-      if (store.tipos.length <= 1) { toast("Precisa sobrar pelo menos um tipo."); return; }
-      var alvo = store.tipos[i];
-      var usos = store.servicos.filter(function (s) { return s.tipo === alvo.id; }).length;
-      var aviso = usos
-        ? "toque de novo — " + usos + " serviço(s) viram “" + store.tipos[i === 0 ? 1 : 0].nome + "”"
-        : "toque de novo para apagar";
-      if (!armar(del, "Apagar tipo", aviso)) return;
-      var destino = store.tipos[i === 0 ? 1 : 0].id;
-      store.servicos.forEach(function (s) { if (s.tipo === alvo.id) s.tipo = destino; });
-      store.tipos.splice(i, 1);
-      save(); render();
-      toast("Tipo apagado.");
-      return;
-    }
-    if (e.target.closest("#addTipo")) {
-      store.tipos.push({
-        id: "t" + Date.now().toString(36),
-        nome: "Novo tipo",
-        cor: CORES[store.tipos.length % CORES.length].id,
-        porMaquina: false,
-        preco: 0
+    /* tabela de sessões — a leitura alternativa ao gráfico */
+    html += '<div class="card"><h3>Sessões</h3>';
+    if (!store.sessions.length) {
+      html += '<div class="empty">Nenhuma sessão fechada ainda.</div>';
+    } else {
+      html += '<div class="tbl-wrap"><table class="data"><thead><tr>' +
+        "<th>Data</th><th>Treino</th><th>Exercícios</th><th>Séries</th></tr></thead><tbody>";
+      store.sessions.slice().reverse().forEach(function (s) {
+        html += "<tr><td class='n'>" + br(s.date) + "</td><td>" + esc(s.name || s.key) +
+          "</td><td class='n'>" + s.ex.length + "</td><td class='n'>" + sessionVolume(s) + "</td></tr>";
       });
-      save(); renderAjustes(); return;
+      html += "</tbody></table></div>";
     }
-    if (e.target.closest("#btnExport")) { exportar(); return; }
-    if (e.target.closest("#btnImport")) { importar(); return; }
-    var w = e.target.closest("#wipe");
-    if (w) {
-      if (!armar(w, "apagar tudo que está salvo", "apagar mesmo? toque de novo")) return;
-      try { localStorage.removeItem(KEY); } catch (err) {}
-      store = padrao();
-      save(); render();
-      toast("Tudo apagado.");
+    html += "</div>";
+
+    elMain.innerHTML = html;
+
+    var pick = document.getElementById("exPick");
+    if (pick) pick.addEventListener("change", function () {
+      histPick = pick.value; renderHist();
+    });
+    if (data.length >= 2) wireChart("ex", series, " kg");
+  }
+
+  function stat(k, v, u, d, cls) {
+    return '<div class="stat"><div class="k">' + esc(k) + '</div>' +
+      '<div class="v">' + v + (u ? '<span class="u">' + u + "</span>" : "") + "</div>" +
+      (d ? '<div class="d ' + (cls || "") + '">' + esc(d) + "</div>" : "") + "</div>";
+  }
+
+  /* ---------- corpo: joelho + medidas ---------- */
+
+  function renderCorpo() {
+    var dSer = seriesFor("p1b_d"), eSer = seriesFor("p1b_e");
+    var dNow = dSer.length ? dSer[dSer.length - 1].v : null;
+    var eNow = eSer.length ? eSer[eSer.length - 1].v : null;
+    var sim = (dNow != null && eNow) ? (dNow / eNow) * 100 : null;
+
+    var html = '<div class="sheet-head"><div class="eyebrow neutral">Corpo</div>' +
+      "<h2>Joelho e medidas</h2>" +
+      '<div class="meta">Pós-op de ' + Math.round((dayms(today()) - dayms("2026-05-27")) / 604800000) +
+      " semanas</div></div>";
+
+    /* painel do joelho */
+    html += '<div class="card"><h3>Simetria de quadríceps</h3>' +
+      '<p class="note">Carga da extensora unilateral: direita (operada) sobre esquerda. ' +
+      "O critério usual para liberar esporte de contato é chegar perto de 90%.</p>";
+
+    if (sim == null) {
+      html += '<div class="empty">Registra a extensora dos dois lados pra esse número aparecer.</div>';
+    } else {
+      html += '<div class="hero"><span class="big">' + Math.round(sim) + "%</span>" +
+        '<span class="cap">Direita ' + fmt(dNow) + " kg · esquerda " + fmt(eNow) + " kg.<br>" +
+        "Faltam <b>" + Math.max(0, Math.round(90 - sim)) + " pontos</b> para os 90%.</span></div>";
+      html += '<div class="meter"><div class="meter-track">' +
+        '<div class="meter-fill amber" style="width:' + Math.min(100, sim) + '%"></div></div>' +
+        '<div class="meter-scale"><span>0%</span><span>meta 90%</span></div></div>';
+    }
+
+    var knee = [];
+    if (eSer.length) knee.push({ name: "Esquerda", data: eSer });
+    if (dSer.length) knee.push({ name: "Direita (operada)", data: dSer });
+    if (knee.length && (eSer.length > 1 || dSer.length > 1)) {
+      html += '<div class="chart-wrap">' +
+        lineChart("knee", knee, { unit: " kg", zeroBase: true, aria: "carga da extensora por lado" }) +
+        "</div>";
+      html += '<div class="legend"><span><i class="c1"></i>Esquerda</span>' +
+        '<span><i class="c2"></i>Direita (operada)</span></div>';
+      html += '<div class="readout" id="ro-knee">Toque no gráfico para ver um dia.</div>';
+    }
+    html += "</div>";
+
+    /* marcos */
+    html += '<div class="card"><h3>Marcos da reabilitação</h3><div class="marks">';
+    var nextFound = false;
+    MARCOS.forEach(function (m) {
+      var dd = daysTo(m.d), done = dd < 0, next = !done && !nextFound;
+      if (next) nextFound = true;
+      html += '<div class="mark' + (done ? " done" : next ? " next" : "") + '"><span class="pip"></span>' +
+        '<span class="t">' + esc(m.t) + "<small>" + esc(m.s) + "</small></span>" +
+        '<span class="when">' + br(m.d) + "<br>" +
+        (done ? "feito" : "faltam " + dd + "d") + "</span></div>";
+    });
+    html += "</div></div>";
+
+    /* cintura */
+    var cSer = bodySeries("cintura");
+    html += '<div class="card"><h3>Cintura</h3>' +
+      '<p class="note">Metas: 88,0 cm até 13/09 · 84,0 cm até dezembro. Medir 1x por semana, no umbigo.</p>';
+    if (cSer.length >= 2) {
+      html += '<div class="chart-wrap">' + lineChart("cint", [{ name: "Cintura", data: cSer }],
+        { unit: " cm", aria: "cintura ao longo do tempo" }) + "</div>";
+      html += '<div class="readout" id="ro-cint">' +
+        chartReadout("cint", [{ name: "Cintura", data: cSer }], cSer[cSer.length - 1].date, " cm") + "</div>";
+    } else {
+      html += '<div class="empty">Precisa de pelo menos duas medidas.</div>';
+    }
+    if (cSer.length) {
+      var cNow = cSer[cSer.length - 1].v;
+      html += '<div class="stat-row">' +
+        stat("Agora", fmt(cNow), "cm", br(cSer[cSer.length - 1].date)) +
+        stat("Meta 13/09", "88,0", "cm", fmt(cNow - 88) + " cm a perder") +
+        stat("Meta dez", "84,0", "cm", fmt(cNow - 84) + " cm a perder") +
+        "</div>";
+    }
+    html += "</div>";
+
+    /* peso */
+    var pSer = bodySeries("peso");
+    html += '<div class="card"><h3>Peso</h3>' +
+      '<p class="note">Um dia isolado é ruído — o que vale é a tendência. Sempre a mesma balança.</p>';
+    if (pSer.length >= 2) {
+      html += '<div class="chart-wrap">' + lineChart("peso", [{ name: "Peso", data: pSer }],
+        { unit: " kg", aria: "peso ao longo do tempo" }) + "</div>";
+      html += '<div class="readout" id="ro-peso">' +
+        chartReadout("peso", [{ name: "Peso", data: pSer }], pSer[pSer.length - 1].date, " kg") + "</div>";
+    } else {
+      html += '<div class="empty">Precisa de pelo menos duas pesagens.</div>';
+    }
+    html += "</div>";
+
+    /* registrar medida */
+    html += '<div class="card"><h3>Registrar medida de hoje</h3>' +
+      '<div class="measures"><div><label for="bPeso">Peso (kg)</label>' +
+      '<input id="bPeso" type="text" inputmode="decimal" placeholder="—"></div>' +
+      '<div><label for="bCint">Cintura (cm)</label>' +
+      '<input id="bCint" type="text" inputmode="decimal" placeholder="—"></div></div>' +
+      '<button type="button" class="btn btn-primary btn-sm" id="saveBody">Salvar medida</button></div>';
+
+    elMain.innerHTML = html;
+
+    if (knee.length && (eSer.length > 1 || dSer.length > 1)) wireChart("knee", knee, " kg");
+    if (cSer.length >= 2) wireChart("cint", [{ name: "Cintura", data: cSer }], " cm");
+    if (pSer.length >= 2) wireChart("peso", [{ name: "Peso", data: pSer }], " kg");
+
+    document.getElementById("saveBody").addEventListener("click", function () {
+      var p = num(document.getElementById("bPeso").value);
+      var c = num(document.getElementById("bCint").value);
+      if (!isFinite(p) && !isFinite(c)) { toast("Preenche peso ou cintura"); return; }
+      pushBody(isFinite(p) ? p : null, isFinite(c) ? c : null);
+      toast("Medida salva"); renderCorpo();
+    });
+  }
+
+  function pushBody(peso, cintura) {
+    var d = today(), row = null;
+    store.body.forEach(function (b) { if (b.date === d) row = b; });
+    if (!row) { row = { date: d, peso: null, cintura: null }; store.body.push(row); }
+    if (peso != null) row.peso = peso;
+    if (cintura != null) row.cintura = cintura;
+    store.body.sort(function (a, b) { return dayms(a.date) - dayms(b.date); });
+    save();
+  }
+
+  /* ---------- dieta ---------- */
+
+  function renderDieta() {
+    var d = today();
+    var list = store.food[d] || [];
+    var total = list.reduce(function (a, x) { return a + x.g; }, 0);
+    var pct = Math.min(100, (total / PROT_ALVO) * 100);
+    var falta = Math.max(0, PROT_ALVO - total);
+
+    var html = '<div class="sheet-head"><div class="eyebrow neutral">Dieta</div>' +
+      "<h2>Proteína de hoje</h2>" +
+      '<div class="meta">Alvo ' + PROT_ALVO + " g · déficit de ~350 kcal</div></div>";
+
+    html += '<div class="card"><div class="hero">' +
+      '<span class="big" style="color:' + (falta ? "var(--s1)" : "var(--ok)") + '">' + total + "</span>" +
+      '<span class="cap">de ' + PROT_ALVO + " g<br>" +
+      (falta ? "Faltam <b>" + falta + " g</b>." : "<b>Alvo batido.</b>") + "</span></div>" +
+      '<div class="meter"><div class="meter-track"><div class="meter-fill' + (falta ? "" : " good") +
+      '" style="width:' + pct + '%"></div></div>' +
+      '<div class="meter-scale"><span>0 g</span><span>' + PROT_ALVO + " g</span></div></div>";
+
+    html += '<div class="meal-grid">';
+    MEALS.forEach(function (m, i) {
+      html += '<button type="button" class="meal" data-meal="' + i + '">' + esc(m.l) +
+        '<span class="g">+' + m.g + " g · " + esc(m.s) + "</span></button>";
+    });
+    html += "</div>";
+
+    if (list.length) {
+      html += '<div class="today-list">';
+      list.forEach(function (x, i) {
+        html += '<div class="today-item"><span>' + esc(x.l) + '</span>' +
+          '<span><span class="g">' + x.g + ' g</span> ' +
+          '<button type="button" data-del="' + i + '" aria-label="Remover">×</button></span></div>';
+      });
+      html += "</div>";
+    }
+    html += "</div>";
+
+    html += '<div class="card"><h3>Prato padrão</h3>' +
+      '<p class="note">200 g de carne (2 palmas) + 1,5 concha de feijão + 4 colheres de arroz + 1 fruta. ' +
+      "Fritura e linguiça: 1–2x por semana. Refrigerante zero pode, normal não.</p></div>";
+
+    elMain.innerHTML = html;
+
+    elMain.querySelectorAll("[data-meal]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var m = MEALS[+b.getAttribute("data-meal")];
+        if (!store.food[d]) store.food[d] = [];
+        store.food[d].push({ l: m.l, g: m.g });
+        save(); renderDieta();
+      });
+    });
+    elMain.querySelectorAll("[data-del]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        store.food[d].splice(+b.getAttribute("data-del"), 1);
+        save(); renderDieta();
+      });
+    });
+  }
+
+  /* ==================== timer ====================
+     Ancorado em horário real (Date.now()), não em contagem de tick:
+     o celular bloqueia a tela e o navegador suspende o setInterval, mas o
+     relógio continua correndo. Ao reabrir, recalcula o tempo restante a
+     partir do horário de término gravado. O estado fica em localStorage
+     para sobreviver a um reload (iOS descarta abas em segundo plano). */
+
+  function startTimer(sec) {
+    var end = Date.now() + sec * 1000;
+    timer.end = end; timer.total = sec;
+    store.timer = { end: end, total: sec }; save();
+    elTimer.classList.add("run"); elTimer.classList.remove("done");
+    tickTimer();
+    if (timer.id) clearInterval(timer.id);
+    timer.id = setInterval(tickTimer, 1000);
+  }
+
+  function tickTimer() {
+    if (timer.end == null) return;
+    var left = Math.ceil((timer.end - Date.now()) / 1000);
+    if (left <= 0) {
+      left = 0;
+      if (timer.id) clearInterval(timer.id);
+      timer.id = null;
+      elTimer.classList.remove("run");
+      if (!elTimer.classList.contains("done")) {
+        elTimer.classList.add("done");
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      }
+      store.timer = null; save();
+    }
+    timer.left = left; paintTimer();
+  }
+
+  function stopTimer() {
+    if (timer.id) clearInterval(timer.id);
+    timer.id = null; timer.left = 0; timer.end = null;
+    store.timer = null; save();
+    elTimer.classList.remove("run", "done"); paintTimer();
+  }
+
+  function paintTimer() {
+    var m = Math.floor(timer.left / 60), s = timer.left % 60;
+    elTimerT.textContent = m + ":" + pad(s);
+  }
+
+  function resumeTimer() {
+    if (!store.timer) { paintTimer(); return; }
+    timer.end = store.timer.end; timer.total = store.timer.total;
+    if (Math.ceil((timer.end - Date.now()) / 1000) <= 0) {
+      timer.left = 0; timer.end = null; store.timer = null; save();
+      elTimer.classList.add("done"); paintTimer(); return;
+    }
+    elTimer.classList.add("run"); tickTimer();
+    timer.id = setInterval(tickTimer, 1000);
+  }
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible" && (timer.id || store.timer)) tickTimer();
+    if (document.visibilityState === "hidden") save();
+  });
+
+  document.getElementById("timerT").addEventListener("click", function () {
+    if (timer.id) stopTimer(); else if (timer.total) startTimer(timer.total);
+  });
+  document.getElementById("timerPlus").addEventListener("click", function () {
+    var left = timer.end ? Math.max(0, Math.ceil((timer.end - Date.now()) / 1000)) : 0;
+    startTimer(left + 30);
+  });
+  document.getElementById("timerMinus").addEventListener("click", function () {
+    var left = timer.end ? Math.max(0, Math.ceil((timer.end - Date.now()) / 1000)) : 0;
+    if (left - 30 <= 0) stopTimer(); else startTimer(left - 30);
+  });
+
+  /* ==================== fechar treino ==================== */
+
+  function buildLog() {
+    var w = wk(current), d = new Date();
+    var lines = ["Treino " + w.key + " (" + w.name + ") feito — " +
+                 pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "."];
+    w.ex.forEach(function (ex) {
+      var st = exState(w.key, ex);
+      var reps = st.reps.filter(function (r) { return String(r).trim() !== ""; });
+      if (!reps.length && !String(st.kg).trim()) return;
+      var unit = ex.repsUnit || "rp";
+      if (ex.noLoad) {
+        lines.push("• " + ex.n + " — " + (reps.length ? reps.join("/") + " " + unit : "sem registro") +
+                   (ex.rir !== "—" ? " (RIR " + ex.rir + ")" : ""));
+        return;
+      }
+      var kg = num(st.kg);
+      lines.push("• " + ex.n + " — " + (isFinite(kg) ? fmt(kg) + " kg" : "?") +
+                 (reps.length ? " — " + reps.join("/") : "") + " (RIR " + ex.rir + ")");
+    });
+    var peso = document.getElementById("mPeso").value.trim();
+    var cint = document.getElementById("mCint").value.trim();
+    if (peso) lines.push("Peso: " + peso + " kg");
+    if (cint) lines.push("Cintura: " + cint + " cm");
+    return lines.join("\n");
+  }
+
+  document.getElementById("finish").addEventListener("click", function () {
+    document.getElementById("mPeso").value = "";
+    document.getElementById("mCint").value = "";
+    elOut.value = buildLog();
+    elModal.classList.add("open");
+  });
+
+  ["mPeso", "mCint"].forEach(function (id) {
+    document.getElementById(id).addEventListener("input", function () { elOut.value = buildLog(); });
+  });
+
+  document.getElementById("closeModal").addEventListener("click", function () {
+    elModal.classList.remove("open");
+  });
+  elModal.addEventListener("click", function (e) {
+    if (e.target === elModal) elModal.classList.remove("open");
+  });
+
+  document.getElementById("copy").addEventListener("click", function () {
+    var text = elOut.value;
+    var ok = function () { commit(); toast("Copiado — cola no chat"); elModal.classList.remove("open"); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(ok, manual);
+    } else manual();
+    function manual() {
+      elOut.removeAttribute("readonly"); elOut.select();
+      try { document.execCommand("copy"); ok(); }
+      catch (e) { toast("Seleciona o texto e copia na mão"); }
+      elOut.setAttribute("readonly", "readonly");
     }
   });
 
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && $("modal").classList.contains("open")) fecharModal();
-  });
+  /* fecha a sessão: vira "última vez" e entra no histórico */
+  function commit() {
+    var w = wk(current), rec = { date: today(), key: w.key, name: w.name, ex: [] };
+    w.ex.forEach(function (ex) {
+      var st = exState(w.key, ex);
+      var reps = st.reps.filter(function (r) { return String(r).trim() !== ""; });
+      if (!reps.length) return;
+      store.last[ex.id] = { kg: st.kg, reps: reps, date: today() };
+      rec.ex.push({ id: ex.id, n: ex.n, kg: st.kg, reps: reps,
+                    noLoad: !!ex.noLoad, repsUnit: ex.repsUnit || null });
+    });
+    if (rec.ex.length) {
+      var i = -1;
+      store.sessions.forEach(function (s, ix) { if (s.date === rec.date && s.key === rec.key) i = ix; });
+      if (i >= 0) store.sessions[i] = rec; else store.sessions.push(rec);
+      store.sessions.sort(function (a, b) { return dayms(a.date) - dayms(b.date); });
+    }
+    var p = num(document.getElementById("mPeso").value);
+    var c = num(document.getElementById("mCint").value);
+    if (isFinite(p) || isFinite(c)) pushBody(isFinite(p) ? p : null, isFinite(c) ? c : null);
+    delete store.draft[w.key];
+    save(); render();
+  }
 
-  // ---------- start ----------
-  load();
-  save();          // grava a migração, senão o marcador de versão nunca avança
-  renderNav();
-  irPara("agenda");
+  var toastT = null;
+  function toast(msg) {
+    elToast.textContent = msg; elToast.classList.add("show");
+    if (toastT) clearTimeout(toastT);
+    toastT = setTimeout(function () { elToast.classList.remove("show"); }, 2200);
+  }
+
+  save();
+  render();
+  resumeTimer();
+  window.addEventListener("pagehide", save);
 })();
 </script>
-
-</body>
-</html>
