@@ -471,6 +471,55 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  /* ---------- ditado ---------- */
+  .bar-btns { display: flex; gap: 8px; }
+  .btn-mic { width: 48px; padding: 0; }
+  .btn-mic svg, .mic-big svg {
+    fill: none; stroke: currentColor; stroke-width: 1.8;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .btn-mic svg { width: 20px; height: 20px; }
+
+  .dit-mic { display: flex; align-items: center; gap: 14px; margin: 2px 0 12px; }
+  .mic-big {
+    position: relative; flex: 0 0 auto;
+    width: 64px; height: 64px; border-radius: 50%;
+    border: 1px solid var(--line); background: var(--surface-2); color: var(--accent);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .mic-big[hidden] { display: none; }
+  .mic-big svg { width: 26px; height: 26px; }
+  .mic-big.on { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+  .mic-big.on::after {
+    content: ""; position: absolute; inset: -6px; border-radius: 50%;
+    border: 2px solid var(--accent); animation: pulso 1.3s ease-out infinite;
+  }
+  @keyframes pulso { from { transform: scale(.92); opacity: .6; } to { transform: scale(1.22); opacity: 0; } }
+  .mic-big:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .mic-st { font-size: 12.5px; line-height: 1.45; color: var(--ink-2); min-width: 0; }
+  .mic-st b { display: block; font-size: 14px; color: var(--ink); margin-bottom: 1px; }
+
+  .fld textarea.dit-txt { height: 96px; font: 500 15px/1.45 var(--sans); }
+  .dit-ex { margin-top: 12px; display: grid; gap: 7px; }
+  .dit-ex i {
+    font-style: normal; font-size: 12.5px; line-height: 1.4; color: var(--ink-2);
+    padding-left: 10px; border-left: 2px solid var(--line);
+  }
+  .dit-prev {
+    margin-top: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 4px;
+    background: var(--surface-2);
+  }
+  .dit-prev dl { display: grid; grid-template-columns: 70px 1fr; gap: 8px 10px; margin: 10px 0 0; }
+  .dit-prev dt {
+    font: 600 9.5px/1.6 var(--mono); letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .dit-prev dd { margin: 0; min-width: 0; font-size: 13.5px; line-height: 1.4; color: var(--ink); overflow-wrap: anywhere; }
+  .dit-prev dd small { font-size: 11.5px; color: var(--ink-3); }
+  .dit-prev dd.falta { color: var(--warn); font-weight: 600; }
+  .dit-prev dd .chip { vertical-align: 1px; }
+  .dit-prev dd b { font: 700 13px/1 var(--mono); font-variant-numeric: tabular-nums; color: var(--s2); }
+
   /* ---------- aviso de armazenamento ---------- */
   .alerta {
     margin-top: 12px; padding: 12px 13px;
@@ -664,7 +713,12 @@
         <div class="v" id="barV">R$ 0</div>
         <div class="s" id="barS">—</div>
       </div>
-      <button class="btn btn-primary" id="btnNovo">+ Serviço</button>
+      <div class="bar-btns">
+        <button class="btn btn-ghost btn-mic" id="btnFalar" aria-label="Ditar um serviço">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
+        </button>
+        <button class="btn btn-primary" id="btnNovo">+ Serviço</button>
+      </div>
     </div>
   </div>
 
@@ -692,6 +746,432 @@
     { id: 5, var: "--t5", nome: "lilás" },
     { id: 6, var: "--t6", nome: "cinza" }
   ];
+
+  // ==== interpretar ditado ====
+  /* Transforma uma frase falada ("amanhã às 8, limpeza de 4 máquinas na Clínica Vida")
+     num serviço. Sem rede e sem chave: é regra, não IA. Cada campo achado é "apagado"
+     do texto (vira ) para o campo seguinte não reaproveitar as mesmas palavras —
+     por isso a ordem das extrações importa. */
+
+  var DIT_MESES = ["janeiro", "fevereiro", "marco", "abril", "maio", "junho", "julho",
+    "agosto", "setembro", "outubro", "novembro", "dezembro"];
+  var DIT_SEMANA = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
+  var DIT_PAL = {
+    um: 1, uma: 1, primeiro: 1, dois: 2, duas: 2, tres: 3, quatro: 4, cinco: 5, seis: 6,
+    sete: 7, oito: 8, nove: 9, dez: 10, onze: 11, doze: 12, treze: 13, catorze: 14,
+    quatorze: 14, quinze: 15, dezesseis: 16, dezessete: 17, dezoito: 18, dezenove: 19,
+    vinte: 20, trinta: 30
+  };
+  var DIT_NUM = "(?:(?<!\\d)\\d{1,2}(?!\\d)|\\b(?:vinte e (?:um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove)" +
+    "|trinta e (?:um|uma)|dezesseis|dezessete|dezoito|dezenove|catorze|quatorze|quinze|treze|doze|onze" +
+    "|dez|vinte|trinta|um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove)\\b)";
+  var DIT_MON = "((?:(?<!\\d)\\d+(?:[.,]\\d+)*)(?:\\s*mil(?:\\s+e\\s+\\d+)?)?|\\bmil(?:\\s+e\\s+\\d+)?)";
+  var DIT_MOEDA = "(?:\\s*(?:reais|real|conto|contos|pila)\\b)?";
+  var DIT_CADA = "(\\s*(?:cada(?: uma| um)?|por (?:maquina|aparelho|unidade|equipamento)))?";
+
+  var DIT_CIDADES = ["Ipatinga", "Coronel Fabriciano", "Timóteo", "Santana do Paraíso", "Belo Oriente",
+    "Itabira", "João Monlevade", "Nova Era", "Caratinga", "Ipaba", "Açucena", "Antônio Dias",
+    "Jaguaraçu", "Marliéria", "Bela Vista de Minas", "São Domingos do Prata", "Rio Piracicaba"];
+
+  // palavras que podem sobrar da frase e não são nome de ninguém
+  var DIT_FILLER = {};
+  ("agendar agenda agende marca marcar marque coloca colocar coloque anota anotar anote bota botar poe " +
+   "por favor um uma uns umas o a os as de do da dos das e em no na nos nas com para pra pro que vem " +
+   "servico servicos visita cliente ai ta la ali aqui ele ela eu vou fazer faz tem ter vai ser pode precisa " +
+   "preciso quer quero ar condicionado condicionados aparelho aparelhos btus btu mil tipo tambem entao " +
+   "depois antes dele dela mesmo esse essa isso este esta dia hora horas horario tudo certo ok beleza oi ola " +
+   "feira h hs min minutos semana proxima proximo pro favor").split(" ").forEach(function (w) { DIT_FILLER[w] = 1; });
+
+  // primeira palavra depois de "na/no/para" que mostra que aquilo não é nome de cliente
+  var DIT_NAO_NOME = {};
+  ("dia rua avenida av bairro centro parte valor semana mes cidade horario periodo manha tarde noite mesmo " +
+   "local endereco lugar hora hoje amanha proxima proximo frente fim final meio primeira primeiro maquina " +
+   "maquinas fazer ver olhar instalar limpar trocar levar buscar arrumar consertar ele ela mim gente " +
+   "casa volta caso").split(" ").forEach(function (w) { DIT_NAO_NOME[w] = 1; });
+
+  function ditNorm(t) {
+    // minúsculo e sem acento, com o MESMO comprimento: a posição i aqui é a posição i no original
+    var out = "";
+    for (var i = 0; i < t.length; i++) out += t[i].toLowerCase().normalize("NFD")[0];
+    return out;
+  }
+
+  function ditNum(s) {
+    s = String(s).trim();
+    if (/^\d+$/.test(s)) return Number(s);
+    return s.split(/\s+e\s+/).reduce(function (a, w) { return a + (DIT_PAL[w.trim()] || 0); }, 0);
+  }
+
+  function ditDinheiro(s) {
+    s = String(s).trim();
+    var mil = /^(\d+(?:[.,]\d+)?)?\s*mil(?:\s+e\s+(\d+))?$/.exec(s);
+    if (mil) return Math.round((mil[1] ? parseFloat(mil[1].replace(",", ".")) : 1) * 1000 + (mil[2] ? Number(mil[2]) : 0));
+    if (/,\d{1,2}$/.test(s)) s = s.replace(/\./g, "").replace(",", ".");   // 1.200,50
+    else s = s.replace(/[.,](?=\d{3}(?!\d))/g, "");                        // 1.200 · 1,200
+    return Number(s) || 0;
+  }
+
+  function ditIso(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+
+  function ditTitulo(s) {
+    var minus = { de: 1, da: 1, do: 1, das: 1, dos: 1, e: 1, em: 1 };
+    var maius = { mg: 1, sp: 1, rj: 1, es: 1, ba: 1, br: 1 };
+    return s.split(/\s+/).filter(Boolean).map(function (w, i) {
+      var k = ditNorm(w).replace(/[^a-z0-9]/g, "");
+      if (maius[k]) return w.toUpperCase();
+      if (i > 0 && minus[k]) return w.toLowerCase();
+      if (/^\d/.test(w)) return w;
+      if (w.length >= 2 && w.length <= 5 && w === w.toUpperCase() && /[A-Z]/.test(w)) return w;
+      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    }).join(" ");
+  }
+
+  function ditLimpa(s) {
+    return s.replace(/^[\s,;:.\-–—]+|[\s,;:\-–—]+$/g, "").replace(/\s+/g, " ");
+  }
+
+  function interpretar(texto, ctx) {
+    var orig = String(texto || "");
+    var n = ditNorm(orig);
+    var hoje = new Date(ctx.hoje.getFullYear(), ctx.hoje.getMonth(), ctx.hoje.getDate());
+    var r = { hora: "", dur: 0, maquinas: 0, mat: 0, matCusto: 0, cliente: "", tel: "", endereco: "", origem: {} };
+
+    function tira(a, b) { n = n.slice(0, a) + new Array(b - a + 1).join("") + n.slice(b); }
+    function pega(rx, fn) {
+      rx.lastIndex = 0;
+      var m;
+      while ((m = rx.exec(n))) {
+        if (!m[0]) { rx.lastIndex++; continue; }
+        if (fn(m) !== false) { tira(m.index, m.index + m[0].length); return m; }
+      }
+      return null;
+    }
+    function rx(s) { return new RegExp(s, "g"); }
+    function soma(dias) { var d = new Date(hoje); d.setDate(d.getDate() + dias); return d; }
+
+    // 1. telefone com palavra-chave ("telefone 31 9 9988 7766") — antes de dinheiro e de hora
+    pega(rx("\\b(?:telefone|fone|celular|whatsapp|whats|zap|numero|contato)\\b(?:\\s*(?:e|dele|dela|do cliente|:))*\\s*((?:\\+?55[\\s.-]*)?\\(?\\d[\\d\\s().-]{6,18}\\d)"), function (m) {
+      var d = m[1].replace(/\D/g, "");
+      if ((d.length === 12 || d.length === 13) && d.slice(0, 2) === "55") d = d.slice(2);
+      if (d.length === 8 || d.length === 9) d = "31" + d;       // sem DDD: é da região dele
+      if (d.length !== 10 && d.length !== 11) return false;
+      r.tel = d;
+    });
+
+    // 2. cliente que já está na carteira — antes de tudo que come palavras soltas
+    var conhecidos = (ctx.carteira || []).slice().sort(function (a, b) { return b.nome.length - a.nome.length; });
+    for (var ci = 0; ci < conhecidos.length && !r.cliente; ci++) {
+      var ck = ditNorm(conhecidos[ci].nome).trim();
+      if (ck.length < 3) continue;
+      var ckRx = ck.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
+      if (pega(rx("\\b" + ckRx + "\\b"), function () {})) {
+        r.cliente = conhecidos[ci].nome;
+        r.conhecido = conhecidos[ci];
+      }
+    }
+
+    // 3. valores: custo antes de material ("custo do material 180" contém "material 180"),
+    //    e material antes de mão de obra ("mão de obra e 300 de material" não pode dar mão de obra 300).
+    //    Cada rótulo aceita o número antes ou depois: "material 300" e "300 de material".
+    var PRE = "(?:r\\$\\s*)?" + DIT_MON + DIT_MOEDA + "\\s+(?:de|do|da|no|na|em|pra|pro)\\s+";
+    pega(rx("\\b(?:custo(?:\\s+d[oe]\\s+material)?|custou|paguei|gastei)\\s*(?:de|foi|:|e)?\\s*(?:r\\$\\s*)?" + DIT_MON + DIT_MOEDA + "(?:\\s*(?:n[oa]|de|em)\\s+material)?"), function (m) {
+      r.matCusto = ditDinheiro(m[1]);
+    });
+    if (!r.matCusto) pega(rx(PRE + "custo\\b(?:\\s+d[oe]\\s+material)?"), function (m) { r.matCusto = ditDinheiro(m[1]); });
+    pega(rx(PRE + "material\\b"), function (m) { r.mat = ditDinheiro(m[1]); });
+    if (!r.mat) pega(rx("\\bmaterial(?:\\s+cobrado)?\\s*(?:de|fica|e|:|sai|por)?\\s*(?:r\\$\\s*)?" + DIT_MON + DIT_MOEDA), function (m) {
+      r.mat = ditDinheiro(m[1]);
+    });
+    pega(rx(PRE + "mao de obra\\b"), function (m) { r.valor = ditDinheiro(m[1]); });
+    if (r.valor == null) pega(rx("\\bmao de obra\\s*(?:de|fica|e|:|sai|por)?\\s*(?:r\\$\\s*)?" + DIT_MON + DIT_MOEDA + DIT_CADA), function (m) {
+      r.valor = ditDinheiro(m[1]); r.valorCada = !!m[2];
+    });
+    if (r.valor == null) pega(rx("\\b(?:valor|cobrar|cobra|cobro|cobrei|cobrando|vou cobrar|preco|total|fica|ficou|sai por|fechado em|fechei em|fechamos em)\\s*(?:de|em|por|:)?\\s*(?:r\\$\\s*)?" + DIT_MON + DIT_MOEDA + DIT_CADA), function (m) {
+      r.valor = ditDinheiro(m[1]); r.valorCada = !!m[2];
+    });
+    if (r.valor == null) pega(rx("(?:r\\$\\s*" + DIT_MON + DIT_MOEDA + "|" + DIT_MON + "\\s*(?:reais|real|conto|contos|pila)\\b)" + DIT_CADA), function (m) {
+      r.valor = ditDinheiro(m[1] || m[2]); r.valorCada = !!m[3];
+    });
+    if (r.valor == null) pega(rx(DIT_MON + "\\s*(?:cada(?: uma| um)?|por (?:maquina|aparelho|unidade|equipamento))"), function (m) {
+      r.valor = ditDinheiro(m[1]); r.valorCada = true;
+    });
+
+    // 4. máquinas — antes da hora, senão "limpar as 4 máquinas" vira 16h
+    pega(rx("\\b(?:de\\s+)?(" + DIT_NUM + ")\\s*(?:maquinas?|aparelhos?|splits?|equipamentos?|evaporadoras?|condensadoras?|unidades?|ar(?:es)?(?:[\\s-]+condicionados?)?)\\b"), function (m) {
+      var q = ditNum(m[1]);
+      if (!q) return false;
+      r.maquinas = q;
+    });
+
+    // 5. duração — antes da hora, senão "por 3 horas" vira 15h
+    pega(rx("\\b(?:durante|leva(?:r)?|vai levar|demora(?:r)?|duracao(?: de)?|por)\\s+(" + DIT_NUM + ")\\s*(?:h|hs|horas?)\\b(?:\\s+e\\s+(meia|\\d{1,2})(?:\\s*min(?:utos)?)?)?"), function (m) {
+      r.dur = ditNum(m[1]) * 60 + (m[2] === "meia" ? 30 : Number(m[2] || 0));
+    });
+    if (!r.dur) pega(rx("(" + DIT_NUM + ")\\s*(?:h|hs|horas?)(?:\\s+e\\s+(meia))?\\s+de\\s+(?:servico|trabalho)\\b"), function (m) {
+      r.dur = ditNum(m[1]) * 60 + (m[2] ? 30 : 0);
+    });
+    if (!r.dur) pega(rx("\\b(?:durante|leva(?:r)?|vai levar|demora(?:r)?|duracao(?: de)?|por)\\s+(\\d{1,3})\\s*min(?:utos)?\\b"), function (m) {
+      r.dur = Number(m[1]);
+    });
+    if (!r.dur) pega(rx("\\b(?:o\\s+)?dia\\s+(?:todo|inteiro)\\b|\\bmeio\\s+periodo\\b|\\bmeia\\s+hora\\b"), function (m) {
+      r.dur = /meia hora/.test(m[0]) ? 30 : /meio/.test(m[0]) ? 240 : 480;
+    });
+    if (r.dur) r.dur = Math.min(720, Math.max(15, Math.round(r.dur / 15) * 15));
+
+    // 6. data — do mais específico pro mais solto
+    var data = null;
+    pega(rx("\\bdepois de amanha\\b"), function () { data = soma(2); });
+    if (!data) pega(rx("\\bamanha\\b"), function () { data = soma(1); });
+    if (!data) pega(rx("\\bhoje\\b"), function () { data = soma(0); });
+    if (!data) pega(rx("\\b(?:daqui a|daqui|em)\\s+(" + DIT_NUM + ")\\s+dias?\\b"), function (m) { data = soma(ditNum(m[1])); });
+    if (!data) pega(rx("\\b(?:(?:no|pro|para o|pra)\\s+)?(?:dia\\s+)?(" + DIT_NUM + "|primeiro)\\s*(?:/|-|de\\s+)(\\d{1,2}|" + DIT_MESES.join("|") + ")(?:\\s*(?:/|-|de\\s+)(\\d{4}|\\d{2}))?\\b"), function (m) {
+      var dia = ditNum(m[1]);
+      var mes = /^\d+$/.test(m[2]) ? Number(m[2]) - 1 : DIT_MESES.indexOf(m[2]);
+      if (!dia || dia > 31 || mes < 0 || mes > 11) return false;
+      var ano = m[3] ? Number(m[3].length === 2 ? "20" + m[3] : m[3]) : hoje.getFullYear();
+      var d = new Date(ano, mes, dia);
+      if (d.getMonth() !== mes) return false;
+      if (!m[3] && d < hoje) d = new Date(ano + 1, mes, dia);
+      data = d;
+    });
+    if (!data) pega(rx("\\b(?:(?:no|pro|para o|pra)\\s+)?dia\\s+(" + DIT_NUM + "|primeiro)\\b"), function (m) {
+      var dia = ditNum(m[1]);
+      if (!dia || dia > 31) return false;
+      for (var k = 0; k < 3; k++) {
+        var d = new Date(hoje.getFullYear(), hoje.getMonth() + k, dia);
+        if (d.getDate() === dia && d >= hoje) { data = d; return; }
+      }
+      return false;
+    });
+    if (!data) pega(rx("\\b(?:(?:na|no|nesta|neste|nessa|nesse|esta|este|essa|esse|proxima|proximo|pra|pro|para)\\s+)?(" + DIT_SEMANA.join("|") + ")(?:[\\s-]*feira)?(?:\\s+que\\s+vem)?\\b"), function (m) {
+      var alvo = DIT_SEMANA.indexOf(m[1]);
+      var falta = (alvo - hoje.getDay() + 7) % 7 || 7;   // sempre pra frente: "sexta" dita na sexta é a próxima
+      data = soma(falta);
+    });
+    if (!data) pega(rx("\\b(?:na\\s+)?(?:proxima\\s+semana|semana\\s+que\\s+vem)\\b"), function () { data = soma(7); });
+    if (data) { r.data = ditIso(data); r.origem.data = "dito"; }
+    else { r.data = ctx.diaAberto; r.origem.data = "aberto"; }
+
+    // 7. período do dia e hora
+    var periodo = "";
+    pega(rx("\\b(?:de|da|pela|na parte da|a|no fim da|no final da|fim da|final da|bem)\\s+(manha|tarde|noite|cedo)\\b|\\bcedo\\b"), function (m) {
+      periodo = m[1] || "cedo";
+      if (/fim|final/.test(m[0]) && periodo === "tarde") periodo = "fimtarde";
+    });
+    var hh = null, mm = 0;
+    function hm(hs, m1, m2, cauda) {
+      hh = ditNum(hs);
+      mm = Number(m1 || m2 || 0);
+      if (cauda) mm = cauda === "meia" ? 30 : cauda === "quinze" ? 15 : Number(cauda);
+    }
+    var CAUDA = "(?:\\s*(?:h|hs|horas?)\\s*(\\d{2})?|\\s*:\\s*(\\d{2}))?(?:\\s+e\\s+(meia|quinze|\\d{1,2})(?:\\s*min(?:utos)?)?)?(?:\\s*(?:h|hs|horas?)\\b)?";
+    pega(rx("\\bmeio[\\s-]?dia(?:\\s+e\\s+(meia|quinze|\\d{1,2}))?\\b"), function (m) { hm("12", 0, 0, m[1]); });
+    if (hh == null) pega(rx("\\b(?:as|umas|pelas|la pelas|por volta das|a partir das|depois das|antes das)\\s+(" + DIT_NUM + ")" + CAUDA), function (m) {
+      hm(m[1], m[2], m[3], m[4]);
+    });
+    if (hh == null) pega(rx("\\ba\\s+(uma|1)\\b" + CAUDA), function (m) { hm("1", m[2], m[3], m[4]); });
+    if (hh == null) pega(rx("(?<!\\d)(\\d{1,2})\\s*(?:h|hs|horas?)\\s*(\\d{2})?(?!\\d)(?:\\s+e\\s+(meia|quinze|\\d{1,2})(?:\\s*min(?:utos)?)?)?"), function (m) {
+      hm(m[1], m[2], 0, m[3]);
+    });
+    if (hh == null) pega(rx("(?<!\\d)(\\d{1,2}):(\\d{2})(?!\\d)"), function (m) { hm(m[1], m[2]); });
+    if (hh == null) pega(rx("(" + DIT_NUM + ")\\s+e\\s+(meia|quinze)\\b"), function (m) { hm(m[1], 0, 0, m[2]); });
+
+    if (hh != null) {
+      if ((periodo === "tarde" || periodo === "fimtarde" || periodo === "noite") && hh < 12) hh += 12;
+      else if (!periodo && hh >= 1 && hh <= 6) hh += 12;    // ninguém marca limpeza às 3 da manhã
+      if (hh > 23 || mm > 59) hh = null;
+    }
+    if (hh != null) { r.hora = String(hh).padStart(2, "0") + ":" + String(mm).padStart(2, "0"); r.origem.hora = "dito"; }
+    else if (periodo) {
+      r.hora = { manha: "08:00", cedo: "07:00", tarde: "14:00", fimtarde: "17:00", noite: "19:00" }[periodo];
+      r.origem.hora = "periodo";
+    }
+
+    // 8. telefone sem palavra-chave (só depois da hora, pra "às 8" não virar DDD)
+    if (!r.tel) pega(rx("(?<!\\d)(\\(?\\d{2}\\)?[\\s.-]*9?[\\s.-]*\\d{4}[\\s.-]*\\d{4})(?!\\d)"), function (m) {
+      var d = m[1].replace(/\D/g, "");
+      if (d.length !== 10 && d.length !== 11) return false;
+      r.tel = d;
+    });
+
+    // 9. tipo de serviço e orçamento
+    pega(rx("\\b(?:orcamentos?|orcar|cotac(?:ao|oes)|visita tecnica|avaliac(?:ao|oes)|avaliar|levantamento)\\b(?:\\s+(?:de|do|da|pra|para))?"), function () {
+      r.orcamento = true;
+    });
+    pega(rx("\\b(?:ja (?:foi |esta |ta )?pag[oa]|ja pagou|ja recebi|pagamento feito)\\b"), function () { r.pago = true; });
+
+    var temTipo = {};
+    (ctx.tipos || []).forEach(function (t) { temTipo[t.id] = true; });
+    var SUF = "(?:\\s+(?:de|do|da|dos|das|no|na|nos|nas)\\s+(?:ar(?:es)?(?:[\\s-]+condicionados?)?|splits?|aparelhos?|placas?|paineis))?";
+    var OBJ_ELETRICO = "(?:tomadas?|disjuntor(?:es)?|chuveiro|iluminacao|luminarias?|lampadas?|quadro(?: de (?:luz|energia|distribuicao))?|padrao|fiacao|interruptor(?:es)?)";
+    /* [tipo, regex, nível, fraca]
+       nível 1 é inequívoco e ganha sempre; no nível 2 ganha o que foi dito primeiro.
+       "fraca" é palavra que também aparece em nome de cliente — Condomínio Solar, Elétrica Silva —
+       e só vale se não estiver colada num nome. */
+    var CHAVES = [
+      ["pmoc", "\\bpmoc\\b", 1],
+      ["solar", "\\b(?:energia solar|fotovoltaic[oa]s?|placas? solar(?:es)?|paineis solares|painel solar|usina solar|sistema solar|instalac(?:ao|oes) de (?:placas|paineis))\\b", 1],
+      ["eletrica", "\\b(?:(?:instalac(?:ao|oes)|troca|trocar|conserto|consertar|instalar|colocar)\\s+(?:(?:de|do|da|dos|das|o|a|um|uma)\\s+)?" + OBJ_ELETRICO + "|instalacao eletrica|servicos? eletricos?|parte eletrica)\\b", 1],
+      ["eletrica", "\\b(?:eletricista|" + OBJ_ELETRICO + ")\\b", 2],
+      ["instal", "\\b(?:instalac(?:ao|oes)|instalar|instala|montagem|conserto|consertar|reparo|recarga|carga de gas|vazamento)\\b", 2],
+      ["limpeza", "\\b(?:limpeza|limpar|higienizac(?:ao|oes)|higienizar)\\b", 2],
+      ["pmoc", "\\b(?:manutenc(?:ao|oes)(?: preventivas?)?|preventiva)\\b", 2],
+      ["solar", "\\b(?:solar|placas?|paineis|painel|usina)\\b", 2, true],
+      ["eletrica", "\\beletric[ao]s?\\b", 2, true],
+      ["pmoc", "\\bcontrato\\b", 2, true]
+    ];
+    // tipos que ele mesmo criou entram pelo nome, e nome inteiro é inequívoco
+    (ctx.tipos || []).forEach(function (t) {
+      var builtin = { pmoc: 1, solar: 1, eletrica: 1, instal: 1, limpeza: 1, outro: 1 };
+      if (builtin[t.id]) return;
+      var k = ditNorm(t.nome).trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
+      if (k.length >= 3) CHAVES.unshift([t.id, "\\b" + k + "\\b", 1]);
+    });
+    var NEGOCIO = {};
+    ("condominio edificio edf ed residencial predio hotel pousada loja mercado supermercado escola colegio " +
+     "clinica consultorio posto restaurante padaria fazenda sitio bar casa empresa academia farmacia igreja " +
+     "oficina shopping galeria comercial industria transportadora distribuidora auto").split(" ").forEach(function (w) { NEGOCIO[w] = 1; });
+    function pareceNome(pos) {
+      var antes = n.slice(0, pos).replace(/\s+$/, "");
+      var ult = (/(\S+)$/.exec(antes) || [])[1] || "";
+      if (NEGOCIO[ult]) return true;
+      var c = orig.charAt(pos);
+      return antes.length > 0 && !/[.!?]$/.test(antes) && c !== c.toLowerCase();   // maiúscula no meio da frase
+    }
+    var cands = [];
+    CHAVES.forEach(function (c) {
+      var re = rx("(?:\\bservicos?\\s+de\\s+)?" + c[1] + SUF), m;
+      while ((m = re.exec(n))) {
+        if (c[3] && pareceNome(m.index)) continue;
+        cands.push({ id: c[0], nivel: c[2], a: m.index, b: m.index + m[0].length, ok: !!temTipo[c[0]] });
+        break;
+      }
+    });
+    var vence = cands.filter(function (c) { return c.ok; })
+      .sort(function (x, y) { return x.nivel - y.nivel || x.a - y.a || (y.b - y.a) - (x.b - x.a); })[0];
+    if (vence) { r.tipo = vence.id; r.origem.tipo = "dito"; tira(vence.a, vence.b); }
+    // o resto das palavras de serviço sai da frase pra não virar nome de cliente — menos as fracas
+    CHAVES.forEach(function (c) {
+      if (c[3]) return;
+      while (pega(rx("(?:\\bservicos?\\s+de\\s+)?" + c[1] + SUF), function () {})) { /* apaga todas */ }
+    });
+
+    // 10. endereço: da palavra "rua/avenida/..." até o próximo campo já achado
+    pega(rx("\\b(?:rua|r\\.|avenida|av\\.?|travessa|tv\\.?|praca|alameda|rodovia|estrada|beco|largo|bairro)(?=\\s)"), function (m) {
+      var ini = m.index;
+      var resto = n.slice(ini);
+      var fim = resto.search(new RegExp("\\u0001|[;!?]|(?<=[a-z0-9]{3})\\.(?=\\s|$)|,?\\s+(?:para|pra|pro|cliente|com o|com a|telefone|fone|zap|whats)\\b"));
+      var trecho = fim < 0 ? resto : resto.slice(0, fim);
+      var bruto = ditLimpa(orig.slice(ini, ini + trecho.length)).replace(/\s+(?:e|em|no|na)$/i, "");
+      if (bruto.length < 5) return false;
+      bruto = bruto.replace(/\s+em\s+/gi, ", ");
+      // cidade colada no fim ("... 300 Ipatinga") ganha vírgula; rua com nome de cidade no meio fica como está
+      DIT_CIDADES.forEach(function (cid) {
+        var nb = ditNorm(bruto), nc = ditNorm(cid);
+        if (nb.length > nc.length + 1 && nb.slice(-nc.length) === nc && /[\s,]/.test(nb[nb.length - nc.length - 1])) {
+          bruto = ditLimpa(bruto.slice(0, bruto.length - nc.length)) + ", " + cid;
+        }
+      });
+      r.endereco = ditTitulo(bruto);
+      tira(ini, ini + trecho.length);
+      return false;   // já apaguei o trecho certo; o pega() só apagaria a palavra "rua"
+    });
+
+    // 11. cidade da região
+    DIT_CIDADES.forEach(function (cid) {
+      var k = ditNorm(cid).replace(/\s+/g, "\\s+");
+      var alt = cid === "Coronel Fabriciano" ? "(?:coronel\\s+|cel\\.?\\s+)?fabriciano" : k;
+      pega(rx("\\b(?:(?:em|de|no|na)\\s+)?(?:" + alt + ")\\b"), function () {
+        if (ditNorm(r.endereco).indexOf(ditNorm(cid)) >= 0) return;
+        r.endereco = r.endereco ? r.endereco + ", " + cid : cid;
+      });
+    });
+
+    // 12. cliente por marcador: "na Clínica Vida", "para o Junior", "cliente Padaria Trigo"
+    if (!r.cliente) pega(rx("\\b(?:cliente|para (?:o|a|os|as)|pra (?:o|a)|na casa (?:do|da|de)|pro|pra|para|no|na|com (?:o|a)" +
+        "|d[ao](?=\\s+(?:dona|seu|senhor|senhora|sr|sra|doutor|doutora|dr|dra)\\b))\\s+"), function (m) {
+      var ini = m.index + m[0].length;
+      if (n[ini] === "") return false;
+      var resto = n.slice(ini);
+      var fim = resto.search(/|[,;.!?]|\s(?:em|as|para|pra|pro|que|porque|pois|telefone|fone|zap)\s/);
+      var trecho = (fim < 0 ? resto : resto.slice(0, fim)).replace(/\s+$/, "");
+      var palavras = trecho.split(/\s+/).filter(Boolean);
+      if (!palavras.length || DIT_NAO_NOME[palavras[0]] || !/[a-z]{2}/.test(trecho)) return false;
+      var nome = ditLimpa(orig.slice(ini, ini + trecho.length)).replace(/^(?:o|a|os|as)\s+/i, "");
+      var ws = nome.split(/\s+/);
+      while (ws.length && DIT_FILLER[ditNorm(ws[ws.length - 1])]) ws.pop();
+      if (!ws.length) return false;
+      r.cliente = ditTitulo(ws.slice(0, 5).join(" "));
+      r.origem.cliente = "dito";
+      tira(m.index, ini + trecho.length);
+      return false;
+    });
+
+    // 13. cliente pelo que sobrou da frase ("Mardel às 7 e meia, instalação")
+    if (!r.cliente) {
+      // pedaços entre campos já achados; número e palavra de equipamento também cortam ("9 mil btus")
+      var CORTA = { mil: 1, btus: 1, btu: 1, split: 1, splits: 1, maquina: 1, maquinas: 1, aparelho: 1, aparelhos: 1 };
+      var grupos = [], atual = [], tr = /[^\s]+|+/g, t2;
+      while ((t2 = tr.exec(n))) {
+        var w = t2[0].replace(/^[,;.!?]+|[,;.!?]+$/g, "");
+        var corta = t2[0][0] === "" || /^\d+$/.test(w) || CORTA[w] || !w;
+        if (corta) { if (atual.length) grupos.push(atual); atual = []; }
+        else {
+          var off = t2[0].indexOf(w);
+          atual.push({ w: w, a: t2.index + off, b: t2.index + off + w.length });
+          if (/[,;.!?]$/.test(t2[0])) { grupos.push(atual); atual = []; }
+        }
+      }
+      if (atual.length) grupos.push(atual);
+      var melhor = null, melhorN = 0;
+      grupos.forEach(function (toks) {
+        while (toks.length && DIT_FILLER[toks[0].w]) toks.shift();
+        while (toks.length && DIT_FILLER[toks[toks.length - 1].w]) toks.pop();
+        var uteis = toks.filter(function (t) { return !DIT_FILLER[t.w] && /[a-z]{3}/.test(t.w); }).length;
+        if (uteis > melhorN && toks.length <= 6) { melhorN = uteis; melhor = toks; }
+      });
+      if (melhor && melhor.length) {
+        var bruto2 = orig.slice(melhor[0].a, melhor[melhor.length - 1].b);
+        r.cliente = ditTitulo(ditLimpa(bruto2).split(/\s+/).slice(0, 5).join(" "));
+        r.origem.cliente = "sobra";
+      }
+    }
+
+    // 14. cliente da carteira escrito um pouco diferente ("clinica vida" x "Clínica Vida - Centro")
+    if (r.cliente && !r.conhecido) {
+      var k2 = ditNorm(r.cliente).trim(), pts = 0;
+      (ctx.carteira || []).forEach(function (c) {
+        var ck2 = ditNorm(c.nome).trim(), p = 0;
+        if (ck2 === k2) p = 100;
+        else if (k2.length >= 4 && ck2.indexOf(k2) >= 0) p = 50 + k2.length;
+        else if (ck2.length >= 4 && k2.indexOf(ck2) >= 0) p = 40 + ck2.length;
+        if (p > pts) { pts = p; r.conhecido = c; }
+      });
+      if (r.conhecido) r.cliente = r.conhecido.nome;
+    }
+
+    // 15. o que não foi dito vem da última visita desse cliente
+    if (r.conhecido) {
+      r.origem.cliente = "carteira";
+      var ult = (r.conhecido.itens || []).filter(function (s) { return s.status !== "cancelado" && !s.orcamento; })[0] ||
+                (r.conhecido.itens || [])[0];
+      if (!r.tel && r.conhecido.tel) { r.tel = String(r.conhecido.tel).replace(/\D/g, ""); r.origem.tel = "carteira"; }
+      if (!r.endereco && r.conhecido.end) { r.endereco = r.conhecido.end; r.origem.endereco = "carteira"; }
+      if (ult) {
+        if (!r.tipo && temTipo[ult.tipo]) { r.tipo = ult.tipo; r.origem.tipo = "carteira"; }
+        if (!r.maquinas && ult.tipo === r.tipo && ult.maquinas) { r.maquinas = ult.maquinas; r.origem.maquinas = "carteira"; }
+        if (!r.dur && ult.tipo === r.tipo && ult.dur) r.dur = ult.dur;
+      }
+    }
+
+    r.falta = [];
+    if (!r.cliente) r.falta.push("cliente");
+    if (!r.hora) r.falta.push("hora");
+    return r;
+  }
+  // ==== fim ditado ====
 
   // ---------- estado ----------
   function padrao() {
@@ -982,7 +1462,7 @@
       : "";
 
     if (!lista.length) {
-      $("dayList").innerHTML = '<div class="empty">Nenhum serviço nesse dia.<br>Toque em <b>+ Serviço</b> para marcar.</div>';
+      $("dayList").innerHTML = '<div class="empty">Nenhum serviço nesse dia.<br>Toque em <b>+ Serviço</b> para marcar, ou no microfone para ditar.</div>';
       return;
     }
 
@@ -1494,9 +1974,204 @@
 
   function fecharModal() {
     desarmar();
+    pararOuvir();
     $("modal").classList.remove("open");
     rascunho = null;
     ui.editando = null;
+  }
+
+  // ---------- ditado ----------
+  /* O reconhecimento de voz é o do próprio Chrome (precisa de internet, não precisa de chave).
+     A frase vira serviço pelo interpretar(), que roda aqui mesmo no celular. */
+  var Reconhece = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var rec = null, ouvindo = false, ditBase = "", ultimoDitado = null;
+
+  function servicoDoDitado(r, texto) {
+    var s = novoServico(r.data);
+    s.hora = r.hora || "";        // hora não entendida fica em branco na ficha — nada de 08:00 fingindo que entendeu
+    if (r.dur) s.dur = r.dur;
+    if (r.tipo) s.tipo = r.tipo;
+    var t = tipoDe(s.tipo);
+    s.orcamento = !!r.orcamento;
+    s.pago = !!r.pago && !r.orcamento;
+    s.maquinas = r.maquinas || (t.porMaquina ? 1 : 0);
+    if (r.valor != null) s.mao = r.valorCada ? r.valor * Math.max(1, s.maquinas) : r.valor;
+    else s.mao = t.porMaquina ? s.maquinas * precoMaq(t) : 0;
+    s.mat = r.mat || 0;
+    s.matCusto = r.matCusto || 0;
+    s.valor = s.mao + s.mat;
+    s.cliente = r.cliente || "";
+    s.tel = r.tel ? telFmt(r.tel) : "";
+    s.endereco = r.endereco || "";
+    s.obs = "Ditado: " + String(texto).trim();   // a frase original fica guardada, pra conferir depois
+    return s;
+  }
+
+  function abrirDitado() {
+    ultimoDitado = null;
+    $("panel").innerHTML =
+      '<h3 id="mTitulo">Ditar serviço</h3>' +
+      '<p class="sub">Fale do jeito que falaria no WhatsApp: quando, o quê, pra quem e onde.</p>' +
+      '<div class="dit-mic">' +
+        '<button class="mic-big" id="micBig" aria-label="Começar a ouvir"' + (Reconhece ? "" : " hidden") + ">" +
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>' +
+        "</button>" +
+        '<div class="mic-st" id="micSt"></div>' +
+      "</div>" +
+      '<div class="fld"><textarea id="ditTxt" class="dit-txt" spellcheck="false" ' +
+        'placeholder="amanhã às 8, limpeza de 4 máquinas na Clínica Vida"></textarea></div>' +
+      '<div id="ditPrev"></div>' +
+      '<div class="actions" id="ditAcoes"></div>';
+    $("modal").classList.add("open");
+    estadoMic();
+    atualizarDitado();
+  }
+
+  function atualizarDitado() {
+    var el = $("ditTxt");
+    if (!el) return;
+    var texto = el.value.trim();
+    var prev = $("ditPrev"), acoes = $("ditAcoes");
+
+    if (!texto) {
+      ultimoDitado = null;
+      prev.innerHTML = '<div class="dit-ex"><span class="eyebrow neutral">Por exemplo</span>' +
+        "<i>amanhã às 8 limpeza de 4 máquinas na Clínica Vida</i>" +
+        "<i>sexta às duas da tarde orçamento de fotovoltaico pro Junior em Nova Era</i>" +
+        "<i>dia 25 às 7 e meia instalação no Mardel, mão de obra 800, material 300</i></div>";
+      acoes.innerHTML = '<button class="btn btn-ghost full" id="fCancel">Fechar</button>';
+      return;
+    }
+
+    var r;
+    try { r = interpretar(texto, { hoje: new Date(), diaAberto: ui.dia, tipos: store.tipos, carteira: carteira() }); }
+    catch (err) {
+      prev.innerHTML = '<div class="dit-prev"><span class="eyebrow">Não consegui ler a frase</span>' +
+        '<p class="note" style="margin-top:6px">Abra na ficha e complete na mão — o que você falou vai junto na observação.</p></div>';
+      acoes.innerHTML = '<button class="btn btn-primary full" id="ditFicha">Completar na ficha</button>';
+      ultimoDitado = { r: { falta: ["tudo"] }, s: (function () { var s = novoServico(ui.dia); s.obs = "Ditado: " + texto; return s; })() };
+      return;
+    }
+    var s = servicoDoDitado(r, texto);
+    ultimoDitado = { r: r, s: s };
+    var t = tipoDe(s.tipo), d = fromISO(s.data), o = r.origem;
+
+    function linha(rot, val, nota, falta) {
+      return "<dt>" + rot + "</dt><dd" + (falta ? ' class="falta"' : "") + ">" + val +
+        (nota ? " <small>" + nota + "</small>" : "") + "</dd>";
+    }
+    var servico = '<span class="chip"><i style="background:' + corVar(t) + '"></i>' + esc(t.nome) + "</span>" +
+      (s.orcamento ? ' <span class="chip orc">orçamento</span>' : "") +
+      (s.maquinas && t.porMaquina ? " · " + s.maquinas + " máq" : "");
+    var dinheiro = s.valor
+      ? "<b>" + brl(s.valor) + "</b>" + (s.mat ? " <small>" + brl(s.mao) + " mão de obra + " + brl(s.mat) + " material</small>" : "") +
+        (s.matCusto ? " <small>· custo " + brl(s.matCusto) + "</small>" : "")
+      : "—";
+
+    prev.innerHTML = '<div class="dit-prev"><span class="eyebrow">Entendi assim</span><dl>' +
+      linha("Dia", DIAS[d.getDay()] + ", " + curto(s.data).slice(0, 5), o.data === "aberto" ? "você não disse o dia — usei o que estava aberto" : "") +
+      (r.hora
+        ? linha("Hora", esc(s.hora) + " · " + durTxt(s.dur), o.hora === "periodo" ? "horário aproximado" : "")
+        : linha("Hora", "não entendi a hora", "", true)) +
+      linha("Serviço", servico, o.tipo === "carteira" ? "como na última visita" : (!o.tipo ? "você não disse — usei o primeiro tipo" : "")) +
+      (s.cliente
+        ? linha("Cliente", esc(s.cliente), o.cliente === "carteira" ? "já é seu cliente" : "cliente novo")
+        : linha("Cliente", "não entendi o nome", "", true)) +
+      linha("Onde", s.endereco ? esc(s.endereco) : "—", o.endereco === "carteira" ? "do cadastro" : "") +
+      linha("Telefone", s.tel ? esc(s.tel) : "—", o.tel === "carteira" ? "do cadastro" : "") +
+      linha(s.orcamento ? "Orçado" : "Valor", dinheiro, s.pago ? "já pago" : "") +
+      "</dl></div>";
+
+    acoes.innerHTML = r.falta.length
+      ? '<button class="btn btn-primary full" id="ditFicha">Completar na ficha</button>'
+      : '<button class="btn btn-ghost" id="ditFicha">Abrir na ficha</button>' +
+        '<button class="btn btn-primary" id="ditAgendar">Agendar</button>';
+  }
+
+  function agendarDitado() {
+    if (!ultimoDitado || ultimoDitado.r.falta.length) return;
+    pararOuvir();
+    var s = ultimoDitado.s;
+    store.servicos.push(s);
+    save();
+    ui.dia = s.data;
+    ui.mes = mesDe(s.data);
+    fecharModal();
+    irPara("agenda");
+    var d = fromISO(s.data);
+    toast("Agendado: " + DIAS[d.getDay()] + " " + curto(s.data).slice(0, 5) + " às " + s.hora + " · " + s.cliente);
+  }
+
+  function estadoMic() {
+    var b = $("micBig"), st = $("micSt");
+    if (!st) return;
+    if (!Reconhece) {
+      st.innerHTML = "<b>Este navegador não faz ditado aqui</b>Toque no campo abaixo e use o microfone do teclado.";
+      return;
+    }
+    if (b) {
+      b.classList.toggle("on", ouvindo);
+      b.setAttribute("aria-label", ouvindo ? "Parar de ouvir" : "Começar a ouvir");
+    }
+    if (st.getAttribute("data-erro") && !ouvindo) return;
+    var tem = $("ditTxt") && $("ditTxt").value.trim();
+    st.innerHTML = ouvindo
+      ? "<b>Ouvindo…</b>Pode falar. Quando você parar, eu preencho."
+      : tem
+        ? "<b>Toque pra continuar falando</b>Ou corrija o texto direto no campo."
+        : "<b>Toque e fale</b>Pode pausar e tocar de novo — continua de onde parou.";
+  }
+
+  function avisoMic(html) {
+    var st = $("micSt");
+    if (!st) return;
+    st.innerHTML = html;
+    st.setAttribute("data-erro", "1");
+  }
+
+  function comecarOuvir() {
+    if (!Reconhece || ouvindo) return;
+    var st = $("micSt");
+    if (st) st.removeAttribute("data-erro");
+    var el = $("ditTxt");
+    ditBase = el ? el.value.trim() : "";
+    try {
+      rec = new Reconhece();
+      rec.lang = "pt-BR";
+      rec.interimResults = true;
+      rec.continuous = false;
+      rec.maxAlternatives = 1;
+    } catch (err) {
+      avisoMic("<b>Não deu pra ligar o microfone</b>Toque no campo abaixo e use o microfone do teclado.");
+      return;
+    }
+    rec.onresult = function (ev) {
+      var fala = "";
+      for (var i = 0; i < ev.results.length; i++) fala += ev.results[i][0].transcript;
+      var campo = $("ditTxt");
+      if (!campo) return;
+      campo.value = (ditBase ? ditBase + " " : "") + fala.trim();
+      atualizarDitado();
+    };
+    rec.onerror = function (ev) {
+      var msg = {
+        "not-allowed": "<b>Microfone bloqueado</b>Toque no cadeado ao lado do endereço do site e libere o microfone.",
+        "service-not-allowed": "<b>Microfone bloqueado</b>Toque no cadeado ao lado do endereço do site e libere o microfone.",
+        "no-speech": "<b>Não ouvi nada</b>Toque no microfone e fale um pouco mais perto.",
+        "network": "<b>Sem internet</b>O ditado do Chrome precisa de internet. Dá pra digitar no campo abaixo.",
+        "audio-capture": "<b>Não achei o microfone</b>Veja se outro app está usando o microfone agora."
+      }[ev.error];
+      if (msg) avisoMic(msg);
+    };
+    rec.onend = function () { ouvindo = false; estadoMic(); };
+    try { rec.start(); ouvindo = true; }
+    catch (err) { ouvindo = false; }
+    estadoMic();
+  }
+
+  function pararOuvir() {
+    if (rec && ouvindo) { try { rec.stop(); } catch (err) { /* já parou */ } }
+    ouvindo = false;
   }
 
   // ---------- backup ----------
@@ -1622,8 +2297,25 @@
     abrirServico(novoServico(ui.dia));
   });
 
+  $("btnFalar").addEventListener("click", function () {
+    abrirDitado();
+    comecarOuvir();   // já liga o microfone: o toque no botão é o gesto que o navegador exige
+  });
+
   $("modal").addEventListener("click", function (e) {
     if (e.target === $("modal")) { fecharModal(); return; }
+
+    if (e.target.closest("#micBig")) {
+      if (ouvindo) pararOuvir(); else comecarOuvir();
+      estadoMic();
+      return;
+    }
+    if (e.target.closest("#ditAgendar")) { agendarDitado(); return; }
+    if (e.target.closest("#ditFicha")) {
+      pararOuvir();
+      abrirServico(ultimoDitado ? ultimoDitado.s : novoServico(ui.dia));
+      return;
+    }
 
     var t = e.target.closest("[data-tipo]");
     if (t && rascunho) {
@@ -1678,6 +2370,7 @@
     if (e.target.closest("#fSalvar")) {
       lerPanel();
       if (!rascunho.cliente) { toast("Falta o nome do cliente."); return; }
+      if (!rascunho.hora) { toast("Falta a hora do serviço."); return; }
       var s = rascunho;
       if (ui.editando) {
         store.servicos = store.servicos.map(function (x) { return x.id === s.id ? s : x; });
@@ -1767,6 +2460,9 @@
     }
     refrescarFolha();
   }
+  $("modal").addEventListener("input", function (e) {
+    if (e.target.id === "ditTxt") atualizarDitado();
+  });
   $("modal").addEventListener("input", aoDigitar);
   $("modal").addEventListener("change", aoDigitar);
 
