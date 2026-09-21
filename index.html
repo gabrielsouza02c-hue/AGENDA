@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- resizes-content: com o teclado aberto a tela encolhe, e a folha do ditado (com o botão Agendar) fica acima dele -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Agenda — serviços</title>
 <meta name="description" content="Agenda de serviços de campo">
 <meta name="mobile-web-app-capable" content="yes">
@@ -498,6 +499,11 @@
   .mic-big:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
   .mic-st { font-size: 12.5px; line-height: 1.45; color: var(--ink-2); min-width: 0; }
   .mic-st b { display: block; font-size: 14px; color: var(--ink); margin-bottom: 1px; }
+  .mic-st small { color: var(--ink-3); font-size: 11.5px; }
+  .mic-st .lnk {
+    margin-top: 6px; padding: 0; border: 0; background: none; cursor: pointer;
+    color: var(--accent); font: 600 12px/1.4 var(--sans); text-decoration: underline;
+  }
 
   .fld textarea.dit-txt { height: 96px; font: 500 15px/1.45 var(--sans); }
   .dit-ex { margin-top: 12px; display: grid; gap: 7px; }
@@ -688,6 +694,13 @@
           <div class="f wide">
             <label for="cfgDur">Duração padrão do serviço</label>
             <div class="fld"><select id="cfgDur"></select></div>
+          </div>
+          <div class="f wide">
+            <label for="cfgDitado">Ditado por voz</label>
+            <div class="fld"><select id="cfgDitado">
+              <option value="teclado">Microfone do teclado</option>
+              <option value="app">Microfone do app</option>
+            </select></div>
           </div>
         </div>
       </div>
@@ -1713,6 +1726,7 @@
     $("cfgPreco").value = store.cfg.preco;
     $("cfgTeto").value = store.cfg.teto;
     $("cfgDur").innerHTML = optsDur(store.cfg.dur);
+    $("cfgDitado").value = store.cfg.ditado || "teclado";
     renderGcal();
 
     $("tipoList").innerHTML = store.tipos.map(function (t, i) {
@@ -2031,13 +2045,19 @@
     return s;
   }
 
+  /* Dois jeitos de ditar. "teclado": a caixa já abre focada e ele usa o microfone do teclado
+     (Gboard) — funciona em qualquer celular. "app": reconhecimento de voz do Chrome, que em alguns
+     aparelhos não liga mesmo com permissão. Teclado é o padrão porque é o que funciona no dele. */
+  var semFalaSeguidas = 0;
+  function modoTeclado() { return !Reconhece || (store.cfg.ditado || "teclado") === "teclado"; }
+
   function abrirDitado() {
     ultimoDitado = null;
     $("panel").innerHTML =
       '<h3 id="mTitulo">Ditar serviço</h3>' +
       '<p class="sub">Fale do jeito que falaria no WhatsApp: quando, o quê, pra quem e onde.</p>' +
       '<div class="dit-mic">' +
-        '<button class="mic-big" id="micBig" aria-label="Começar a ouvir"' + (Reconhece ? "" : " hidden") + ">" +
+        '<button class="mic-big" id="micBig" aria-label="Começar a ouvir"' + (modoTeclado() ? " hidden" : "") + ">" +
           '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>' +
         "</button>" +
         '<div class="mic-st" id="micSt"></div>' +
@@ -2072,7 +2092,8 @@
     catch (err) {
       prev.innerHTML = '<div class="dit-prev"><span class="eyebrow">Não consegui ler a frase</span>' +
         '<p class="note" style="margin-top:6px">Abra na ficha e complete na mão — o que você falou vai junto na observação.</p></div>';
-      acoes.innerHTML = '<button class="btn btn-primary full" id="ditFicha">Completar na ficha</button>';
+      acoes.innerHTML = '<button class="btn btn-ghost" id="fCancel">Fechar</button>' +
+        '<button class="btn btn-primary" id="ditFicha">Completar na ficha</button>';
       ultimoDitado = { r: { falta: ["tudo"] }, s: (function () { var s = novoServico(ui.dia); s.obs = "Ditado: " + texto; return s; })() };
       return;
     }
@@ -2106,10 +2127,13 @@
       linha(s.orcamento ? "Orçado" : "Valor", dinheiro, s.pago ? "já pago" : "") +
       "</dl></div>";
 
+    // sempre tem como fechar: o Voltar do Android sai da página, não fecha a folha
     acoes.innerHTML = r.falta.length
-      ? '<button class="btn btn-primary full" id="ditFicha">Completar na ficha</button>'
+      ? '<button class="btn btn-ghost" id="fCancel">Fechar</button>' +
+        '<button class="btn btn-primary" id="ditFicha">Completar na ficha</button>'
       : '<button class="btn btn-ghost" id="ditFicha">Abrir na ficha</button>' +
-        '<button class="btn btn-primary" id="ditAgendar">Agendar</button>';
+        '<button class="btn btn-primary" id="ditAgendar">Agendar</button>' +
+        '<button class="btn btn-ghost btn-sm full" id="fCancel">Fechar sem agendar</button>';
   }
 
   function agendarDitado() {
@@ -2130,15 +2154,19 @@
   function estadoMic() {
     var b = $("micBig"), st = $("micSt");
     if (!st) return;
-    if (!Reconhece) {
-      st.innerHTML = "<b>Este navegador não faz ditado aqui</b>Toque no campo abaixo e use o microfone do teclado.";
-      return;
-    }
+    // o botão sempre reflete o estado real, mesmo quando há um aviso de erro na tela
     if (b) {
+      b.hidden = modoTeclado();
       b.classList.toggle("on", ouvindo);
       b.setAttribute("aria-label", ouvindo ? "Parar de ouvir" : "Começar a ouvir");
     }
     if (st.getAttribute("data-erro") && !ouvindo) return;
+    if (modoTeclado()) {
+      st.innerHTML = "<b>Toque no microfone do teclado e fale</b>" +
+        "O que você disser aparece aqui embaixo, e eu preencho na hora." +
+        (Reconhece ? '<br><button type="button" class="lnk" id="micApp">usar o microfone do app</button>' : "");
+      return;
+    }
     var tem = $("ditTxt") && $("ditTxt").value.trim();
     st.innerHTML = ouvindo
       ? "<b>Ouvindo…</b>Pode falar. Quando você parar, eu preencho."
@@ -2154,6 +2182,26 @@
     st.setAttribute("data-erro", "1");
   }
 
+  var MOTIVO_MIC = {
+    "not-allowed": "o Chrome não liberou o microfone pra este site",
+    "service-not-allowed": "o serviço de voz do Google não atendeu o Chrome",
+    "language-not-supported": "o reconhecimento em português não está instalado",
+    "bad-grammar": "erro interno do reconhecimento de voz",
+    "no-speech": "o microfone do app não captou som duas vezes seguidas"
+  };
+
+  // o microfone do app não funciona neste aparelho: passa pro teclado de vez e conta o porquê
+  function falhouMic(codigo) {
+    store.cfg.ditado = "teclado";
+    save();
+    semFalaSeguidas = 0;
+    var b = $("micBig");
+    if (b) { b.hidden = true; b.classList.remove("on"); }
+    avisoMic("<b>O microfone do app não funcionou neste celular</b>" +
+      "Toque no campo abaixo e use o microfone do teclado — daqui pra frente o botão já abre assim." +
+      '<br><small>Motivo: ' + esc(MOTIVO_MIC[codigo] || codigo) + "</small>");
+  }
+
   function comecarOuvir() {
     if (!Reconhece || ouvindo) return;
     var st = $("micSt");
@@ -2167,10 +2215,13 @@
       rec.continuous = false;
       rec.maxAlternatives = 1;
     } catch (err) {
-      avisoMic("<b>Não deu pra ligar o microfone</b>Toque no campo abaixo e use o microfone do teclado.");
+      falhouMic("o Chrome não conseguiu criar o reconhecimento de voz");
       return;
     }
+    var ouviu = false, codigo = "";
     rec.onresult = function (ev) {
+      ouviu = true;
+      semFalaSeguidas = 0;
       var fala = "";
       for (var i = 0; i < ev.results.length; i++) fala += ev.results[i][0].transcript;
       var campo = $("ditTxt");
@@ -2178,19 +2229,28 @@
       campo.value = (ditBase ? ditBase + " " : "") + fala.trim();
       atualizarDitado();
     };
-    rec.onerror = function (ev) {
-      var msg = {
-        "not-allowed": "<b>Microfone bloqueado</b>Toque no cadeado ao lado do endereço do site e libere o microfone.",
-        "service-not-allowed": "<b>Microfone bloqueado</b>Toque no cadeado ao lado do endereço do site e libere o microfone.",
-        "no-speech": "<b>Não ouvi nada</b>Toque no microfone e fale um pouco mais perto.",
-        "network": "<b>Sem internet</b>O ditado do Chrome precisa de internet. Dá pra digitar no campo abaixo.",
-        "audio-capture": "<b>Não achei o microfone</b>Veja se outro app está usando o microfone agora."
-      }[ev.error];
-      if (msg) avisoMic(msg);
+    rec.onerror = function (ev) { codigo = ev.error || "desconhecido"; };
+    rec.onend = function () {
+      ouvindo = false;
+      if (ouviu || codigo === "aborted") { estadoMic(); return; }
+      // falhas passageiras: avisa e deixa tentar de novo
+      if (codigo === "network") {
+        avisoMic("<b>Sem internet</b>O microfone do app precisa de internet. O do teclado costuma funcionar mesmo assim — toque no campo abaixo.");
+        return;
+      }
+      if (codigo === "audio-capture") {
+        avisoMic("<b>O microfone está ocupado</b>Outro app está usando o microfone agora. Feche ele e toque de novo.");
+        return;
+      }
+      if (codigo === "no-speech" && ++semFalaSeguidas < 2) {
+        avisoMic("<b>Não ouvi nada</b>Toque no microfone e fale um pouco mais perto.");
+        return;
+      }
+      // o resto é o aparelho não deixando: passa pro teclado de vez, e diz o motivo
+      falhouMic(codigo || "o reconhecimento de voz do Chrome não respondeu");
     };
-    rec.onend = function () { ouvindo = false; estadoMic(); };
     try { rec.start(); ouvindo = true; }
-    catch (err) { ouvindo = false; }
+    catch (err) { ouvindo = false; falhouMic("o Chrome recusou ligar o microfone"); return; }
     estadoMic();
   }
 
@@ -2643,7 +2703,10 @@
 
   $("btnFalar").addEventListener("click", function () {
     abrirDitado();
-    comecarOuvir();   // já liga o microfone: o toque no botão é o gesto que o navegador exige
+    // tudo aqui dentro do toque: é o gesto que o navegador exige pra ligar o microfone
+    // ou pra subir o teclado sozinho
+    if (modoTeclado()) $("ditTxt").focus();
+    else comecarOuvir();
   });
 
   $("modal").addEventListener("click", function (e) {
@@ -2661,6 +2724,13 @@
     if (e.target.closest("#micBig")) {
       if (ouvindo) pararOuvir(); else comecarOuvir();
       estadoMic();
+      return;
+    }
+    if (e.target.closest("#micApp")) {
+      store.cfg.ditado = "app";
+      save();
+      semFalaSeguidas = 0;
+      comecarOuvir();
       return;
     }
     if (e.target.closest("#ditAgendar")) { agendarDitado(); return; }
@@ -2849,6 +2919,7 @@
 
   $("sec-ajustes").addEventListener("change", function (e) {
     if (e.target.id === "cfgDur") { store.cfg.dur = Number(e.target.value); save(); }
+    if (e.target.id === "cfgDitado") { store.cfg.ditado = e.target.value; semFalaSeguidas = 0; save(); }
     if (e.target.id === "gAvisos") {
       gcfg().avisos = e.target.value;
       save();
