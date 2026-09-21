@@ -534,6 +534,21 @@
   }
   .alerta.ok { background: var(--ok-bg); border-left-color: var(--ok); }
   .alerta.ok b.tit { color: var(--ok); }
+  .alerta.warn { background: var(--warn-bg); border-left-color: var(--warn); }
+  .alerta.warn b.tit { color: var(--warn); }
+
+  /* ---------- lembrete no Google ---------- */
+  .sv .sino { display: block; margin-top: 6px; line-height: 0; }
+  .sv .sino svg {
+    width: 12px; height: 12px; fill: none; stroke: var(--ink-3); stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .sv .sino.fila svg { stroke: var(--warn); }
+  .passos {
+    margin: 0 0 12px; padding-left: 20px; display: grid; gap: 8px;
+    font-size: 13px; line-height: 1.5; color: var(--ink-2);
+  }
+  .passos b { color: var(--ink); font-weight: 650; }
   .alerta .btn { margin-top: 10px; width: 100%; }
 
   .empty {
@@ -682,6 +697,12 @@
         <p class="note">A cor aparece na bolinha do calendário. Marque “cobra por máquina” para o valor sair sozinho.</p>
         <div id="tipoList"></div>
         <div class="actions"><button class="btn btn-ghost full" id="addTipo">+ Novo tipo</button></div>
+      </div>
+
+      <div class="card">
+        <h3>Lembrete no Google Agenda</h3>
+        <p class="note">Ligado, todo serviço e orçamento que você marcar vira evento no seu Google Agenda, com aviso no celular — sem tocar em nada. Mudou a data, muda lá; cancelou ou excluiu, sai de lá.</p>
+        <div id="gcalInfo"></div>
       </div>
 
       <div class="card">
@@ -1481,7 +1502,7 @@
 
       return '<button class="sv' + cls + '" data-id="' + s.id + '">' +
         '<span class="stripe" style="background:' + corVar(t) + '"></span>' +
-        '<span class="time">' + esc(s.hora || "--:--") + (s.dur ? "<small>" + durTxt(s.dur) + "</small>" : "") + "</span>" +
+        '<span class="time">' + esc(s.hora || "--:--") + (s.dur ? "<small>" + durTxt(s.dur) + "</small>" : "") + sinoDe(s) + "</span>" +
         '<span class="body">' +
           '<b class="cli">' + esc(s.cliente || "sem nome") + "</b>" +
           '<span class="sub">' + sub + "</span>" +
@@ -1692,6 +1713,7 @@
     $("cfgPreco").value = store.cfg.preco;
     $("cfgTeto").value = store.cfg.teto;
     $("cfgDur").innerHTML = optsDur(store.cfg.dur);
+    renderGcal();
 
     $("tipoList").innerHTML = store.tipos.map(function (t, i) {
       return '<div class="card flat" style="margin-top:10px">' +
@@ -1862,7 +1884,9 @@
           icon("chat") + "WhatsApp</a>" +
         '<a id="qMapa" href="' + (l.mapa || "#") + '" target="_blank" rel="noopener"' + (l.mapa ? "" : ' aria-disabled="true"') + ">" +
           icon("pin") + "Rota</a>" +
-        '<a id="qCal" href="' + l.gcal + '" target="_blank" rel="noopener">' + icon("bell") + "Lembrete</a>" +
+        (gcalLigado()
+          ? '<button type="button" id="qGoo">' + icon("bell") + '<span id="qGooTxt">' + rotuloGoogle() + "</span></button>"
+          : '<a id="qCal" href="' + l.gcal + '" target="_blank" rel="noopener">' + icon("bell") + "Lembrete</a>") +
       "</div>" +
 
       '<div class="fields">' +
@@ -2100,6 +2124,7 @@
     irPara("agenda");
     var d = fromISO(s.data);
     toast("Agendado: " + DIAS[d.getDay()] + " " + curto(s.data).slice(0, 5) + " às " + s.hora + " · " + s.cliente);
+    sincronizar(s.id, true);
   }
 
   function estadoMic() {
@@ -2174,6 +2199,324 @@
     ouvindo = false;
   }
 
+  // ---------- lembrete automático no Google Agenda ----------
+  /* A página não consegue tocar alarme com o celular bloqueado: quem avisa é o Google Agenda.
+     O conector (Apps Script na conta Google dele — agenda-dev\conector-google-agenda.gs) cria o
+     evento com aviso. O endereço do conector fica só neste celular, nunca no arquivo público.
+     O conector acha o evento pela etiqueta com o id do serviço: reenviar é seguro, nunca duplica. */
+
+  // ==== conector ====
+  var CODIGO_CONECTOR = "/**\n * Conector da Agenda de serviços → Google Agenda\n *\n * Cria, atualiza e apaga no seu Google Agenda os eventos dos serviços que você marca\n * na Agenda, já com aviso no celular. Roda na SUA conta Google e não guarda nada\n * além dos próprios eventos na sua agenda principal.\n *\n * Cada evento leva uma etiqueta com o código do serviço na Agenda. É por ela que o\n * conector acha o evento de novo: mandar o mesmo serviço duas vezes atualiza, nunca duplica.\n */\n\nfunction doGet() {\n  return ContentService.createTextOutput(\n    \"Conector da Agenda funcionando. Copie o endereço desta página e cole na Agenda: \" +\n    \"Ajustes → Lembrete no Google Agenda → Conectar.\");\n}\n\nfunction doPost(e) {\n  var saida;\n  try {\n    var p = JSON.parse(e.postData.contents);\n    var cal = CalendarApp.getDefaultCalendar();\n\n    if (p.acao === \"teste\") {\n      if (p.criar) {\n        // prova visível, pra quando o navegador não deixa a Agenda ler a resposta\n        var ini = new Date(Date.now() + 2 * 60000);\n        var prova = cal.createEvent(\"Agenda de serviços conectada\", ini, new Date(ini.getTime() + 15 * 60000), {\n          description: \"Pode apagar este evento. Ele só mostra que a Agenda conseguiu falar com o seu Google Agenda.\"\n        });\n        prova.removeAllReminders();\n      }\n      saida = { ok: true, agenda: cal.getName() };\n\n    } else if (p.acao === \"apagar\") {\n      var alvo = achar(cal, p);\n      if (alvo) alvo.deleteEvent();\n      saida = { ok: true, apagou: !!alvo };\n\n    } else if (p.acao === \"salvar\") {\n      var inicio = new Date(p.inicio), fim = new Date(p.fim);\n      var ev = achar(cal, p);\n      if (ev) {\n        ev.setTitle(p.titulo);\n        ev.setTime(inicio, fim);\n        ev.setLocation(p.local || \"\");\n        ev.setDescription(p.descricao || \"\");\n      } else {\n        ev = cal.createEvent(p.titulo, inicio, fim, { location: p.local || \"\", description: p.descricao || \"\" });\n        ev.setTag(\"agendaId\", String(p.agendaId));\n      }\n      ev.removeAllReminders();\n      (p.avisos && p.avisos.length ? p.avisos : [60]).slice(0, 5).forEach(function (min) {\n        ev.addPopupReminder(Number(min));\n      });\n      saida = { ok: true, id: ev.getId() };\n\n    } else {\n      saida = { ok: false, erro: \"Ação desconhecida: \" + p.acao };\n    }\n  } catch (err) {\n    saida = { ok: false, erro: String((err && err.message) || err) };\n  }\n  return ContentService.createTextOutput(JSON.stringify(saida)).setMimeType(ContentService.MimeType.JSON);\n}\n\n// Acha o evento do serviço: pelo id que o Google devolveu antes ou, se não tiver,\n// pela etiqueta, procurando um dia pra cada lado da data nova e da data antiga.\nfunction achar(cal, p) {\n  var codigo = String(p.agendaId);\n  if (p.id) {\n    try {\n      var ev = cal.getEventById(p.id);\n      if (ev && ev.getTag(\"agendaId\") === codigo) return ev;\n    } catch (e) { /* id velho ou de outra agenda: procura pela etiqueta */ }\n  }\n  var dia = 24 * 3600 * 1000;\n  var perto = [p.inicio, p.antes].filter(function (x) { return x; });\n  for (var i = 0; i < perto.length; i++) {\n    var lista = cal.getEvents(new Date(Number(perto[i]) - dia), new Date(Number(perto[i]) + dia));\n    for (var j = 0; j < lista.length; j++) {\n      if (lista[j].getTag(\"agendaId\") === codigo) return lista[j];\n    }\n  }\n  return null;\n}\n";
+  // ==== fim conector ====
+
+  var AVISOS = [
+    { v: "30", nome: "30 minutos antes", min: [30] },
+    { v: "60", nome: "1 hora antes", min: [60] },
+    { v: "120", nome: "2 horas antes", min: [120] },
+    { v: "1440", nome: "Na véspera", min: [1440] },
+    { v: "1440+60", nome: "Na véspera e 1 hora antes", min: [1440, 60] }
+  ];
+  var URL_CONECTOR = /^https:\/\/script\.google\.com\/(?:a\/macros\/[^/]+|macros)\/s\/[\w-]+\/exec$/;
+
+  function gcfg() {
+    if (!store.cfg.gcal) store.cfg.gcal = { url: "", avisos: "1440+60", nome: "" };
+    return store.cfg.gcal;
+  }
+  function gcalLigado() { return !!gcfg().url; }
+  function acharServico(id) { return store.servicos.filter(function (x) { return x.id === id; })[0]; }
+
+  function inicioMs(s) {
+    var d = fromISO(s.data), p = String(s.hora || "08:00").split(":");
+    d.setHours(Number(p[0]) || 0, Number(p[1]) || 0, 0, 0);
+    return d.getTime();
+  }
+  function avisosMin() {
+    return (AVISOS.filter(function (a) { return a.v === gcfg().avisos; })[0] || AVISOS[4]).min;
+  }
+  function eventoDe(s) {
+    var t = tipoDe(s.tipo), ini = inicioMs(s), desc = [];
+    if (s.tel) desc.push("Telefone: " + s.tel + " · WhatsApp: https://wa.me/" + telE164(s.tel));
+    if (t.porMaquina && s.maquinas) desc.push(s.maquinas + " máquina(s)");
+    if (valorDe(s)) desc.push((s.orcamento ? "Orçado: " : "Valor: ") + brl(valorDe(s)) +
+      (s.mat ? " (mão de obra " + brl(s.mao) + " + material " + brl(s.mat) + ")" : ""));
+    if (s.obs) desc.push(s.obs);
+    desc.push("Marcado pela Agenda de serviços.");
+    return {
+      titulo: (s.orcamento ? "Orçamento · " : "") + t.nome + " — " + (s.cliente || "sem nome"),
+      inicio: ini,
+      fim: ini + Math.max(15, Number(s.dur || 60)) * 60000,
+      local: s.endereco || "",
+      descricao: desc.join("\n"),
+      avisos: avisosMin()
+    };
+  }
+  function assinatura(s) { return s.status === "cancelado" ? "apagado" : JSON.stringify(eventoDe(s)); }
+
+  // o que ainda falta mandar pro Google
+  function precisaSinc(s) {
+    var g = s.gcal || {};
+    if (s.status === "cancelado") return !!(g.id || g.ini);     // só apaga o que chegou a ir
+    if (g.assin === assinatura(s)) return false;                  // lá já está igual
+    if (!g.ini && inicioMs(s) + Number(s.dur || 60) * 60000 < Date.now()) return false;   // passado que nunca foi
+    return true;
+  }
+  function estadoLembrete(s) {
+    if (!gcalLigado()) return "";
+    if (precisaSinc(s)) return "fila";
+    return (s.gcal || {}).ini && s.status !== "cancelado" ? "ok" : "";
+  }
+
+  function textoErro(err) {
+    var m = String((err && err.message) || err || "");
+    if (/sem internet/i.test(m) || err instanceof TypeError) return "sem internet — vai quando voltar o sinal";
+    if (err instanceof SyntaxError) return "o conector respondeu algo estranho — confira o endereço";
+    return "o Google recusou: " + m;
+  }
+
+  function enviar(p) {
+    var url = gcfg().url;
+    if (!url) return Promise.reject(new Error("conector desligado"));
+    if (navigator.onLine === false) return Promise.reject(new Error("sem internet"));
+    var corpo = JSON.stringify(p);
+    // corpo em texto puro = pedido "simples": sem pré-consulta, e o Apps Script aceita
+    return fetch(url, { method: "POST", body: corpo })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || !j.ok) throw new Error((j && j.erro) || "resposta sem ok");
+        return j;
+      })
+      .catch(function (err) {
+        // TypeError com internet = o navegador não deixou LER a resposta. Manda às cegas:
+        // o conector acha o evento pela etiqueta, então repetir não duplica.
+        if (err instanceof TypeError && navigator.onLine !== false) {
+          return fetch(url, { method: "POST", body: corpo, mode: "no-cors" })
+            .then(function () { return { ok: true, cego: true }; });
+        }
+        throw err;
+      });
+  }
+
+  // fila de um em um: dois envios do mesmo serviço ao mesmo tempo podiam criar dois eventos
+  var filaSinc = [], sincRodando = false, avisarId = null;
+
+  function sincronizar(id, avisar) {
+    if (!gcalLigado()) return;
+    var s = acharServico(id);
+    if (!s || !precisaSinc(s)) return;
+    if (avisar) avisarId = id;
+    if (filaSinc.indexOf(id) < 0) filaSinc.push(id);
+    rodarSinc();
+  }
+
+  function rodarSinc() {
+    if (sincRodando) return;
+    var id = filaSinc.shift();
+    if (!id) { processarApagar(); return; }
+    var s = acharServico(id);
+    if (!s || !precisaSinc(s)) { rodarSinc(); return; }
+    var g = s.gcal || {}, ev = eventoDe(s), sig = assinatura(s);
+    var p = s.status === "cancelado"
+      ? { acao: "apagar", agendaId: s.id, id: g.id || "", inicio: g.ini || ev.inicio }
+      : { acao: "salvar", agendaId: s.id, id: g.id || "", antes: g.ini && g.ini !== ev.inicio ? g.ini : 0,
+          titulo: ev.titulo, inicio: ev.inicio, fim: ev.fim, local: ev.local, descricao: ev.descricao, avisos: ev.avisos };
+    sincRodando = true;
+    var deuCerto = false;
+    enviar(p).then(function (resp) {
+      deuCerto = true;
+      var atual = acharServico(id);   // pode ter sido editado no meio do caminho: grava no objeto de agora
+      if (!atual) return;
+      if (p.acao === "apagar") atual.gcal = { assin: "apagado" };
+      else {
+        atual.gcal = atual.gcal || {};
+        if (resp.id) atual.gcal.id = resp.id;
+        atual.gcal.ini = p.inicio;
+        atual.gcal.assin = sig;         // se mudou enquanto ia, precisaSinc() pega na próxima volta
+      }
+      atual.gcal.erro = "";
+      save();
+      if (avisarId === id) {
+        avisarId = null;
+        toast(p.acao === "apagar" ? "Lembrete tirado do Google Agenda." : "Lembrete criado no Google Agenda.");
+      }
+    }).catch(function (err) {
+      var atual = acharServico(id);
+      if (atual) { atual.gcal = atual.gcal || {}; atual.gcal.erro = textoErro(err); save(); }
+      if (avisarId === id) { avisarId = null; toast("Lembrete: " + textoErro(err) + "."); }
+    }).then(function () {
+      sincRodando = false;
+      if (deuCerto) {
+        var atual = acharServico(id);
+        if (atual && precisaSinc(atual) && filaSinc.indexOf(id) < 0) filaSinc.push(id);
+        rodarSinc();
+      } else {
+        filaSinc = [];                  // sem sinal: para e tenta tudo de novo quando voltar
+      }
+      marcarLembrete();
+    });
+  }
+
+  function filaApagar(s) {
+    var g = (s && s.gcal) || {};
+    if (!gcalLigado() || !(g.id || g.ini)) return;
+    store.gcalApagar = store.gcalApagar || [];
+    store.gcalApagar.push({ agendaId: s.id, id: g.id || "", inicio: g.ini });
+    save();
+    processarApagar();
+  }
+
+  var apagando = false;
+  function processarApagar() {
+    var fila = store.gcalApagar || [];
+    if (apagando || !fila.length || !gcalLigado()) return;
+    apagando = true;
+    var item = fila[0], deuCerto = false;
+    enviar({ acao: "apagar", agendaId: item.agendaId, id: item.id, inicio: item.inicio }).then(function () {
+      deuCerto = true;
+      store.gcalApagar.shift();
+      save();
+    }).catch(function () { /* fica na fila pra próxima */ }).then(function () {
+      apagando = false;
+      if (deuCerto) processarApagar();
+      marcarLembrete();
+    });
+  }
+
+  function processarFila() {
+    if (!gcalLigado() || navigator.onLine === false) return;
+    store.servicos.forEach(function (s) {
+      if (precisaSinc(s) && filaSinc.indexOf(s.id) < 0) filaSinc.push(s.id);
+    });
+    rodarSinc();
+    processarApagar();
+  }
+
+  function marcarLembrete() {
+    if (ui.sec === "agenda") renderDia();
+    if (ui.sec === "ajustes") renderGcal();
+    var el = $("qGooTxt");
+    if (el) el.textContent = rotuloGoogle();
+  }
+
+  function rotuloGoogle() {
+    var guardado = rascunho && acharServico(rascunho.id);
+    if (!guardado) return "Ao salvar";
+    var e = estadoLembrete(guardado);
+    return e === "ok" ? "No Google" : e === "fila" ? "Na fila" : "Lembrete";
+  }
+
+  function sinoDe(s) {
+    var e = estadoLembrete(s);
+    if (!e) return "";
+    return '<span class="sino ' + e + '" title="' +
+      (e === "ok" ? "Lembrete no Google Agenda" : "Lembrete esperando pra ir pro Google") + '">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 15V10a6 6 0 1 0-12 0v5l-2 3h16l-2-3z"/><path d="M10 21h4"/></svg></span>';
+  }
+
+  function renderGcal() {
+    var el = $("gcalInfo");
+    if (!el) return;
+    var c = gcfg();
+    if (!c.url) {
+      el.innerHTML =
+        '<div class="fields"><div class="f wide"><label for="gUrl">Endereço do conector</label>' +
+        '<div class="fld"><input id="gUrl" class="txt" type="url" inputmode="url" autocomplete="off" spellcheck="false" ' +
+        'placeholder="https://script.google.com/macros/s/…/exec"></div></div></div>' +
+        '<div class="actions">' +
+          '<button class="btn btn-ghost" id="gComo">Como conseguir</button>' +
+          '<button class="btn btn-primary" id="gConectar">Conectar</button>' +
+        "</div>";
+      return;
+    }
+    var fila = store.servicos.filter(precisaSinc).length + (store.gcalApagar || []).length;
+    var erro = store.servicos.map(function (s) { return s.gcal && s.gcal.erro; }).filter(Boolean)[0] || "";
+    el.innerHTML =
+      '<div class="alerta ' + (fila ? "warn" : "ok") + '"><b class="tit">' +
+        (fila ? fila + " lembrete(s) na fila" : "Ligado") + "</b>" +
+        (fila
+          ? (erro ? esc(erro.charAt(0).toUpperCase() + erro.slice(1)) + "." : "Mandando pro Google Agenda…")
+          : "O que está marcado daqui pra frente já está no seu Google Agenda" + (c.nome ? " (" + esc(c.nome) + ")" : "") + ".") +
+      "</div>" +
+      '<div class="fields"><div class="f wide"><label for="gAvisos">Avisar no celular</label><div class="fld"><select id="gAvisos">' +
+        AVISOS.map(function (a) { return '<option value="' + a.v + '"' + (a.v === c.avisos ? " selected" : "") + ">" + a.nome + "</option>"; }).join("") +
+      "</select></div></div></div>" +
+      '<div class="actions">' +
+        (fila ? '<button class="btn btn-ghost full" id="gAgora">Tentar mandar agora</button>' : "") +
+        '<button class="btn btn-ghost" id="gComo">Passo a passo</button>' +
+        '<button class="btn btn-ghost" id="gDesligar">Desligar</button>' +
+      "</div>";
+  }
+
+  function ligarGoogle(url, nome) {
+    var c = gcfg();
+    c.url = url;
+    c.nome = nome || "";
+    save();
+    renderGcal();
+    processarFila();   // o que já está marcado daqui pra frente vai junto
+  }
+
+  function conectarGoogle() {
+    var inp = $("gUrl"), url = inp ? inp.value.trim() : "";
+    if (!URL_CONECTOR.test(url)) {
+      toast(url ? "Esse não é o endereço do conector — ele termina em /exec." : "Cole o endereço do conector.");
+      return;
+    }
+    var b = $("gConectar");
+    if (b) { b.disabled = true; b.textContent = "Testando…"; }
+    function solta() { if (b && b.isConnected) { b.disabled = false; b.textContent = "Conectar"; } }
+    fetch(url, { method: "POST", body: JSON.stringify({ acao: "teste" }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || !j.ok) throw new Error((j && j.erro) || "sem resposta");
+        ligarGoogle(url, j.agenda);
+        toast("Conectado. Mandando o que já está marcado…");
+      })
+      .catch(function (err) {
+        solta();
+        if (err instanceof TypeError && navigator.onLine !== false) {
+          // o navegador não deixou ler a resposta: manda uma prova que ele consegue ver
+          fetch(url, { method: "POST", mode: "no-cors", body: JSON.stringify({ acao: "teste", criar: true }) })
+            .then(function () {
+              ligarGoogle(url, "");
+              $("panel").innerHTML = "<h3>Confira no Google Agenda</h3>" +
+                '<p class="sub">O navegador não deixou eu confirmar a conexão, então mandei um evento de prova: ' +
+                "<b>“Agenda de serviços conectada”</b>, para daqui a 2 minutos. Se ele apareceu no seu Google Agenda, " +
+                "está funcionando — pode apagar o evento. Se não apareceu, desligue em Ajustes e confira o passo a passo.</p>" +
+                '<div class="actions"><button class="btn btn-primary full" id="fCancel">Entendi</button></div>';
+              $("modal").classList.add("open");
+            })
+            .catch(function () { toast("Não consegui falar com o conector. Confira a internet e o endereço."); });
+          return;
+        }
+        toast(err instanceof SyntaxError
+          ? "Esse endereço não respondeu como conector. Confira se copiou o URL do app da Web."
+          : "Não conectou: " + String(err.message || err));
+      });
+  }
+
+  function mostrarPassoAPasso() {
+    $("panel").innerHTML =
+      "<h3>Ligar o lembrete automático</h3>" +
+      '<p class="sub">Uma vez só, uns 5 minutos. Faça no computador — é bem mais fácil.</p>' +
+      '<ol class="passos">' +
+        "<li>Abra <b>script.google.com</b> com a mesma conta do seu Google Agenda e clique em <b>Novo projeto</b>.</li>" +
+        "<li>Clique em <b>Projeto sem título</b>, lá em cima, e troque o nome para <b>Agenda</b>.</li>" +
+        "<li>Apague tudo o que estiver escrito, cole o código lá de baixo e salve (Ctrl+S).</li>" +
+        "<li>Botão azul <b>Implantar</b> → <b>Nova implantação</b>. Na engrenagem, escolha <b>App da Web</b>.</li>" +
+        "<li>Em <b>Executar como</b>, deixe <b>Eu</b>. Em <b>Quem pode acessar</b>, escolha <b>Qualquer pessoa</b> — " +
+          "<b>não</b> a opção “Qualquer pessoa com Conta do Google”, senão o celular não consegue falar com ele. Clique em <b>Implantar</b>.</li>" +
+        "<li>Ele pede autorização: <b>Autorizar acesso</b> → sua conta. Vai aparecer <b>“O Google não verificou este app”</b>: " +
+          "clique em <b>Avançado</b> → <b>Acessar Agenda (não seguro)</b> → <b>Permitir</b>. Esse aviso aparece porque o app " +
+          "é seu e não passou por revisão do Google — ele só mexe na sua própria agenda.</li>" +
+        "<li>Copie o <b>URL do app da Web</b> (termina em <b>/exec</b>) e mande pra você mesmo no WhatsApp.</li>" +
+        "<li>No celular: Ajustes → Lembrete no Google Agenda → cole o endereço → <b>Conectar</b>.</li>" +
+      "</ol>" +
+      '<textarea class="out" id="txtOut" readonly spellcheck="false">' + esc(CODIGO_CONECTOR) + "</textarea>" +
+      '<div class="actions"><button class="btn btn-ghost" id="fCancel">Fechar</button>' +
+      '<button class="btn btn-primary" id="txtCopy">Copiar código</button></div>';
+    $("modal").classList.add("open");
+  }
+
   // ---------- backup ----------
   function exportar() {
     var nome = "agenda-" + hojeISO() + ".json";
@@ -2232,6 +2575,7 @@
     fecharModal();
     render();
     toast("Restaurado: " + store.servicos.length + " serviço(s).");
+    processarFila();
   }
 
   // ---------- eventos ----------
@@ -2304,6 +2648,15 @@
 
   $("modal").addEventListener("click", function (e) {
     if (e.target === $("modal")) { fecharModal(); return; }
+
+    if (e.target.closest("#qGoo")) {
+      var gs = rascunho && acharServico(rascunho.id);
+      if (!gs) { toast("O lembrete vai pro Google Agenda quando você salvar."); return; }
+      if (estadoLembrete(gs) === "ok") { toast("Esse já está no seu Google Agenda, com aviso."); return; }
+      sincronizar(gs.id, true);
+      toast("Mandando pro Google Agenda…");
+      return;
+    }
 
     if (e.target.closest("#micBig")) {
       if (ouvindo) pararOuvir(); else comecarOuvir();
@@ -2383,6 +2736,7 @@
       fecharModal();
       render();
       toast("Serviço salvo.");
+      sincronizar(s.id, true);
       return;
     }
 
@@ -2425,6 +2779,7 @@
     if (ex) {
       if (!armar(ex, "Excluir serviço", "toque de novo para excluir")) return;
       var id = rascunho.id;
+      filaApagar(acharServico(id));   // tira do Google Agenda também
       store.servicos = store.servicos.filter(function (x) { return x.id !== id; });
       save();
       fecharModal();
@@ -2494,9 +2849,28 @@
 
   $("sec-ajustes").addEventListener("change", function (e) {
     if (e.target.id === "cfgDur") { store.cfg.dur = Number(e.target.value); save(); }
+    if (e.target.id === "gAvisos") {
+      gcfg().avisos = e.target.value;
+      save();
+      processarFila();   // o aviso faz parte do evento: os que já estão lá são atualizados
+      toast("Aviso trocado. Atualizando os lembretes que já estão no Google…");
+    }
   });
 
   $("sec-ajustes").addEventListener("click", function (e) {
+    if (e.target.closest("#gConectar")) { conectarGoogle(); return; }
+    if (e.target.closest("#gComo")) { mostrarPassoAPasso(); return; }
+    if (e.target.closest("#gAgora")) { processarFila(); toast("Tentando mandar agora…"); return; }
+    var gd = e.target.closest("#gDesligar");
+    if (gd) {
+      if (!armar(gd, "Desligar", "toque de novo")) return;
+      gcfg().url = "";
+      save();
+      renderGcal();
+      toast("Desligado. Os eventos que já estão no Google continuam lá.");
+      return;
+    }
+
     var cor = e.target.closest("[data-tcor]");
     if (cor) {
       store.tipos[Number(cor.getAttribute("data-tcor"))].cor = Number(cor.getAttribute("data-cor"));
@@ -2556,6 +2930,11 @@
   save();          // grava a migração, senão o marcador de versão nunca avança
   renderNav();
   irPara("agenda");
+
+  // o que ficou na fila sem sinal vai quando o app abre, quando volta pra tela ou quando a internet volta
+  setTimeout(processarFila, 800);
+  window.addEventListener("online", processarFila);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) processarFila(); });
 })();
 </script>
 
