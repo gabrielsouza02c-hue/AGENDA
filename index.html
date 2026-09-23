@@ -2489,21 +2489,94 @@
     }
     var fila = store.servicos.filter(precisaSinc).length + (store.gcalApagar || []).length;
     var erro = store.servicos.map(function (s) { return s.gcal && s.gcal.erro; }).filter(Boolean)[0] || "";
+    var jaForam = store.servicos.filter(function (s) {
+      return (s.gcal || {}).ini && s.status !== "cancelado";
+    }).length;
+    /* "Ligado" sozinho engana: sem nada pendente o quadro ficava verde mesmo sem nunca ter
+       mandado um evento. Enquanto nada tiver chegado lá, o quadro avisa em laranja. */
+    var caixa = fila
+      ? { cor: "warn", tit: fila + " lembrete(s) na fila",
+          txt: erro ? esc(erro.charAt(0).toUpperCase() + erro.slice(1)) + "." : "Mandando pro Google Agenda…" }
+      : jaForam
+        ? { cor: "ok", tit: "Ligado",
+            txt: jaForam + (jaForam === 1 ? " serviço daqui pra frente já está" : " serviços daqui pra frente já estão") +
+              " no seu Google Agenda" + (c.nome ? " (" + esc(c.nome) + ")" : "") + "." }
+        : { cor: "warn", tit: "Ligado, mas nada foi mandado ainda",
+            txt: "Serviço com hora já passada não vira lembrete. Marque um daqui pra frente e ele vai na hora. " +
+              "Se você já marcou e não apareceu no Google Agenda, toque em <b>Conferir conexão</b>." };
     el.innerHTML =
-      '<div class="alerta ' + (fila ? "warn" : "ok") + '"><b class="tit">' +
-        (fila ? fila + " lembrete(s) na fila" : "Ligado") + "</b>" +
-        (fila
-          ? (erro ? esc(erro.charAt(0).toUpperCase() + erro.slice(1)) + "." : "Mandando pro Google Agenda…")
-          : "O que está marcado daqui pra frente já está no seu Google Agenda" + (c.nome ? " (" + esc(c.nome) + ")" : "") + ".") +
-      "</div>" +
+      '<div class="alerta ' + caixa.cor + '"><b class="tit">' + caixa.tit + "</b>" + caixa.txt + "</div>" +
       '<div class="fields"><div class="f wide"><label for="gAvisos">Avisar no celular</label><div class="fld"><select id="gAvisos">' +
         AVISOS.map(function (a) { return '<option value="' + a.v + '"' + (a.v === c.avisos ? " selected" : "") + ">" + a.nome + "</option>"; }).join("") +
       "</select></div></div></div>" +
       '<div class="actions">' +
+        '<button class="btn btn-ghost full" id="gConferir">Conferir conexão</button>' +
         (fila ? '<button class="btn btn-ghost full" id="gAgora">Tentar mandar agora</button>' : "") +
+        (jaForam ? '<button class="btn btn-ghost full" id="gTudo">Mandar tudo de novo</button>' : "") +
         '<button class="btn btn-ghost" id="gComo">Passo a passo</button>' +
         '<button class="btn btn-ghost" id="gDesligar">Desligar</button>' +
       "</div>";
+  }
+
+  /* Diz em qual conta do Google os eventos estão sendo criados — é o que resolve o caso
+     "o app diz que mandou e o Google Agenda do celular está vazio": em geral o script foi
+     autorizado numa conta diferente da que está no celular. */
+  function conferirConexao() {
+    var b = $("gConferir");
+    if (b) { b.disabled = true; b.textContent = "Conferindo…"; }
+    function solta() { if (b && b.isConnected) { b.disabled = false; b.textContent = "Conferir conexão"; } }
+    fetch(gcfg().url, { method: "POST", body: JSON.stringify({ acao: "teste" }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || !j.ok) throw new Error((j && j.erro) || "sem resposta");
+        solta();
+        gcfg().nome = j.agenda || "";
+        save();
+        renderGcal();
+        $("panel").innerHTML = "<h3>O conector respondeu</h3>" +
+          '<p class="sub">Ele está criando os eventos na agenda de:</p>' +
+          '<div class="alerta ok"><b class="tit">Conta do Google</b>' + esc(j.agenda || "(sem nome)") + "</div>" +
+          '<p class="sub" style="margin-top:14px">Confira se é <b>essa mesma conta</b> que está no Google Agenda do seu celular. ' +
+          "Se for outra, é por isso que os serviços não aparecem: o conector foi autorizado na conta errada. " +
+          "Nesse caso, refaça o passo a passo entrando na conta certa.</p>" +
+          '<div class="actions"><button class="btn btn-ghost" id="fCancel">Fechar</button>' +
+          '<button class="btn btn-primary" id="gProva">Mandar evento de prova</button></div>';
+        $("modal").classList.add("open");
+      })
+      .catch(function (err) {
+        solta();
+        var causa = err instanceof TypeError || err instanceof SyntaxError
+          ? "O conector não respondeu como devia. O motivo mais comum é a implantação estar com " +
+            "<b>Quem pode acessar: Qualquer pessoa com Conta do Google</b> — tem que ser <b>Qualquer pessoa</b>, sem a parte da conta. " +
+            "Outro motivo comum é o endereço ser de uma implantação antiga."
+          : "O conector respondeu com erro: <b>" + esc(String(err.message || err)) + "</b>";
+        $("panel").innerHTML = "<h3>Não consegui falar com o conector</h3>" +
+          '<div class="alerta"><b class="tit">O que provavelmente é</b>' + causa + "</div>" +
+          '<p class="sub" style="margin-top:14px">No computador: script.google.com → seu projeto → <b>Implantar</b> → ' +
+          "<b>Gerenciar implantações</b> → lápis de editar → confira <b>Quem pode acessar</b> e salve como " +
+          "<b>Nova versão</b>. Depois copie o endereço de novo e reconecte aqui.</p>" +
+          '<div class="actions"><button class="btn btn-ghost" id="fCancel">Fechar</button>' +
+          '<button class="btn btn-primary" id="gComo">Ver o passo a passo</button></div>';
+        $("modal").classList.add("open");
+      });
+  }
+
+  function mandarProva() {
+    enviar({ acao: "teste", criar: true }).then(function () {
+      toast("Evento de prova mandado. Veja no Google Agenda, daqui a 2 minutos.");
+    }).catch(function (err) {
+      toast("Não deu: " + textoErro(err) + ".");
+    });
+  }
+
+  // reenvia tudo o que está daqui pra frente (útil se os eventos foram pra conta errada)
+  function mandarTudoDeNovo() {
+    store.servicos.forEach(function (s) {
+      if (s.gcal) { s.gcal.assin = ""; s.gcal.id = ""; s.gcal.ini = 0; }
+    });
+    save();
+    processarFila();
+    toast("Mandando tudo de novo pro Google Agenda…");
   }
 
   function ligarGoogle(url, nome) {
@@ -2514,6 +2587,8 @@
     renderGcal();
     processarFila();   // o que já está marcado daqui pra frente vai junto
   }
+
+  var urlPendente = "";
 
   function conectarGoogle() {
     var inp = $("gUrl"), url = inp ? inp.value.trim() : "";
@@ -2533,24 +2608,23 @@
       })
       .catch(function (err) {
         solta();
-        if (err instanceof TypeError && navigator.onLine !== false) {
-          // o navegador não deixou ler a resposta: manda uma prova que ele consegue ver
-          fetch(url, { method: "POST", mode: "no-cors", body: JSON.stringify({ acao: "teste", criar: true }) })
-            .then(function () {
-              ligarGoogle(url, "");
-              $("panel").innerHTML = "<h3>Confira no Google Agenda</h3>" +
-                '<p class="sub">O navegador não deixou eu confirmar a conexão, então mandei um evento de prova: ' +
-                "<b>“Agenda de serviços conectada”</b>, para daqui a 2 minutos. Se ele apareceu no seu Google Agenda, " +
-                "está funcionando — pode apagar o evento. Se não apareceu, desligue em Ajustes e confira o passo a passo.</p>" +
-                '<div class="actions"><button class="btn btn-primary full" id="fCancel">Entendi</button></div>';
-              $("modal").classList.add("open");
-            })
-            .catch(function () { toast("Não consegui falar com o conector. Confira a internet e o endereço."); });
-          return;
-        }
-        toast(err instanceof SyntaxError
-          ? "Esse endereço não respondeu como conector. Confira se copiou o URL do app da Web."
-          : "Não conectou: " + String(err.message || err));
+        /* Antes eu ligava "às cegas" quando não dava pra ler a resposta. Isso deixava o quadro
+           verde com nada chegando no Google. Agora explico a causa provável e só forço se ele pedir. */
+        urlPendente = url;
+        var causa = err instanceof TypeError || err instanceof SyntaxError
+          ? "O conector não respondeu como devia. O motivo mais comum é a implantação estar com " +
+            "<b>Quem pode acessar: Qualquer pessoa com Conta do Google</b> — tem que ser <b>Qualquer pessoa</b>, " +
+            "sem a parte da conta. Outro motivo comum é o endereço ser de uma implantação antiga."
+          : "O conector respondeu com erro: <b>" + esc(String(err.message || err)) + "</b>";
+        $("panel").innerHTML = "<h3>Não conectou</h3>" +
+          '<div class="alerta"><b class="tit">O que provavelmente é</b>' + causa + "</div>" +
+          '<p class="sub" style="margin-top:14px">No computador: script.google.com → seu projeto → <b>Implantar</b> → ' +
+          "<b>Gerenciar implantações</b> → lápis de editar → confira <b>Quem pode acessar</b> e salve como " +
+          "<b>Nova versão</b>. Depois copie o endereço e tente de novo.</p>" +
+          '<div class="actions"><button class="btn btn-ghost" id="fCancel">Fechar</button>' +
+          '<button class="btn btn-primary" id="gComo">Ver o passo a passo</button>' +
+          '<button class="btn btn-ghost btn-sm full" id="gForcar">Ligar assim mesmo e mandar evento de prova</button></div>';
+        $("modal").classList.add("open");
       });
   }
 
@@ -2726,6 +2800,21 @@
       estadoMic();
       return;
     }
+    // estes aparecem nas folhas de conferência da conexão
+    if (e.target.closest("#gProva")) { mandarProva(); return; }
+    if (e.target.closest("#gComo")) { mostrarPassoAPasso(); return; }
+    if (e.target.closest("#gForcar")) {
+      if (!urlPendente) return;
+      ligarGoogle(urlPendente, "");
+      mandarProva();
+      $("panel").innerHTML = "<h3>Ligado sem confirmação</h3>" +
+        '<p class="sub">Mandei um evento de prova: <b>“Agenda de serviços conectada”</b>, para daqui a 2 minutos. ' +
+        "<b>Abra o Google Agenda e veja se ele apareceu.</b> Se não apareceu, o conector não está recebendo nada — " +
+        "volte no passo a passo e confira a implantação.</p>" +
+        '<div class="actions"><button class="btn btn-primary full" id="fCancel">Entendi</button></div>';
+      return;
+    }
+
     if (e.target.closest("#micApp")) {
       store.cfg.ditado = "app";
       save();
@@ -2931,6 +3020,8 @@
   $("sec-ajustes").addEventListener("click", function (e) {
     if (e.target.closest("#gConectar")) { conectarGoogle(); return; }
     if (e.target.closest("#gComo")) { mostrarPassoAPasso(); return; }
+    if (e.target.closest("#gConferir")) { conferirConexao(); return; }
+    if (e.target.closest("#gTudo")) { mandarTudoDeNovo(); return; }
     if (e.target.closest("#gAgora")) { processarFila(); toast("Tentando mandar agora…"); return; }
     var gd = e.target.closest("#gDesligar");
     if (gd) {
