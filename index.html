@@ -1471,7 +1471,7 @@
   // ---------- estado ----------
   function padrao() {
     return {
-      v: 3,
+      v: 5,
       emp: empPadrao(),
       itens: catalogoPadrao(),
       docs: [],
@@ -1545,6 +1545,33 @@
       if (!store.docs) store.docs = [];
       if (!store.cfg.seq) store.cfg.seq = { os: 1, orc: 1 };
       store.v = 3;
+    }
+    if (Number(store.v || 1) < 4) {
+      // preenche só o que está em branco — nada do que ele já digitou no celular é sobrescrito
+      var p = empPadrao(), e = emp();
+      ["nome", "ativ", "doc"].forEach(function (k) { if (!e[k]) e[k] = p[k]; });
+      if (!e.gar || e.gar === "90 dias para o serviço executado") e.gar = GAR_CDC;
+      // valor que ele já usou de verdade: o contrato de PMOC mensal
+      [{ nome: "PMOC mensal (contrato)", un: "fixo", preco: 600 }].forEach(function (novo, k) {
+        var tem = (store.itens || []).some(function (i) { return ditNorm(i.nome) === ditNorm(novo.nome); });
+        if (!tem) store.itens.push({ id: "pv" + k, nome: novo.nome, un: novo.un, preco: novo.preco });
+      });
+      store.v = 4;
+    }
+    if (Number(store.v || 1) < 5) {
+      /* Correção dele em 30/09/2026: o serviço da Aline (R$ 350 de mão de obra) era ELÉTRICO,
+         não instalação de ar. Tiro o item errado que eu havia criado e levo o valor pro elétrico.
+         Instalação de ar continua como ele deixou. */
+      store.itens = (store.itens || []).filter(function (i) {
+        return !(ditNorm(i.nome).indexOf("instalacao de split 12.000") === 0 && Number(i.preco) === 350);
+      });
+      var el = store.itens.filter(function (i) { return ditNorm(i.nome) === "servico eletrico"; })[0];
+      if (el && !Number(el.preco)) { el.preco = 350; el.un = "fixo"; }     // só se ele não tiver posto preço
+      else if (!el) store.itens.push({ id: "pv2", nome: "Serviço elétrico (mão de obra)", un: "fixo", preco: 350 });
+      // telefone e Pix, que ele passou em 30/09/2026 (a chave Pix é o próprio CNPJ)
+      var pp = empPadrao(), ee = emp();
+      ["tel", "pix"].forEach(function (k) { if (!ee[k]) ee[k] = pp[k]; });
+      store.v = 5;
     }
     store.servicos.forEach(function (s) {
       // antes existia um valor só; ele vira mão de obra, e material começa zerado
@@ -3017,9 +3044,21 @@
     { v: "m", nome: "por metro", curto: "m" }
   ];
 
+  /* dados tirados dos modelos de NFS-e dele (E:\servidor\modelos-nfse.md) e do relatório do MEI.
+     Telefone e Pix ficam em branco: não estavam em lugar nenhum. */
+  var GAR_CDC = "Garantia legal de 90 dias sobre o serviço executado (CDC, art. 26, II)";
   function empPadrao() {
-    return { nome: "", ativ: "", doc: "", tel: "", pix: "", gar: "90 dias para o serviço executado",
-             pag: "Pix ou dinheiro na entrega do serviço", val: 15 };
+    return {
+      nome: "Gabriel Souza Cardoso",
+      ativ: "Instalação e manutenção de ar-condicionado · PMOC · serviços elétricos",
+      doc: "CNPJ 64.215.943/0001-14 · Nova Era/MG",
+      tel: "(31) 9 9516-9422",
+      pix: "64.215.943/0001-14",          // a chave Pix dele é o próprio CNPJ
+
+      gar: GAR_CDC,
+      pag: "Pix ou dinheiro na entrega do serviço",
+      val: 15
+    };
   }
   function emp() {
     if (!store.emp) store.emp = empPadrao();
@@ -3030,11 +3069,12 @@
     var ti = (store && store.tipos || []).filter(function (x) { return x.id === "instal"; })[0];
     return [
       { id: "p1", nome: "PMOC / manutenção", un: "maq", preco: porMaq },
+      { id: "p8", nome: "PMOC mensal (contrato)", un: "fixo", preco: 600 },
       { id: "p2", nome: "Limpeza de ar-condicionado", un: "maq", preco: porMaq },
       { id: "p3", nome: "Instalação de ar-condicionado", un: "maq", preco: Number((ti && ti.preco) || 0) },
       { id: "p4", nome: "Carga de gás", un: "maq", preco: 0 },
       { id: "p5", nome: "Visita técnica", un: "fixo", preco: 0 },
-      { id: "p6", nome: "Serviço elétrico", un: "hora", preco: 0 },
+      { id: "p6", nome: "Serviço elétrico", un: "fixo", preco: 350 },
       { id: "p7", nome: "Material (peças e insumos)", un: "fixo", preco: 0 }
     ];
   }
