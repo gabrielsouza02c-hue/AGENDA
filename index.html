@@ -128,12 +128,12 @@
     font-family: var(--mono); font-size: 11px; color: var(--ink-3);
     letter-spacing: .02em; white-space: nowrap;
   }
-  .nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 10px 0 0; }
+  .nav { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; padding: 10px 0 0; }
   .nav button {
-    min-height: 40px; padding: 0 4px;
+    min-height: 40px; padding: 0 2px;
     border: 0; border-bottom: 2px solid transparent;
     background: transparent; color: var(--ink-3);
-    font: 600 12.5px/1 var(--sans); cursor: pointer;
+    font: 600 11.5px/1 var(--sans); cursor: pointer;
   }
   .nav button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
   .nav button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
@@ -571,6 +571,86 @@
   .foot button { background: none; border: 0; padding: 0; color: var(--ink-3); text-decoration: underline; cursor: pointer; font: inherit; }
   .foot button.armado { padding: 5px 9px; border-radius: 3px; text-decoration: none; font-weight: 700; }
 
+  /* ---------- itens do documento ---------- */
+  .linha {
+    margin-top: 9px; padding: 10px 11px;
+    border: 1px solid var(--line); border-radius: 4px; background: var(--surface-2);
+  }
+  .linha-topo { display: grid; grid-template-columns: 1fr 34px; gap: 8px; align-items: center; }
+  .linha input.lin-nome {
+    width: 100%; height: 42px; padding: 0 10px;
+    border: 1px solid var(--line); border-radius: 3px; background: var(--surface);
+    color: var(--ink); font: 600 14px/1 var(--sans);
+  }
+  .linha .lin-x {
+    height: 42px; border: 1px solid var(--line); border-radius: 3px;
+    background: var(--surface); color: var(--ink-3); font: 400 18px/1 var(--sans); cursor: pointer;
+  }
+  .linha .lin-x:hover { color: var(--danger); border-color: var(--danger); }
+  .linha-num { display: grid; grid-template-columns: 62px 1fr 1fr; gap: 7px; margin-top: 8px; }
+  .linha-num input, .linha-num select {
+    width: 100%; height: 42px; padding: 0 8px;
+    border: 1px solid var(--line); border-radius: 3px; background: var(--surface); color: var(--ink);
+    font: 600 14px/1 var(--mono); font-variant-numeric: tabular-nums; -webkit-appearance: none; appearance: none;
+  }
+  .linha-num select { font: 600 12.5px/1 var(--sans); }
+  .linha-tot {
+    margin-top: 7px; text-align: right;
+    font: 700 13px/1 var(--mono); color: var(--s2); font-variant-numeric: tabular-nums;
+  }
+  .doc-tot {
+    margin-top: 12px; padding: 11px 12px; border-radius: 4px;
+    background: var(--surface-2); border: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .doc-tot .k { font: 600 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+  .doc-tot .v { font: 700 24px/1 var(--mono); color: var(--s2); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+
+  /* ---------- a folha do documento: papel branco, nos dois temas e na impressão ---------- */
+  .folha {
+    background: #fff; color: #14181d;
+    padding: 22px 20px; border-radius: 3px;
+    font: 400 12.5px/1.5 var(--sans);
+  }
+  .folha .f-topo { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; }
+  .folha .f-emp b { display: block; font-size: 15.5px; font-weight: 700; letter-spacing: -.01em; }
+  .folha .f-emp span { display: block; font-size: 11.5px; color: #5b6570; margin-top: 2px; }
+  .folha .f-num { text-align: right; white-space: nowrap; }
+  .folha .f-num b {
+    display: block; font: 700 10px/1.3 var(--mono); letter-spacing: .1em;
+    text-transform: uppercase; color: #1f5fbf;
+  }
+  .folha .f-num span { display: block; font: 700 17px/1.2 var(--mono); }
+  .folha .f-num em { display: block; font: 500 11px/1.4 var(--mono); color: #5b6570; font-style: normal; }
+  .folha hr { border: 0; border-top: 1px solid #d7dde3; margin: 14px 0; }
+  .folha .f-rot { font: 700 9.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #8a959f; margin-bottom: 5px; }
+  .folha .f-cli b { font-size: 14px; font-weight: 650; }
+  .folha .f-cli div { font-size: 12px; color: #3d4650; margin-top: 2px; }
+  .folha table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+  .folha th {
+    text-align: left; padding: 0 0 6px; border-bottom: 1px solid #d7dde3;
+    font: 700 9px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #8a959f;
+  }
+  .folha th.n, .folha td.n { text-align: right; white-space: nowrap; padding-left: 12px; }
+  .folha td { padding: 7px 0; border-bottom: 1px solid #eceff2; font-size: 12px; vertical-align: top; }
+  .folha td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .folha tr.f-somatot td { border-bottom: 0; padding-top: 11px; font-weight: 700; font-size: 14px; }
+  .folha tr.f-somatot td.n { font-size: 15px; }
+  .folha .f-cond { margin-top: 14px; font-size: 11.5px; color: #3d4650; line-height: 1.6; }
+  .folha .f-cond b { color: #14181d; }
+  .folha .f-ass { margin-top: 30px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+  .folha .f-ass div { border-top: 1px solid #14181d; padding-top: 5px; font-size: 10.5px; color: #5b6570; }
+  .folha .f-pe { margin-top: 16px; font-size: 9.5px; color: #8a959f; line-height: 1.5; }
+
+  #folha { display: none; }
+  @media print {
+    .app, .modal, .toast { display: none !important; }
+    body { background: #fff !important; }
+    #folha { display: block !important; }
+    .folha { padding: 0; border-radius: 0; }
+    @page { margin: 14mm; }
+  }
+
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 
@@ -672,6 +752,20 @@
       </div>
     </section>
 
+    <!-- ================= NOTAS ================= -->
+    <section id="sec-notas" hidden>
+      <div class="sheet-head">
+        <div class="eyebrow">Papelada</div>
+        <h2>Ordens e orçamentos</h2>
+        <div class="meta" id="notasMeta">—</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="novoOrc">+ Orçamento</button>
+        <button class="btn btn-primary" id="novaOs">+ Ordem de serviço</button>
+      </div>
+      <div id="notasLista"></div>
+    </section>
+
     <!-- ================= AJUSTES ================= -->
     <section id="sec-ajustes" hidden>
       <div class="sheet-head">
@@ -703,6 +797,56 @@
             </select></div>
           </div>
         </div>
+      </div>
+
+      <div class="card">
+        <h3>Seus dados</h3>
+        <p class="note">É o cabeçalho das ordens de serviço e dos orçamentos. Preencha uma vez.</p>
+        <div class="fields">
+          <div class="f wide">
+            <label for="empNome">Nome / empresa</label>
+            <div class="fld"><input id="empNome" class="txt" type="text" placeholder="Gabriel Souza — Ar-condicionado"></div>
+          </div>
+          <div class="f wide">
+            <label for="empAtiv">Atividade (aparece embaixo do nome)</label>
+            <div class="fld"><input id="empAtiv" class="txt" type="text" placeholder="Instalação e manutenção · PMOC · elétrica"></div>
+          </div>
+          <div class="f">
+            <label for="empDoc">CNPJ (MEI) ou CPF</label>
+            <div class="fld"><input id="empDoc" class="txt" type="text" inputmode="numeric" placeholder="00.000.000/0000-00"></div>
+          </div>
+          <div class="f">
+            <label for="empTel">Seu telefone</label>
+            <div class="fld"><input id="empTel" class="txt" type="tel" inputmode="tel" placeholder="31 9 9999-9999"></div>
+          </div>
+          <div class="f wide">
+            <label for="empPix">Chave Pix (aparece no documento)</label>
+            <div class="fld"><input id="empPix" class="txt" type="text" placeholder="e-mail, telefone ou chave aleatória"></div>
+          </div>
+          <div class="f wide">
+            <label for="empGar">Garantia padrão</label>
+            <div class="fld"><input id="empGar" class="txt" type="text" placeholder="90 dias para o serviço executado"></div>
+          </div>
+          <div class="f wide">
+            <label for="empPag">Forma de pagamento padrão</label>
+            <div class="fld"><input id="empPag" class="txt" type="text" placeholder="Pix ou dinheiro na entrega do serviço"></div>
+          </div>
+          <div class="f">
+            <label for="empVal">Orçamento vale</label>
+            <div class="fld has-unit"><input id="empVal" type="number" inputmode="numeric" min="1" step="1"><span class="unit">dias</span></div>
+          </div>
+          <div class="f">
+            <label for="empSeq">Próxima OS nº</label>
+            <div class="fld"><input id="empSeq" type="number" inputmode="numeric" min="1" step="1"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Tabela de preços</h3>
+        <p class="note">O que você cobra de cada coisa. Na hora de montar a OS, é só escolher da tabela e dizer a quantidade. Preço 0 quer dizer que você preenche na hora.</p>
+        <div id="precoLista"></div>
+        <div class="actions"><button class="btn btn-ghost full" id="addPreco">+ Item na tabela</button></div>
       </div>
 
       <div class="card">
@@ -763,6 +907,9 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </div>
+
+<!-- só pra impressão: fica fora do app pra folha sair sozinha no papel -->
+<div id="folha"></div>
 
 <script>
 (function () {
@@ -1207,11 +1354,128 @@
   }
   // ==== fim ditado ====
 
+  // ==== interpretar itens ====
+  /* Frase falada -> itens do documento. Aqui pode ter vários itens numa frase só, então o texto é
+     cortado em pedaços ("e", vírgula, "mais") e cada pedaço vira um item. O nome e o preço saem da
+     TABELA DE PREÇOS quando ele só diz o serviço. Preço solto no fim do pedaço é o total do item;
+     com "cada", é preço por unidade. */
+  /* "mantem" = a palavra é a própria coisa feita e continua no nome do item:
+     "3 disjuntores" -> "troca de disjuntores". Máquina, hora e metro são só medida e saem do nome. */
+  var ITEM_UN = [
+    { un: "maq", rx: "(?:maquinas?|aparelhos?|splits?|equipamentos?|evaporadoras?|condensadoras?|ares?(?:[\\s-]+condicionados?)?)" },
+    { un: "hora", rx: "(?:horas?|hs?)" },
+    { un: "m", rx: "(?:metros?|mts?)" },
+    { un: "un", rx: "(?:unidades?|un)" },
+    { un: "un", rx: "(?:pecas?|pontos?|tomadas?|disjuntores?|lampadas?|luminarias?|interruptores?)", mantem: true }
+  ];
+
+  function itemDoPedaco(p, ctx) {
+    var n = ditNorm(p), usado = [], un = "", qtd = 0, precoUnit = null, precoTotal = null;
+    function dentro(i) {
+      return usado.some(function (u) { return i >= u[0] && i < u[1]; });
+    }
+
+    // preço por unidade: "a 80 cada", "250 por máquina"
+    var mu = new RegExp("(?:\\b(?:a|por|de)\\s*)?(?:r\\$\\s*)?" + DIT_MON +
+      "\\s*(?:reais|real)?\\s*(?:cada(?:\\s+(?:um|uma|maquina|aparelho|unidade))?|por\\s+(?:maquina|aparelho|unidade|hora|metro)|a\\s+(?:maquina|unidade))").exec(n);
+    if (mu) { precoUnit = ditDinheiro(mu[1]); usado.push([mu.index, mu.index + mu[0].length]); }
+
+    // quantidade junto da unidade ("4 máquinas", "3 horas")
+    var mq = null, mantem = false;
+    for (var i = 0; i < ITEM_UN.length; i++) {
+      var m = new RegExp("(" + DIT_NUM + ")\\s*" + ITEM_UN[i].rx + "\\b").exec(n);
+      if (m && !dentro(m.index) && (!mq || m.index < mq.index)) { mq = m; un = ITEM_UN[i].un; mantem = !!ITEM_UN[i].mantem; }
+    }
+    if (mq) {
+      qtd = ditNum(mq[1]);
+      usado.push([mq.index, mq.index + (mantem ? mq[1].length : mq[0].length)]);
+    }
+    else {
+      var mb = new RegExp("^\\s*(" + DIT_NUM + ")\\b").exec(n);   // "2 limpezas"
+      if (mb && !dentro(mb.index)) { qtd = ditNum(mb[1]); usado.push([mb.index, mb.index + mb[0].length]); }
+    }
+
+    // preço do item inteiro, no fim do pedaço ("por 1600", "material 320")
+    if (precoUnit === null) {
+      var mt = new RegExp("(?:\\b(?:por|em|fica|ficou|valor|preco|de)\\s*)?(?:r\\$\\s*)?" + DIT_MON +
+        "\\s*(?:reais|real)?\\s*$").exec(n);
+      if (mt && !dentro(mt.index)) { precoTotal = ditDinheiro(mt[1]); usado.push([mt.index, mt.index + mt[0].length]); }
+    }
+
+    // o nome é o que sobrou do pedaço
+    usado.sort(function (a, b) { return a[0] - b[0]; });
+    var partes = [], pos = 0;
+    usado.forEach(function (u) { if (u[0] >= pos) { partes.push(p.slice(pos, u[0])); pos = u[1]; } });
+    partes.push(p.slice(pos));
+    var nome = partes.join(" ").replace(/\s+/g, " ").trim()
+      .replace(/^(?:de|do|da|e|em|por|a|o|com|no|na|r\$)\s+/i, "")
+      .replace(/[\s,]+(?:de|do|da|e|em|por|a|o|com|no|na|r\$)$/i, "").trim();
+
+    // casa com a tabela de preços dele
+    var cat = null, pontos = 0;
+    (ctx.itens || []).forEach(function (c) {
+      var pal = ditNorm(c.nome).split(/[^a-z0-9]+/).filter(function (w) { return w.length >= 4; });
+      var p2 = pal.filter(function (w) { return n.indexOf(w) >= 0; }).length;
+      if (p2 > pontos) { pontos = p2; cat = c; }
+    });
+
+    var item = {
+      nome: cat ? cat.nome : (nome ? nome.charAt(0).toUpperCase() + nome.slice(1) : ""),
+      un: un || (cat ? cat.un : "fixo"),
+      qtd: qtd || 1,
+      preco: 0
+    };
+    if (precoUnit !== null) item.preco = precoUnit;
+    else if (precoTotal !== null) item.preco = item.qtd > 1 ? Math.round((precoTotal / item.qtd) * 100) / 100 : precoTotal;
+    else if (cat) item.preco = Number(cat.preco || 0);
+    if (!item.nome) return null;
+    return item;
+  }
+
+  function interpretarItens(texto, ctx) {
+    var r = { itens: [], desconto: 0, obs: "", cliente: "" };
+    var txt = String(texto || "").replace(/\s+/g, " ").trim();
+    if (!txt) return r;
+
+    // observação leva tudo o que vem depois dela
+    var n = ditNorm(txt);
+    var mo = new RegExp("\\b(?:observacao|observacoes|obs|anotar|anote|anota|recado)\\b\\s*:?\\s*").exec(n);
+    if (mo) {
+      r.obs = txt.slice(mo.index + mo[0].length).trim();
+      txt = txt.slice(0, mo.index).trim();
+      n = ditNorm(txt);
+    }
+    var mc = new RegExp("\\bcliente\\s+([^,;.]+)").exec(n);
+    if (mc) {
+      r.cliente = ditTitulo(txt.substr(mc.index + mc[0].length - mc[1].length, mc[1].length).trim());
+      txt = (txt.slice(0, mc.index) + " " + txt.slice(mc.index + mc[0].length)).replace(/\s+/g, " ").trim();
+      n = ditNorm(txt);
+    }
+    var md = new RegExp("\\bdesconto\\b\\s*(?:de|:)?\\s*(?:r\\$\\s*)?" + DIT_MON + "\\s*(?:reais|real)?").exec(n);
+    if (md) {
+      r.desconto = ditDinheiro(md[1]);
+      txt = (txt.slice(0, md.index) + " " + txt.slice(md.index + md[0].length)).replace(/\s+/g, " ").trim();
+    }
+
+    txt.split(/\s*(?:,|;|\+|\be\b|\bmais\b|\btambem\b|\btambém\b)\s*/i)
+      .map(function (p) { return p.trim(); })
+      .filter(Boolean)
+      .forEach(function (p) {
+        var item = itemDoPedaco(p, ctx);
+        if (item) r.itens.push(item);
+      });
+    return r;
+  }
+  // ==== fim itens ====
+
   // ---------- estado ----------
   function padrao() {
     return {
-      v: 2,
-      cfg: { preco: 250, teto: 30, dur: 90 },
+      v: 3,
+      emp: empPadrao(),
+      itens: catalogoPadrao(),
+      docs: [],
+      cfg: { preco: 250, teto: 30, dur: 90, seq: { os: 1, orc: 1 } },
       tipos: [
         { id: "pmoc",     nome: "PMOC / manutenção",        cor: 1, porMaquina: true,  preco: 250 },
         { id: "limpeza",  nome: "Limpeza de ar-condicionado", cor: 5, porMaquina: true,  preco: 0 },
@@ -1273,6 +1537,14 @@
         store.tipos.push(novo);
       });
       store.v = 2;
+    }
+    if (Number(store.v || 1) < 3) {
+      // papelada: dados do cabeçalho, tabela de preços (já com os valores que ele usa) e os documentos
+      if (!store.emp) store.emp = empPadrao();
+      if (!store.itens || !store.itens.length) store.itens = catalogoPadrao();
+      if (!store.docs) store.docs = [];
+      if (!store.cfg.seq) store.cfg.seq = { os: 1, orc: 1 };
+      store.v = 3;
     }
     store.servicos.forEach(function (s) {
       // antes existia um valor só; ele vira mão de obra, e material começa zerado
@@ -1427,6 +1699,7 @@
   var SECOES = [
     { id: "agenda", nome: "Agenda" },
     { id: "clientes", nome: "Clientes" },
+    { id: "notas", nome: "Notas" },
     { id: "resumo", nome: "Resumo" },
     { id: "ajustes", nome: "Ajustes" }
   ];
@@ -1593,8 +1866,10 @@
   }
 
   function curto(iso) {
+    // dia com zero na frente: alinha as listas e, sem ele, "2/10/26" cortado em 5 letras comia o ano
     var d = fromISO(iso);
-    return d.getDate() + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + String(d.getFullYear()).slice(2);
+    return String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") +
+      "/" + String(d.getFullYear()).slice(2);
   }
 
   // ---------- resumo ----------
@@ -1727,6 +2002,8 @@
     $("cfgTeto").value = store.cfg.teto;
     $("cfgDur").innerHTML = optsDur(store.cfg.dur);
     $("cfgDitado").value = store.cfg.ditado || "teclado";
+    renderEmp();
+    renderPrecos();
     renderGcal();
 
     $("tipoList").innerHTML = store.tipos.map(function (t, i) {
@@ -1789,6 +2066,7 @@
     renderGuarda();
     if (ui.sec === "agenda") { renderCal(); renderDia(); }
     if (ui.sec === "clientes") renderClientes();
+    if (ui.sec === "notas") renderNotas();
     if (ui.sec === "resumo") renderResumo();
     if (ui.sec === "ajustes") renderAjustes();
     renderBar();
@@ -1964,6 +2242,7 @@
       '<div class="actions">' +
         '<button class="btn btn-ghost" id="fCancel">Fechar</button>' +
         '<button class="btn btn-primary" id="fSalvar">Salvar</button>' +
+        (ui.editando ? '<button class="btn btn-ghost full" id="fDoc">' + rotuloDoc(s) + "</button>" : "") +
         (ui.editando && s.orcamento ? '<button class="btn btn-ghost full" id="fVirou">O cliente aprovou — virar serviço</button>' : "") +
         (ui.editando ? '<button class="btn btn-ghost full" id="fDuplicar">Repetir esse serviço em outra data</button>' : "") +
         (ui.editando ? '<button class="btn btn-danger full" id="fExcluir">Excluir serviço</button>' : "") +
@@ -2015,6 +2294,7 @@
     pararOuvir();
     $("modal").classList.remove("open");
     rascunho = null;
+    docRascunho = null;
     ui.editando = null;
   }
 
@@ -2051,19 +2331,21 @@
   var semFalaSeguidas = 0;
   function modoTeclado() { return !Reconhece || (store.cfg.ditado || "teclado") === "teclado"; }
 
-  function abrirDitado() {
+  var ditModo = "servico";   // "servico" na agenda, "itens" dentro da ordem/orçamento
+
+  function abrirFolhaDitado(modo, titulo, sub, exemplo) {
+    ditModo = modo;
     ultimoDitado = null;
     $("panel").innerHTML =
-      '<h3 id="mTitulo">Ditar serviço</h3>' +
-      '<p class="sub">Fale do jeito que falaria no WhatsApp: quando, o quê, pra quem e onde.</p>' +
+      '<h3 id="mTitulo">' + titulo + "</h3>" +
+      '<p class="sub">' + sub + "</p>" +
       '<div class="dit-mic">' +
         '<button class="mic-big" id="micBig" aria-label="Começar a ouvir"' + (modoTeclado() ? " hidden" : "") + ">" +
           '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>' +
         "</button>" +
         '<div class="mic-st" id="micSt"></div>' +
       "</div>" +
-      '<div class="fld"><textarea id="ditTxt" class="dit-txt" spellcheck="false" ' +
-        'placeholder="amanhã às 8, limpeza de 4 máquinas na Clínica Vida"></textarea></div>' +
+      '<div class="fld"><textarea id="ditTxt" class="dit-txt" spellcheck="false" placeholder="' + esc(exemplo) + '"></textarea></div>' +
       '<div id="ditPrev"></div>' +
       '<div class="actions" id="ditAcoes"></div>';
     $("modal").classList.add("open");
@@ -2071,7 +2353,78 @@
     atualizarDitado();
   }
 
+  function abrirDitado() {
+    abrirFolhaDitado("servico", "Ditar serviço",
+      "Fale do jeito que falaria no WhatsApp: quando, o quê, pra quem e onde.",
+      "amanhã às 8, limpeza de 4 máquinas na Clínica Vida");
+  }
+
+  function abrirDitadoItens() {
+    abrirFolhaDitado("itens", "Ditar os itens",
+      "Fale o serviço e a quantidade. O preço vem da sua tabela de preços — só diga o valor quando for diferente.",
+      "limpeza de 4 máquinas e carga de gás em 2 aparelhos a 180 cada");
+  }
+
+  var ultimosItens = null;
+
+  function atualizarDitadoItens() {
+    var el = $("ditTxt");
+    if (!el) return;
+    var texto = el.value.trim();
+    var prev = $("ditPrev"), acoes = $("ditAcoes");
+    if (!texto) {
+      ultimosItens = null;
+      prev.innerHTML = '<div class="dit-ex"><span class="eyebrow neutral">Por exemplo</span>' +
+        "<i>limpeza de 4 máquinas</i>" +
+        "<i>pmoc de 6 máquinas e carga de gás em 2 aparelhos a 180 cada</i>" +
+        "<i>troca de 3 disjuntores a 80 cada, desconto de 50</i></div>";
+      acoes.innerHTML = '<button class="btn btn-ghost full" id="ditVoltarDoc">Voltar</button>';
+      return;
+    }
+    var r;
+    try { r = interpretarItens(texto, { itens: store.itens || [] }); }
+    catch (err) { r = { itens: [], desconto: 0, obs: "", cliente: "" }; }
+    ultimosItens = { r: r, texto: texto };
+    var soma = r.itens.reduce(function (a, i) { return a + Number(i.qtd || 0) * Number(i.preco || 0); }, 0);
+    var linhas = r.itens.map(function (i, k) {
+      return "<dt>" + (k + 1) + "</dt><dd>" + esc(i.nome) + " <small>" + qtdTxt(i) +
+        (Number(i.preco) ? " × " + brlDoc(i.preco) + " = " + brlDoc(i.qtd * i.preco) : " · preço em branco") +
+        "</small></dd>";
+    }).join("");
+    if (Number(r.desconto || 0)) linhas += "<dt>Desconto</dt><dd><b>− " + brlDoc(r.desconto) + "</b></dd>";
+    if (r.cliente) linhas += "<dt>Cliente</dt><dd>" + esc(r.cliente) + "</dd>";
+    if (r.obs) linhas += "<dt>Obs</dt><dd>" + esc(r.obs) + "</dd>";
+    if (r.itens.length > 1) linhas += "<dt>Soma</dt><dd><b>" + brlDoc(soma - Number(r.desconto || 0)) + "</b></dd>";
+
+    prev.innerHTML = '<div class="dit-prev"><span class="eyebrow">' +
+      (r.itens.length ? "Vou acrescentar" : "Não achei item nenhum") + "</span>" +
+      (r.itens.length ? "<dl>" + linhas + "</dl>"
+        : '<p class="note" style="margin-top:6px">Diga o serviço e a quantidade, por exemplo ' +
+          "<b>limpeza de 4 máquinas</b>. Se não estiver na sua tabela, diga o valor: <b>conserto do dreno 120</b>.</p>") +
+      "</div>";
+    acoes.innerHTML = r.itens.length
+      ? '<button class="btn btn-ghost" id="ditVoltarDoc">Voltar</button>' +
+        '<button class="btn btn-primary" id="ditUsar">Acrescentar</button>'
+      : '<button class="btn btn-ghost full" id="ditVoltarDoc">Voltar</button>';
+  }
+
+  function aplicarItensDitados() {
+    if (!ultimosItens || !docRascunho) return;
+    var r = ultimosItens.r;
+    if (!r.itens.length) return;
+    // a linha em branco do documento novo sai fora
+    docRascunho.itens = (docRascunho.itens || []).filter(function (i) { return i.nome || Number(i.preco || 0); });
+    r.itens.forEach(function (i) { docRascunho.itens.push(i); });
+    if (Number(r.desconto || 0)) docRascunho.desconto = Number(r.desconto);
+    if (r.obs) docRascunho.obs = docRascunho.obs ? docRascunho.obs + " · " + r.obs : r.obs;
+    if (r.cliente && !docRascunho.cliente) docRascunho.cliente = r.cliente;
+    pararOuvir();
+    desenharDoc();
+    toast(r.itens.length === 1 ? "1 item acrescentado." : r.itens.length + " itens acrescentados.");
+  }
+
   function atualizarDitado() {
+    if (ditModo === "itens") { atualizarDitadoItens(); return; }
     var el = $("ditTxt");
     if (!el) return;
     var texto = el.value.trim();
@@ -2651,6 +3004,398 @@
     $("modal").classList.add("open");
   }
 
+  // ---------- ordem de serviço e orçamento ----------
+  /* Documento é uma foto do combinado: nasce do serviço (cliente, máquinas, mão de obra, material)
+     e depois vive por conta própria — mexer no serviço não reescreve a OS que o cliente já assinou.
+     O CUSTO do material nunca entra aqui: é conta dele, não do cliente. */
+
+  var UNS = [
+    { v: "maq", nome: "por máquina", curto: "máq" },
+    { v: "fixo", nome: "valor fixo", curto: "" },
+    { v: "hora", nome: "por hora", curto: "h" },
+    { v: "un", nome: "por unidade", curto: "un" },
+    { v: "m", nome: "por metro", curto: "m" }
+  ];
+
+  function empPadrao() {
+    return { nome: "", ativ: "", doc: "", tel: "", pix: "", gar: "90 dias para o serviço executado",
+             pag: "Pix ou dinheiro na entrega do serviço", val: 15 };
+  }
+  function emp() {
+    if (!store.emp) store.emp = empPadrao();
+    return store.emp;
+  }
+  function catalogoPadrao() {
+    var porMaq = Number((store && store.cfg && store.cfg.preco) || 250);
+    var ti = (store && store.tipos || []).filter(function (x) { return x.id === "instal"; })[0];
+    return [
+      { id: "p1", nome: "PMOC / manutenção", un: "maq", preco: porMaq },
+      { id: "p2", nome: "Limpeza de ar-condicionado", un: "maq", preco: porMaq },
+      { id: "p3", nome: "Instalação de ar-condicionado", un: "maq", preco: Number((ti && ti.preco) || 0) },
+      { id: "p4", nome: "Carga de gás", un: "maq", preco: 0 },
+      { id: "p5", nome: "Visita técnica", un: "fixo", preco: 0 },
+      { id: "p6", nome: "Serviço elétrico", un: "hora", preco: 0 },
+      { id: "p7", nome: "Material (peças e insumos)", un: "fixo", preco: 0 }
+    ];
+  }
+
+  function brlDoc(v) {
+    return "R$ " + Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function numFmt(n) { return String(n || 0).padStart(3, "0"); }
+  function unCurto(un) { return (UNS.filter(function (u) { return u.v === un; })[0] || UNS[1]).curto; }
+  function qtdTxt(i) {
+    var c = unCurto(i.un);
+    return num(Number(i.qtd || 0)) + (c ? " " + c : "");
+  }
+  function totalItens(d) {
+    return (d.itens || []).reduce(function (a, i) { return a + Number(i.qtd || 0) * Number(i.preco || 0); }, 0);
+  }
+  function totalDoc(d) { return Math.max(0, totalItens(d) - Number(d.desconto || 0)); }
+  function docsDe(servicoId) {
+    return (store.docs || []).filter(function (d) { return d.servicoId === servicoId; });
+  }
+  function somaDias(iso, n) {
+    var d = fromISO(iso);
+    d.setDate(d.getDate() + Number(n || 0));
+    return toISO(d);
+  }
+  function tituloDoc(t) { return t === "orc" ? "Orçamento" : "Ordem de serviço"; }
+  function dataLonga(iso) {
+    var d = fromISO(iso);
+    return String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
+  }
+
+  function docDoServico(s, tipo) {
+    var t = tipoDe(s.tipo), itens = [];
+    var q = t.porMaquina && Number(s.maquinas) ? Number(s.maquinas) : 1;
+    itens.push({ nome: t.nome, un: t.porMaquina ? "maq" : "fixo", qtd: q,
+                 preco: Math.round((Number(s.mao || 0) / q) * 100) / 100 });
+    if (Number(s.mat || 0)) itens.push({ nome: "Material (peças e insumos)", un: "fixo", qtd: 1, preco: Number(s.mat) });
+    return {
+      // a OS é do dia do serviço; o orçamento é do dia em que foi feito
+      id: "", tipo: tipo, num: 0, data: tipo === "orc" ? hojeISO() : s.data, servicoId: s.id,
+      cliente: s.cliente || "", tel: s.tel || "", endereco: s.endereco || "",
+      itens: itens, desconto: 0,
+      obs: /^Ditado:/.test(s.obs || "") ? "" : (s.obs || ""),   // a frase do ditado não é recado pro cliente
+      gar: emp().gar, pag: emp().pag,
+      val: tipo === "orc" ? somaDias(hojeISO(), emp().val) : ""
+    };
+  }
+  function docVazio(tipo) {
+    return { id: "", tipo: tipo, num: 0, data: hojeISO(), servicoId: "", cliente: "", tel: "", endereco: "",
+             itens: [{ nome: "", un: "fixo", qtd: 1, preco: 0 }], desconto: 0, obs: "",
+             gar: emp().gar, pag: emp().pag, val: tipo === "orc" ? somaDias(hojeISO(), emp().val) : "" };
+  }
+
+  var docRascunho = null;
+
+  function abrirDoc(d) {
+    docRascunho = JSON.parse(JSON.stringify(d));
+    desenharDoc();
+    $("modal").classList.add("open");
+  }
+
+  function desenharDoc() {
+    var d = docRascunho;
+    $("panel").innerHTML =
+      '<h3 id="mTitulo">' + tituloDoc(d.tipo) + "</h3>" +
+      '<p class="sub">' + (d.num ? "Nº " + numFmt(d.num) + " · " : "") + "Confira os valores antes de gerar." +
+        (d.servicoId ? " Veio do serviço marcado na agenda." : "") + "</p>" +
+
+      '<div class="f wide"><label>O que é</label><div class="opts cols2">' +
+        '<button class="opt" data-dtipo="os" aria-pressed="' + (d.tipo !== "orc") + '">Ordem de serviço</button>' +
+        '<button class="opt" data-dtipo="orc" aria-pressed="' + (d.tipo === "orc") + '">Orçamento</button>' +
+      "</div></div>" +
+
+      '<div class="fields">' +
+        '<div class="f wide"><label for="dCli">Cliente</label><div class="fld">' +
+          '<input id="dCli" class="txt" type="text" list="clientes-dl" value="' + esc(d.cliente) + '"></div></div>' +
+        '<datalist id="clientes-dl">' + carteira().map(function (c) { return "<option>" + esc(c.nome) + "</option>"; }).join("") + "</datalist>" +
+        '<div class="f wide"><label for="dEnd">Endereço</label><div class="fld">' +
+          '<input id="dEnd" class="txt" type="text" value="' + esc(d.endereco) + '"></div></div>' +
+        '<div class="f"><label for="dTel">Telefone</label><div class="fld">' +
+          '<input id="dTel" class="txt" type="tel" inputmode="tel" value="' + esc(d.tel) + '"></div></div>' +
+        '<div class="f"><label for="dData">Data</label><div class="fld">' +
+          '<input id="dData" type="date" value="' + esc(d.data) + '"></div></div>' +
+        (d.tipo === "orc"
+          ? '<div class="f wide"><label for="dVal">Vale até</label><div class="fld">' +
+            '<input id="dVal" type="date" value="' + esc(d.val || "") + '"></div></div>'
+          : "") +
+      "</div>" +
+
+      '<div class="f wide" style="margin-top:14px"><label>Itens</label></div>' +
+      '<div id="docLinhas">' + d.itens.map(linhaHtml).join("") + "</div>" +
+      '<div class="fld" style="margin-top:9px"><select id="docCat">' +
+        '<option value="">+ item da tabela de preços</option>' +
+        (store.itens || []).map(function (p) {
+          return '<option value="' + p.id + '">' + esc(p.nome) + (p.preco ? " — " + brlDoc(p.preco) : " — preço em branco") + "</option>";
+        }).join("") +
+      "</select></div>" +
+      '<div class="actions">' +
+        '<button class="btn btn-ghost btn-sm" id="docLinhaNova">+ item em branco</button>' +
+        '<button class="btn btn-ghost btn-sm" id="docDitar">Ditar itens</button>' +
+      "</div>" +
+
+      '<div class="fields">' +
+        '<div class="f wide"><label for="dDesc">Desconto</label><div class="fld has-pre"><span class="pre">R$</span>' +
+          '<input id="dDesc" type="number" inputmode="decimal" min="0" step="10" value="' + Number(d.desconto || 0) + '"></div></div>' +
+      "</div>" +
+      '<div class="doc-tot"><span class="k">Total</span><span class="v" id="docTot">' + brlDoc(totalDoc(d)) + "</span></div>" +
+
+      '<div class="fields">' +
+        '<div class="f wide"><label for="dObs">Observações (o cliente vê)</label><div class="fld">' +
+          '<textarea id="dObs" placeholder="dreno refeito · cliente vai trocar o filtro em 3 meses">' + esc(d.obs) + "</textarea></div></div>" +
+        '<div class="f wide"><label for="dGar">Garantia</label><div class="fld">' +
+          '<input id="dGar" class="txt" type="text" value="' + esc(d.gar || "") + '"></div></div>' +
+        '<div class="f wide"><label for="dPag">Pagamento</label><div class="fld">' +
+          '<input id="dPag" class="txt" type="text" value="' + esc(d.pag || "") + '"></div></div>' +
+      "</div>" +
+
+      '<div class="actions">' +
+        '<button class="btn btn-ghost" id="fCancel">Fechar</button>' +
+        '<button class="btn btn-primary" id="docGerar">' + (d.num ? "Salvar e ver" : "Gerar") + "</button>" +
+        (d.id ? '<button class="btn btn-danger btn-sm full" id="docExcluir">Excluir documento</button>' : "") +
+      "</div>";
+  }
+
+  function rotuloDoc(s) {
+    var d = docsDe(s.id)[0];
+    if (d) return "Ver " + (d.tipo === "orc" ? "orçamento" : "OS") + " nº " + numFmt(d.num);
+    return s.orcamento ? "Gerar orçamento pro cliente" : "Gerar ordem de serviço";
+  }
+
+  function linhaHtml(i, k) {
+    return '<div class="linha" data-i="' + k + '">' +
+      '<div class="linha-topo">' +
+        '<input class="lin-nome" type="text" placeholder="o que foi feito" value="' + esc(i.nome || "") + '">' +
+        '<button class="lin-x" type="button" aria-label="Tirar este item">×</button>' +
+      "</div>" +
+      '<div class="linha-num">' +
+        '<input class="lin-qtd" type="number" inputmode="decimal" min="0" step="1" value="' + Number(i.qtd || 0) + '">' +
+        '<select class="lin-un">' + UNS.map(function (u) {
+          return '<option value="' + u.v + '"' + (u.v === i.un ? " selected" : "") + ">" + u.nome + "</option>";
+        }).join("") + "</select>" +
+        '<input class="lin-preco" type="number" inputmode="decimal" min="0" step="10" value="' + Number(i.preco || 0) + '">' +
+      "</div>" +
+      '<div class="linha-tot">' + brlDoc(Number(i.qtd || 0) * Number(i.preco || 0)) + "</div>" +
+    "</div>";
+  }
+
+  function lerDoc() {
+    var d = docRascunho;
+    if (!d) return;
+    var g = function (id) { var el = $(id); return el ? el.value : ""; };
+    d.cliente = g("dCli").trim();
+    d.endereco = g("dEnd").trim();
+    d.tel = g("dTel").trim();
+    d.data = g("dData") || d.data;
+    if ($("dVal")) d.val = g("dVal");
+    d.desconto = Number(g("dDesc") || 0);
+    d.obs = g("dObs").trim();
+    d.gar = g("dGar").trim();
+    d.pag = g("dPag").trim();
+    var linhas = document.querySelectorAll("#docLinhas .linha");
+    d.itens = [].map.call(linhas, function (el) {
+      return {
+        nome: el.querySelector(".lin-nome").value.trim(),
+        un: el.querySelector(".lin-un").value,
+        qtd: Number(el.querySelector(".lin-qtd").value || 0),
+        preco: Number(el.querySelector(".lin-preco").value || 0)
+      };
+    });
+  }
+
+  // recalcula sem redesenhar, pra não tirar o foco do campo
+  function atualizarTotaisDoc() {
+    lerDoc();
+    var d = docRascunho;
+    [].forEach.call(document.querySelectorAll("#docLinhas .linha"), function (el, k) {
+      var i = d.itens[k];
+      el.querySelector(".linha-tot").textContent = brlDoc(Number(i.qtd || 0) * Number(i.preco || 0));
+    });
+    if ($("docTot")) $("docTot").textContent = brlDoc(totalDoc(d));
+  }
+
+  function gerarDoc() {
+    lerDoc();
+    var d = docRascunho;
+    if (!d.cliente) { toast("Falta o nome do cliente."); return; }
+    d.itens = d.itens.filter(function (i) { return i.nome || Number(i.preco || 0); });
+    if (!d.itens.length) { toast("Coloque pelo menos um item."); return; }
+    store.docs = store.docs || [];
+    if (!d.id) {
+      if (!store.cfg.seq) store.cfg.seq = { os: 1, orc: 1 };
+      d.id = "d" + Date.now() + Math.random().toString(36).slice(2, 6);
+      d.num = Number(store.cfg.seq[d.tipo] || 1);
+      store.cfg.seq[d.tipo] = d.num + 1;
+      store.docs.push(d);
+    } else {
+      store.docs = store.docs.map(function (x) { return x.id === d.id ? d : x; });
+    }
+    save();
+    verFolha(d);
+    render();
+  }
+
+  function htmlFolha(d) {
+    var e = emp();
+    var cab = [e.doc, e.tel].filter(Boolean).join(" · ");
+    var linhas = (d.itens || []).map(function (i) {
+      return "<tr><td>" + esc(i.nome || "—") + '</td><td class="n">' + qtdTxt(i) +
+        '</td><td class="n">' + brlDoc(i.preco) + '</td><td class="n">' +
+        brlDoc(Number(i.qtd || 0) * Number(i.preco || 0)) + "</td></tr>";
+    }).join("");
+    var cond = [];
+    if (d.gar) cond.push("<b>Garantia:</b> " + esc(d.gar));
+    if (d.pag) cond.push("<b>Pagamento:</b> " + esc(d.pag));
+    if (e.pix) cond.push("<b>Pix:</b> " + esc(e.pix));
+    if (d.tipo === "orc" && d.val) cond.push("<b>Este orçamento vale até</b> " + dataLonga(d.val) + ".");
+    if (d.obs) cond.push("<b>Observações:</b> " + esc(d.obs));
+
+    return '<div class="f-topo">' +
+        '<div class="f-emp"><b>' + esc(e.nome || "Seu nome aqui — preencha em Ajustes") + "</b>" +
+          (e.ativ ? "<span>" + esc(e.ativ) + "</span>" : "") +
+          (cab ? "<span>" + esc(cab) + "</span>" : "") +
+        "</div>" +
+        '<div class="f-num"><b>' + (d.tipo === "orc" ? "Orçamento" : "Ordem de serviço") + "</b>" +
+          "<span>Nº " + numFmt(d.num) + "</span><em>" + dataLonga(d.data) + "</em></div>" +
+      "</div><hr>" +
+      '<div class="f-rot">Cliente</div>' +
+      '<div class="f-cli"><b>' + esc(d.cliente || "—") + "</b>" +
+        (d.endereco ? "<div>" + esc(d.endereco) + "</div>" : "") +
+        (d.tel ? "<div>" + esc(telFmt(d.tel)) + "</div>" : "") +
+      "</div><hr>" +
+      '<div class="f-rot">' + (d.tipo === "orc" ? "Itens do orçamento" : "Serviços executados") + "</div>" +
+      "<table><tr><th>Descrição</th><th class='n'>Qtd</th><th class='n'>Valor</th><th class='n'>Total</th></tr>" +
+        linhas +
+        (Number(d.desconto || 0)
+          ? '<tr><td colspan="3">Desconto</td><td class="n">− ' + brlDoc(d.desconto) + "</td></tr>"
+          : "") +
+        '<tr class="f-somatot"><td colspan="3">Total</td><td class="n">' + brlDoc(totalDoc(d)) + "</td></tr>" +
+      "</table>" +
+      (cond.length ? '<div class="f-cond">' + cond.join("<br>") + "</div>" : "") +
+      '<div class="f-ass">' +
+        "<div>" + (d.tipo === "orc" ? "De acordo — assinatura do cliente" : "Assinatura do cliente") + "</div>" +
+        "<div>Data</div>" +
+      "</div>" +
+      '<div class="f-pe">Documento gerado pela Agenda de serviços. Não é nota fiscal.</div>';
+  }
+
+  var docAberto = "";
+  function docAtual() {
+    return (store.docs || []).filter(function (d) { return d.id === docAberto; })[0] || docRascunho;
+  }
+  function verFolha(d) {
+    docAberto = d.id;
+    $("folha").innerHTML = htmlFolha(d);      // essa é a que vai pro papel
+    $("panel").innerHTML =
+      "<h3>" + tituloDoc(d.tipo) + " nº " + numFmt(d.num) + "</h3>" +
+      '<p class="sub">É isso que o cliente recebe.</p>' +
+      '<div class="folha">' + htmlFolha(d) + "</div>" +
+      '<div class="actions">' +
+        '<button class="btn btn-ghost" id="docZap">Texto do WhatsApp</button>' +
+        '<button class="btn btn-primary" id="docPrint">Imprimir / PDF</button>' +
+        '<button class="btn btn-ghost btn-sm" id="docEditar">Editar</button>' +
+        '<button class="btn btn-ghost btn-sm" id="fCancel">Fechar</button>' +
+      "</div>";
+    $("modal").classList.add("open");
+  }
+
+  function textoZap(d) {
+    var e = emp(), L = [];
+    L.push("*" + (d.tipo === "orc" ? "ORÇAMENTO" : "ORDEM DE SERVIÇO") + " Nº " + numFmt(d.num) + "*");
+    if (e.nome) L.push(e.nome);
+    if (e.ativ) L.push(e.ativ);
+    var cab = [e.doc, e.tel].filter(Boolean).join(" · ");
+    if (cab) L.push(cab);
+    L.push("");
+    L.push("Cliente: " + (d.cliente || "—"));
+    if (d.endereco) L.push("Endereço: " + d.endereco);
+    L.push("Data: " + dataLonga(d.data));
+    if (d.tipo === "orc" && d.val) L.push("Vale até: " + dataLonga(d.val));
+    L.push("");
+    L.push("*" + (d.tipo === "orc" ? "Itens do orçamento" : "Serviços") + "*");
+    (d.itens || []).forEach(function (i) {
+      L.push("• " + (i.nome || "—") + " — " + qtdTxt(i) + " x " + brlDoc(i.preco) +
+        " = " + brlDoc(Number(i.qtd || 0) * Number(i.preco || 0)));
+    });
+    if (Number(d.desconto || 0)) L.push("• Desconto = − " + brlDoc(d.desconto));
+    L.push("");
+    L.push("*TOTAL: " + brlDoc(totalDoc(d)) + "*");
+    if (d.gar) L.push("Garantia: " + d.gar);
+    if (d.pag) L.push("Pagamento: " + d.pag);
+    if (e.pix) L.push("Pix: " + e.pix);
+    if (d.obs) { L.push(""); L.push("Obs: " + d.obs); }
+    return L.join("\n");
+  }
+
+  function mostrarZap(d) {
+    var txt = textoZap(d);
+    var fone = telE164(d.tel);
+    $("panel").innerHTML =
+      "<h3>Texto pro WhatsApp</h3>" +
+      '<p class="sub">Copie e cole na conversa' + (fone ? ", ou toque em Mandar que já abre a conversa do cliente." : ".") + "</p>" +
+      '<textarea class="out" id="txtOut" spellcheck="false">' + esc(txt) + "</textarea>" +
+      '<div class="actions">' +
+        '<button class="btn btn-ghost" id="txtCopy">Copiar</button>' +
+        (fone
+          ? '<a class="btn btn-primary" href="https://wa.me/' + fone + "?text=" + encodeURIComponent(txt) + '" target="_blank" rel="noopener">Mandar</a>' +
+            '<button class="btn btn-ghost btn-sm full" id="docVoltar">Voltar pra folha</button>'
+          : '<button class="btn btn-primary" id="docVoltar">Voltar pra folha</button>') +
+      "</div>";
+    $("modal").classList.add("open");
+  }
+
+  function renderNotas() {
+    var docs = (store.docs || []).slice().sort(function (a, b) {
+      return (b.data + b.id).localeCompare(a.data + a.id);
+    });
+    $("notasMeta").textContent = docs.length
+      ? docs.length + (docs.length === 1 ? " documento" : " documentos") + " · toque pra abrir de novo"
+      : "nenhum documento ainda";
+    $("notasLista").innerHTML = docs.length
+      ? docs.map(function (d) {
+          return '<button class="row" data-doc="' + d.id + '">' +
+            '<span><span class="nm">' + (d.tipo === "orc" ? "Orçamento" : "OS") + " " + numFmt(d.num) +
+              " · " + esc(d.cliente || "sem nome") + "</span>" +
+            '<span class="dt">' + curto(d.data) +
+              (d.tipo === "orc" && d.val ? " · vale até " + curto(d.val) : "") + "</span></span>" +
+            '<span class="rv">' + brl(totalDoc(d)) + "</span></button>";
+        }).join("")
+      : '<div class="empty">Nenhuma ordem nem orçamento ainda.<br>Dá pra gerar direto do serviço: abra o card na agenda e toque em <b>Gerar ordem de serviço</b>.</div>';
+  }
+
+  function renderEmp() {
+    var e = emp();
+    $("empNome").value = e.nome || "";
+    $("empAtiv").value = e.ativ || "";
+    $("empDoc").value = e.doc || "";
+    $("empTel").value = e.tel || "";
+    $("empPix").value = e.pix || "";
+    $("empGar").value = e.gar || "";
+    $("empPag").value = e.pag || "";
+    $("empVal").value = Number(e.val || 15);
+    $("empSeq").value = Number((store.cfg.seq || {}).os || 1);
+  }
+
+  function renderPrecos() {
+    $("precoLista").innerHTML = (store.itens || []).map(function (p, k) {
+      return '<div class="linha" data-p="' + k + '">' +
+        '<div class="linha-topo">' +
+          '<input class="lin-nome" type="text" data-pnome="' + k + '" value="' + esc(p.nome) + '">' +
+          '<button class="lin-x" type="button" data-pdel="' + k + '" aria-label="Tirar da tabela">×</button>' +
+        "</div>" +
+        '<div class="linha-num" style="grid-template-columns:1fr 1fr">' +
+          '<select class="lin-un" data-pun="' + k + '">' + UNS.map(function (u) {
+            return '<option value="' + u.v + '"' + (u.v === p.un ? " selected" : "") + ">" + u.nome + "</option>";
+          }).join("") + "</select>" +
+          '<input class="lin-preco" type="number" inputmode="decimal" min="0" step="10" data-ppreco="' + k + '" value="' + Number(p.preco || 0) + '">' +
+        "</div>" +
+      "</div>";
+    }).join("");
+  }
+
   // ---------- backup ----------
   function exportar() {
     var nome = "agenda-" + hojeISO() + ".json";
@@ -2815,6 +3560,57 @@
       return;
     }
 
+    // ---- ordem de serviço / orçamento ----
+    var dt = e.target.closest("[data-dtipo]");
+    if (dt && docRascunho) {
+      lerDoc();
+      docRascunho.tipo = dt.getAttribute("data-dtipo");
+      if (docRascunho.tipo === "orc" && !docRascunho.val) docRascunho.val = somaDias(docRascunho.data, emp().val);
+      desenharDoc();
+      return;
+    }
+    if (e.target.closest("#docLinhaNova") && docRascunho) {
+      lerDoc();
+      docRascunho.itens.push({ nome: "", un: "fixo", qtd: 1, preco: 0 });
+      desenharDoc();
+      return;
+    }
+    var lx = e.target.closest("#docLinhas .lin-x");
+    if (lx && docRascunho) {
+      lerDoc();
+      var k = Number(lx.closest(".linha").getAttribute("data-i"));
+      docRascunho.itens.splice(k, 1);
+      if (!docRascunho.itens.length) docRascunho.itens.push({ nome: "", un: "fixo", qtd: 1, preco: 0 });
+      desenharDoc();
+      return;
+    }
+    if (e.target.closest("#docDitar") && docRascunho) {
+      lerDoc();                       // guarda o que já está digitado antes de trocar a folha
+      abrirDitadoItens();
+      // dentro do toque: é o gesto que o navegador exige pro microfone ou pro teclado subir
+      if (modoTeclado()) $("ditTxt").focus();
+      else comecarOuvir();
+      return;
+    }
+    if (e.target.closest("#ditUsar")) { aplicarItensDitados(); return; }
+    if (e.target.closest("#ditVoltarDoc")) { pararOuvir(); desenharDoc(); return; }
+    if (e.target.closest("#docGerar")) { gerarDoc(); return; }
+    if (e.target.closest("#docPrint")) { window.print(); return; }
+    if (e.target.closest("#docZap")) { mostrarZap(docAtual()); return; }
+    if (e.target.closest("#docVoltar")) { verFolha(docAtual()); return; }
+    if (e.target.closest("#docEditar")) { abrirDoc(docAtual()); return; }
+    var dex = e.target.closest("#docExcluir");
+    if (dex) {
+      if (!armar(dex, "Excluir documento", "toque de novo para excluir")) return;
+      var idd = docRascunho.id;
+      store.docs = (store.docs || []).filter(function (x) { return x.id !== idd; });
+      save();
+      fecharModal();
+      render();
+      toast("Documento excluído.");
+      return;
+    }
+
     if (e.target.closest("#micApp")) {
       store.cfg.ditado = "app";
       save();
@@ -2899,6 +3695,22 @@
       return;
     }
 
+    if (e.target.closest("#fDoc")) {
+      lerPanel();
+      if (!rascunho.cliente) { toast("Falta o nome do cliente."); return; }
+      if (!rascunho.hora) { toast("Falta a hora do serviço."); return; }
+      // salva o serviço primeiro: o documento é uma foto dele, não pode sair de dado velho
+      var sv = rascunho;
+      if (ui.editando) store.servicos = store.servicos.map(function (x) { return x.id === sv.id ? sv : x; });
+      else store.servicos.push(sv);
+      save();
+      sincronizar(sv.id);
+      var jaTem = docsDe(sv.id)[0];
+      if (jaTem) { verFolha(jaTem); return; }
+      abrirDoc(docDoServico(sv, sv.orcamento ? "orc" : "os"));
+      return;
+    }
+
     if (e.target.closest("#fVirou")) {
       lerPanel();
       // o orçamento fica no histórico como visita feita; o serviço nasce como um novo compromisso
@@ -2975,7 +3787,30 @@
     refrescarFolha();
   }
   $("modal").addEventListener("input", function (e) {
-    if (e.target.id === "ditTxt") atualizarDitado();
+    if (e.target.id === "ditTxt") { atualizarDitado(); return; }
+    if (docRascunho && (e.target.closest("#docLinhas") || e.target.id === "dDesc")) atualizarTotaisDoc();
+  });
+  $("modal").addEventListener("change", function (e) {
+    if (!docRascunho) return;
+    if (e.target.classList.contains("lin-un")) { atualizarTotaisDoc(); return; }
+    if (e.target.id === "docCat") {
+      var p = (store.itens || []).filter(function (x) { return x.id === e.target.value; })[0];
+      e.target.value = "";
+      if (!p) return;
+      lerDoc();
+      docRascunho.itens.push({ nome: p.nome, un: p.un, qtd: 1, preco: Number(p.preco || 0) });
+      desenharDoc();
+    }
+  });
+
+  $("sec-notas").addEventListener("click", function (e) {
+    if (e.target.closest("#novaOs")) { abrirDoc(docVazio("os")); return; }
+    if (e.target.closest("#novoOrc")) { abrirDoc(docVazio("orc")); return; }
+    var b = e.target.closest("[data-doc]");
+    if (b) {
+      var d = (store.docs || []).filter(function (x) { return x.id === b.getAttribute("data-doc"); })[0];
+      if (d) verFolha(d);
+    }
   });
   $("modal").addEventListener("input", aoDigitar);
   $("modal").addEventListener("change", aoDigitar);
@@ -3004,11 +3839,23 @@
     if (el.id === "cfgTeto") { store.cfg.teto = Math.max(Number(el.value || 1), 1); save(); return; }
     if (el.hasAttribute("data-tnome")) { store.tipos[Number(el.getAttribute("data-tnome"))].nome = el.value; save(); return; }
     if (el.hasAttribute("data-tpreco")) { store.tipos[Number(el.getAttribute("data-tpreco"))].preco = Number(el.value || 0); save(); return; }
+    var campoEmp = { empNome: "nome", empAtiv: "ativ", empDoc: "doc", empTel: "tel", empPix: "pix", empGar: "gar", empPag: "pag" }[el.id];
+    if (campoEmp) { emp()[campoEmp] = el.value; save(); return; }
+    if (el.id === "empVal") { emp().val = Math.max(1, Number(el.value || 15)); save(); return; }
+    if (el.id === "empSeq") {
+      if (!store.cfg.seq) store.cfg.seq = { os: 1, orc: 1 };
+      store.cfg.seq.os = Math.max(1, Number(el.value || 1));
+      save();
+      return;
+    }
+    if (el.hasAttribute("data-pnome")) { store.itens[Number(el.getAttribute("data-pnome"))].nome = el.value; save(); return; }
+    if (el.hasAttribute("data-ppreco")) { store.itens[Number(el.getAttribute("data-ppreco"))].preco = Number(el.value || 0); save(); return; }
   });
 
   $("sec-ajustes").addEventListener("change", function (e) {
     if (e.target.id === "cfgDur") { store.cfg.dur = Number(e.target.value); save(); }
     if (e.target.id === "cfgDitado") { store.cfg.ditado = e.target.value; semFalaSeguidas = 0; save(); }
+    if (e.target.hasAttribute("data-pun")) { store.itens[Number(e.target.getAttribute("data-pun"))].un = e.target.value; save(); }
     if (e.target.id === "gAvisos") {
       gcfg().avisos = e.target.value;
       save();
@@ -3059,6 +3906,20 @@
       store.tipos.splice(i, 1);
       save(); render();
       toast("Tipo apagado.");
+      return;
+    }
+    if (e.target.closest("#addPreco")) {
+      store.itens = store.itens || [];
+      store.itens.push({ id: "p" + Date.now().toString(36), nome: "", un: "fixo", preco: 0 });
+      save();
+      renderPrecos();
+      return;
+    }
+    var pdel = e.target.closest("[data-pdel]");
+    if (pdel) {
+      store.itens.splice(Number(pdel.getAttribute("data-pdel")), 1);
+      save();
+      renderPrecos();
       return;
     }
     if (e.target.closest("#addTipo")) {
