@@ -571,6 +571,40 @@
   .foot button { background: none; border: 0; padding: 0; color: var(--ink-3); text-decoration: underline; cursor: pointer; font: inherit; }
   .foot button.armado { padding: 5px 9px; border-radius: 3px; text-decoration: none; font-weight: 700; }
 
+  /* ---------- arrastar o card pra outro dia ---------- */
+  .sv { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  .sv.pegando { opacity: .3; }
+  /* etiqueta pequena, acima do dedo: um card inteiro taparia a linha do calendário */
+  .fantasma {
+    position: fixed; z-index: 70; pointer-events: none;
+    transform: translate(-50%, -165%) rotate(-1.5deg);
+    display: flex; align-items: center; gap: 7px;
+    max-width: 62vw; padding: 9px 12px;
+    background: var(--surface); border: 1px solid var(--accent); border-radius: 4px;
+    font: 600 13px/1.2 var(--sans); color: var(--ink);
+    white-space: nowrap; overflow: hidden;
+    box-shadow: 0 12px 26px -10px rgba(0,0,0,.6);
+  }
+  .fantasma i { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+  .fantasma b { font: 700 13px/1.2 var(--mono); }
+  .solta {
+    position: fixed; top: 8px; left: 50%; transform: translateX(-50%);
+    z-index: 71; pointer-events: none; white-space: nowrap;
+    background: var(--ink); color: var(--bg);
+    padding: 9px 15px; border-radius: 20px;
+    font: 700 12.5px/1 var(--sans);
+    box-shadow: 0 4px 14px rgba(0,0,0,.35);
+  }
+  .solta[hidden] { display: none; }
+  .solta.fora { background: var(--ink-3); }
+  .d.alvo { background: var(--accent) !important; border-color: var(--accent) !important; }
+  .d.alvo .n { color: var(--surface) !important; }
+  .d.alvo .dots i { background: var(--surface) !important; color: var(--surface) !important; }
+  .dica {
+    margin-top: 11px; text-align: center;
+    font: 500 11.5px/1.45 var(--mono); color: var(--ink-3);
+  }
+
   /* ---------- itens do documento ---------- */
   .linha {
     margin-top: 9px; padding: 10px 11px;
@@ -906,6 +940,7 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="solta" id="solta" hidden></div>
 </div>
 
 <!-- só pra impressão: fica fora do app pra folha sair sozinha no papel -->
@@ -1823,7 +1858,9 @@
         "</span>" +
         '<span class="val">' + (valorDe(s) ? brl(valorDe(s)) : "") + "</span>" +
       "</button>";
-    }).join("");
+    }).join("") +
+      (store.cfg.dicaArrasto === false ? ""
+        : '<div class="dica">Segure um card e arraste pra outro dia do calendário.</div>');
   }
 
   // ---------- clientes ----------
@@ -3031,6 +3068,149 @@
     $("modal").classList.add("open");
   }
 
+  // ---------- arrastar o serviço pra outro dia (tipo Trello) ----------
+  /* No celular, arrastar e rolar a tela são o mesmo gesto. Então: toque e segure parado pega o card,
+     e só aí a rolagem é travada (preventDefault no touchmove). Se o dedo andar antes do tempo, era
+     rolagem — cancela. Segurar sobre as setas ‹ › vira o mês, pra mandar o serviço pra outro mês. */
+  var LONGO = 320, arrasto = null, pendente = null, arrastouEm = 0;
+
+  function travarRolagem(e) { e.preventDefault(); }
+
+  /* Acha o dia pela posição do dedo comparada com o retângulo de cada célula.
+     Não uso elementFromPoint: qualquer coisa sobreposta (o próprio fantasma, um toast) atrapalharia. */
+  function dentroDe(el, x, y) {
+    if (!el || !el.isConnected) return false;
+    var r = el.getBoundingClientRect();
+    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+  }
+  function diaEm(x, y) {
+    var cels = document.querySelectorAll("#grid [data-d]");
+    for (var i = 0; i < cels.length; i++) if (dentroDe(cels[i], x, y)) return cels[i];
+    return null;
+  }
+  function setaEm(x, y) {
+    if (dentroDe($("prevM"), x, y)) return $("prevM");
+    if (dentroDe($("nextM"), x, y)) return $("nextM");
+    return null;
+  }
+
+  function iniciarArrasto(p, x, y) {
+    var s = acharServico(p.id);
+    if (!s) return;
+    var t = tipoDe(s.tipo);
+    var g = document.createElement("div");
+    g.className = "fantasma";
+    g.innerHTML = '<i style="background:' + corVar(t) + '"></i><b>' + esc(s.hora || "--:--") + "</b>" +
+      esc(s.cliente || "sem nome");
+    document.body.appendChild(g);
+    arrasto = { id: p.id, ghost: g, alvo: null, sobre: "", desde: 0 };
+    var vivo = document.querySelector('#dayList [data-id="' + p.id + '"]');
+    arrasto.card = vivo || null;
+    if (vivo) vivo.classList.add("pegando");
+    $("solta").hidden = false;
+    moverGhost(x, y);
+    mexerArrasto(x, y);
+    document.addEventListener("touchmove", travarRolagem, { passive: false });
+    if (navigator.vibrate) { try { navigator.vibrate(15); } catch (e) {} }
+  }
+
+  function moverGhost(x, y) {
+    arrasto.ghost.style.left = x + "px";
+    arrasto.ghost.style.top = y + "px";
+  }
+
+  function mexerArrasto(x, y) {
+    moverGhost(x, y);
+    var alvo = diaEm(x, y);
+    if (alvo !== arrasto.alvo) {
+      if (arrasto.alvo && arrasto.alvo.isConnected) arrasto.alvo.classList.remove("alvo");
+      arrasto.alvo = alvo;
+      if (alvo) alvo.classList.add("alvo");
+    }
+    // o dia de destino escrito por extenso, porque a etiqueta pode tapar a célula acesa
+    var av = $("solta");
+    if (alvo) {
+      var dd = fromISO(alvo.getAttribute("data-d"));
+      av.className = "solta";
+      av.textContent = "Soltar em " + DIAS[dd.getDay()] + ", " + curto(alvo.getAttribute("data-d")).slice(0, 5);
+    } else {
+      av.className = "solta fora";
+      av.textContent = "Arraste até um dia do calendário";
+    }
+    // parado sobre a seta do mês: vira o mês e segue arrastando
+    var seta = setaEm(x, y);
+    var nome = seta ? seta.id : "";
+    if (nome !== arrasto.sobre) { arrasto.sobre = nome; arrasto.desde = Date.now(); }
+    else if (nome && Date.now() - arrasto.desde > 600) {
+      arrasto.desde = Date.now();
+      pulaMes(nome === "prevM" ? -1 : 1);
+      arrasto.card = null;     // render() refez a lista; o card original já não existe
+      arrasto.alvo = null;
+    }
+    // rolagem automática perto das bordas, pra alcançar o calendário
+    if (y < 95) window.scrollBy(0, -14);
+    else if (y > window.innerHeight - 120) window.scrollBy(0, 14);
+  }
+
+  function soltarArrasto(valeu) {
+    if (!arrasto) return;
+    var id = arrasto.id, destino = valeu && arrasto.alvo ? arrasto.alvo.getAttribute("data-d") : "";
+    if (arrasto.ghost.parentNode) arrasto.ghost.parentNode.removeChild(arrasto.ghost);
+    if (arrasto.card && arrasto.card.isConnected) arrasto.card.classList.remove("pegando");
+    if (arrasto.alvo && arrasto.alvo.isConnected) arrasto.alvo.classList.remove("alvo");
+    $("solta").hidden = true;
+    document.removeEventListener("touchmove", travarRolagem, { passive: false });
+    arrasto = null;
+    arrastouEm = Date.now();    // o clique que vem depois de soltar não deve abrir a ficha
+    var s = acharServico(id);
+    if (!destino || !s || s.data === destino) return;
+    s.data = destino;
+    save();
+    ui.dia = destino;
+    if (mesDe(destino) !== ui.mes) ui.mes = mesDe(destino);
+    if (store.cfg.dicaArrasto !== false) { store.cfg.dicaArrasto = false; save(); }
+    render();
+    sincronizar(id);            // o lembrete no Google Agenda muda de dia junto
+    var d = fromISO(destino);
+    toast((s.orcamento ? "Orçamento movido" : "Serviço movido") + " para " +
+      DIAS[d.getDay()] + ", " + curto(destino).slice(0, 5) + ".");
+  }
+
+  $("dayList").addEventListener("pointerdown", function (e) {
+    if (arrasto || (e.pointerType === "mouse" && e.button !== 0)) return;
+    var card = e.target.closest(".sv");
+    if (!card || !card.getAttribute("data-id")) return;
+    var x = e.clientX, y = e.clientY, r = card.getBoundingClientRect();
+    var p = {
+      id: card.getAttribute("data-id"), x: x, y: y,
+      w: r.width, html: card.innerHTML, dx: x - r.left, dy: y - r.top
+    };
+    p.t = setTimeout(function () { pendente = null; iniciarArrasto(p, x, y); }, LONGO);
+    pendente = p;
+  });
+
+  document.addEventListener("pointermove", function (e) {
+    if (pendente) {
+      // andou antes de pegar: era rolagem ou toque, não arrasto
+      if (Math.abs(e.clientX - pendente.x) > 10 || Math.abs(e.clientY - pendente.y) > 10) {
+        clearTimeout(pendente.t);
+        pendente = null;
+      }
+      return;
+    }
+    if (arrasto) { e.preventDefault(); mexerArrasto(e.clientX, e.clientY); }
+  }, { passive: false });
+
+  document.addEventListener("pointerup", function () {
+    if (pendente) { clearTimeout(pendente.t); pendente = null; return; }
+    soltarArrasto(true);
+  });
+  document.addEventListener("pointercancel", function () {
+    if (pendente) { clearTimeout(pendente.t); pendente = null; }
+    soltarArrasto(false);
+  });
+  document.addEventListener("contextmenu", function (e) { if (arrasto) e.preventDefault(); });
+
   // ---------- ordem de serviço e orçamento ----------
   /* Documento é uma foto do combinado: nasce do serviço (cliente, máquinas, mão de obra, material)
      e depois vive por conta própria — mexer no serviço não reescreve a OS que o cliente já assinou.
@@ -3533,6 +3713,7 @@
   });
 
   $("dayList").addEventListener("click", function (e) {
+    if (Date.now() - arrastouEm < 400) return;   // acabou de soltar o card: não abre a ficha
     var b = e.target.closest("button[data-id]");
     if (!b) return;
     var s = store.servicos.filter(function (x) { return x.id === b.getAttribute("data-id"); })[0];
